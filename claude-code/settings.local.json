@@ -1,0 +1,53 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Agent",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git status:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(date:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(xargs grep:*)",
+      "Bash(xargs wc:*)",
+      "Bash(npm list:*)",
+      "Bash(npm --version)",
+      "Bash(npx --version)",
+      "Bash(npx which:*)",
+      "Bash(jq:*)",
+      "Bash(where:*)",
+      "Bash(claude mcp:*)",
+      "Bash(mkdir -p:*)",
+      "Bash(npx kordoc:*)",
+      "Bash(npx officeparser:*)",
+      "Bash(py:*)",
+      "mcp__github__list_pull_requests",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_run_code",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_wait_for",
+      "Bash(./mvnw test:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "playwright",
+    "github"
+  ]
+}
