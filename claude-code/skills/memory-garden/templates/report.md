@@ -21,6 +21,7 @@
 | Resolved (삭제) | N | High/Med |
 | Outdated (갱신 or 삭제) | N | High/Med |
 | Promoted (삭제) | N | High/Med |
+| Consolidate (메타 게이트 + 하위 유지) | N | High/Med |
 | Duplicate (통합) | N | High/Med |
 | Stale (사용자 확인) | N | Low |
 
@@ -44,6 +45,11 @@
 
 | # | 파일 | confidence | 반영처 (CLAUDE.md / rules / skills) |
 |---|------|-----------|-----------------------------------|
+
+### Consolidate — 메타 게이트 후보 (N건)
+
+| # | 도메인 | 하위 메모리 (N건) | confidence | 권장 옵션 (A/B) |
+|---|-------|----------------|-----------|--------------|
 
 ### Duplicate — 통합 후보 (N건)
 
@@ -81,7 +87,7 @@
 
 ### 진행 옵션
 
-- **전체 반영** — Completed 아카이브 + Resolved/Promoted 삭제 + Outdated 갱신 + Duplicate 통합
+- **전체 반영** — Completed 아카이브 + Resolved/Promoted 삭제 + Outdated 갱신 + Consolidate 메타 게이트 + Duplicate 통합
 - **선택 반영** — 번호 지정 (예: `1,3,5`)
 - **카테고리 한정** — 예: `Promoted만`
 - **취소**
