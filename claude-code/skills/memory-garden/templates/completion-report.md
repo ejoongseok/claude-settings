@@ -11,6 +11,7 @@
 | 아카이브 (Completed) | N |
 | 삭제 (Resolved / Promoted) | N |
 | 갱신 (Outdated) | N |
+| 메타 게이트 신규 (Consolidate) | N |
 | 통합 (Duplicate) | N |
 
 ### MEMORY.md 크기 변화
@@ -38,12 +39,12 @@
 
 #### type별 판정 분포
 
-| type | Active | Completed | Resolved | Outdated | Promoted | Duplicate | Stale | 비고 |
-|------|--------|-----------|----------|----------|----------|-----------|-------|------|
-| user | N | - | - | N | - | - | N | |
-| feedback | N | - | N | N | N | N | N | |
-| project | N | N | N | N | - | N | N | |
-| reference | N | - | N | N | - | N | N | |
+| type | Active | Completed | Resolved | Outdated | Promoted | Consolidate | Duplicate | Stale | 비고 |
+|------|--------|-----------|----------|----------|----------|-------------|-----------|-------|------|
+| user | N | - | - | N | - | - | - | N | |
+| feedback | N | - | N | N | N | N | N | N | |
+| project | N | N | N | N | - | N | N | N | |
+| reference | N | - | N | N | - | - | N | N | |
 
 #### 수명 분석
 
@@ -69,6 +70,12 @@
 | contradiction | N |
 | reference | N |
 
+#### Consolidate 후보 신호
+
+| 도메인 | 누적 메모리 수 | 메타 게이트 존재 | 작성 시점 게이트 부재 신호 |
+|-------|------------|--------------|---------------------|
+| {도메인명} | N | yes/no | yes/no |
+
 ---
 
 ### 개정 제안 (해당 시)
@@ -78,6 +85,7 @@
 예시:
 - **제안 1**: `feedback` 타입의 "인용 누락" 결함 N건 반복 → `~/.claude/CLAUDE.md`의 `# auto memory` 섹션에 "feedback 작성 시 반영처 경로 인용 의무" 명문화 권장
 - **제안 2**: `project` 타입 평균 수명이 짧음(N일) → 프로젝트 메모리 작성 전 `.local.claude/projects/` 존재 여부 선확인 루틴 필요
+- **제안 3**: 같은 도메인 메모리 3건+ 누적되었으나 메타 게이트 부재 → 새 메모리 추가 직전 grep 자가 점검(같은 도메인 기존 메모리 검색) 루틴 명문화 권장. Consolidate 부담을 작성 시점에 분산
 
 **반영 경로**: `/optimize-claude-md` 호출 또는 사용자 직접 편집.
 
