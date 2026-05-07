@@ -190,6 +190,40 @@
 
 ---
 
+## 예시 8 — Consolidate (같은 도메인, 서로 다른 사실 N건)
+
+**메모리 A**: `feedback_review_focus_external_api.md` ("외부 API 변경 시 호환성 검토")
+
+**메모리 B**: `feedback_review_focus_naming.md` ("외부 노출 식별자는 도메인 용어 사용")
+
+**메모리 C**: `feedback_review_focus_error_message.md` ("외부 노출 에러 메시지에 내부 코드명 포함 금지")
+
+**Phase 2 관계 탐지**:
+
+- 셋 다 "외부 가시성" 도메인. 서로 다른 사실(API 호환·식별자 명명·에러 메시지)이지만 같은 본질
+- 같은 본문 인용·동일 PR 번호 등 직접 참조는 없음 → containment 아님
+- 주장이 동일하지 않음 → Duplicate 아님
+
+**판정**: **Consolidate** / confidence Med — 같은 도메인 3건 누적, 메타 게이트 부재
+
+**근거**: 같은 도메인("외부 가시성") 메모리 3건+ 분산. 진입점 메모리 부재 → 발동률 저하·중복 추가 위험
+
+**동작 (Phase 6-1)**:
+
+- 옵션 A (권장): 메타 게이트 메모리 `feedback_external_visibility.md` 신규 작성. frontmatter `meta_gate: true` + 본문에 하위 3건 목록과 도메인 요약. **하위 본문 유지** (정보 손실 0)
+- 옵션 B: 통합본 1건으로 병합 + 하위 3건 아카이브. 발동 빈도가 매우 낮을 때만
+
+**Duplicate와 차이**:
+
+- Duplicate = 주장·범위 실질 동일/포함 (한쪽이 다른 쪽에 흡수 가능)
+- Consolidate = 주장은 다르나 같은 도메인 분산 (진입점 메타로 묶음, 본문 유지)
+
+**임계값 주의**:
+
+- N=3은 시작값 권장. 환경에 따라 조정. 단정형 적용 금지(예: "3건이면 무조건 Consolidate") — 하위 사실의 독립성·발동 빈도 함께 고려
+
+---
+
 ## 요약 패턴
 
 - **확인 가능 사실 + 구체 출처** → High confidence 판정 가능
@@ -197,3 +231,4 @@
 - **검증 경로 매핑 실패** → Stale (Low confidence)
 - **관계 그래프 우선 활용** → Duplicate/Resolved 판정 정확도 향상
 - **모순은 항상 사용자 확인** → 자동 처리 금지
+- **같은 도메인 + 서로 다른 사실 N건+** → Consolidate (Duplicate와 구분)
