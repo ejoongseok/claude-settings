@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!--
+  spec-demo example — state machine (forward + revert). Generic order-status case. Self-contained (font CDN only).
+  현재 상태에서 갈 수 있는 전이만 버튼 활성. 정방향 + 되돌리기(역전이, 점선). 거쳐온 경로 표시.
+  허용 전이(특히 역전이)와 그 트리거는 합의 포인트로 둔다.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주문 상태 머신 — 예시</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#f7f8fa; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e8ebee;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --line:#e5e8eb; --line-2:#eef1f3;
+    --accent:#3182f6; --accent-deep:#1b64da; --accent-soft:#eaf2ff; --accent-line:#c3dafe;
+    --ok:#15b86b; --ok-bg:#e7f7ef; --warn:#c8820a; --warn-bg:#fff6e0;
+    --r-sm:10px; --r-md:14px; --r-lg:20px; --r-chip:999px;
+    --shadow:0 1px 3px rgba(25,31,40,.05),0 8px 28px rgba(25,31,40,.06);
+    --shadow-soft:0 1px 2px rgba(25,31,40,.04);
+    --sans:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'D2Coding',Consolas,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.72;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .shell{max-width:880px;margin:0 auto;padding:46px 22px 90px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .dot{width:34px;height:34px;border-radius:11px;background:var(--accent);flex:none;display:grid;place-items:center;box-shadow:0 6px 16px rgba(49,130,246,.28)}
+  .dot svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:23px;font-weight:700;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--ink-3);font-size:13.5px;margin:3px 0 0;font-weight:500}
+
+  section{margin-bottom:32px}
+  .sec-h{display:flex;align-items:center;gap:11px;margin:0 0 16px}
+  .sec-h .n{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)}
+  .sec-h h3{font-size:21px;font-weight:700;margin:0;letter-spacing:-.02em}
+
+  .hero{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:30px 34px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#4593fc,#1b64da)}
+  .eyebrow{display:inline-flex;font-size:11.5px;font-weight:700;color:var(--accent-deep);background:var(--accent-soft);padding:5px 13px;border-radius:var(--r-chip);letter-spacing:.03em}
+  .hero h2{font-size:23px;line-height:1.45;font-weight:700;margin:12px 0 0;letter-spacing:-.02em;max-width:42ch}
+  .hero h2 .key{color:var(--accent-deep)}
+  .why{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:9px;max-width:64ch}
+  .why li{position:relative;padding-left:18px;font-size:14.5px;color:var(--ink)}
+  .why li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .why b{color:var(--accent-deep)}
+
+  .machine{display:flex;align-items:center;flex-wrap:wrap;gap:0;justify-content:center;padding:8px 0 4px}
+  .snode{display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 16px;border-radius:var(--r-md);border:1.5px solid var(--line);background:var(--surface);min-width:84px;transition:all .3s var(--ease);cursor:pointer}
+  .snode:hover{border-color:var(--accent-line)}
+  .snode .scode{font-family:var(--mono);font-size:11px;color:var(--ink-3);font-weight:700}
+  .snode .snm{font-size:14px;font-weight:700;color:var(--ink-2)}
+  .snode.visited{border-color:var(--accent-line);background:var(--accent-soft)}
+  .snode.visited .snm{color:var(--accent-deep)}
+  .snode.current{border-color:var(--accent);background:var(--accent);box-shadow:0 8px 20px rgba(49,130,246,.35);transform:scale(1.06)}
+  .snode.current .snm{color:#fff}.snode.current .scode{color:rgba(255,255,255,.8)}
+  .snode.done{border-color:var(--ok)} .snode.current.done{background:var(--ok);box-shadow:0 8px 20px rgba(21,184,107,.35)}
+  .sarrow{color:var(--ink-3);font-size:18px;padding:0 6px;flex:none}
+
+  .triggers{margin-top:20px;padding:18px;background:var(--surface-2);border-radius:var(--r-md)}
+  .triggers .th{font-size:12.5px;font-weight:700;color:var(--ink-2);margin-bottom:10px}
+  .triggers .th b{color:var(--accent-deep)}
+  .tgroup{font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.03em;margin:12px 0 7px}
+  .tbtns{display:flex;flex-wrap:wrap;gap:8px}
+  .tbtn{font-family:inherit;text-align:left;padding:10px 14px;border-radius:var(--r-md);cursor:pointer;border:1px solid var(--accent-line);background:var(--surface);color:var(--ink);transition:all .18s var(--ease)}
+  .tbtn:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .tbtn .tl{font-size:13.5px;font-weight:700;display:block}
+  .tbtn .tt{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:2px}
+  .tbtn .tto{color:var(--accent-deep)}
+  .tbtn.rev{border-style:dashed;border-color:var(--line);background:var(--surface-2)}
+  .tbtn.rev:hover{border-color:var(--ink-3);background:var(--surface-3)}
+  .tbtn.rev .tto{color:var(--ink-2)}
+  .nomove{font-size:13px;color:var(--ink-3)}
+
+  .path{margin-top:16px;font-size:13px;color:var(--ink-3);font-family:var(--mono);line-height:1.9}
+  .path .plbl{font-family:var(--sans);font-size:12px;font-weight:600;display:block;margin-bottom:4px}
+  .path .pcur{color:var(--accent-deep);font-weight:700}
+  .btn-reset{font-family:inherit;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:var(--r-chip);cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);margin-top:14px}
+  .btn-reset:hover{background:var(--surface-2);color:var(--ink)}
+
+  .note{display:flex;gap:11px;border-radius:var(--r-md);padding:14px 16px;margin:14px 0 0;font-size:14px;line-height:1.62}
+  .note .lbl{flex:none;font-weight:800;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;border-radius:8px;height:fit-content;white-space:nowrap}
+  .note.warn{background:var(--warn-bg)}.note.warn .lbl{background:#e6a93a;color:#4a3500}
+  .note.info{background:var(--accent-soft)}.note.info .lbl{background:var(--accent);color:#fff}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 6h8M7 8l4 8M17 8l-4 8"/></svg></span>
+    <div><h1>주문 상태 머신 — 예시</h1><p class="sub">앞으로 진행, 뒤로 되돌리기 — 어디로 갈 수 있나</p></div>
+  </header>
+
+  <section>
+    <div class="hero">
+      <span class="eyebrow">상황 — 주문 진행과 되돌리기</span>
+      <h2>주문은 앞으로 진행하고, <span class="key">필요하면 되돌릴</span> 수 있어야 하나요?</h2>
+      <ul class="why">
+        <li>현재 상태에서 <b>진행</b> 전이(파란 버튼)와 <b>되돌리기</b> 전이(점선 버튼)가 나뉘어 보입니다 — 결제 취소, 출고 보류처럼 뒤로 가는 경로.</li>
+        <li>버튼을 누르면 상태가 이동하고 거쳐온 경로가 남습니다. "완료에서 배송 취소로 되돌릴 수 있나?"가 한눈에.</li>
+        <li><b>특정 상태로 바로 가려면</b> 위 상태 노드를 직접 클릭하세요(예시 — 한 번에 이동). 아래 버튼은 규칙상 허용되는 전이입니다.</li>
+        <li>어떤 되돌리기가 허용되는지, 그 트리거가 무엇인지가 핵심 합의입니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">01</span><h3>상태 전이 (양방향)</h3></div>
+
+    <div class="machine" id="machine"></div>
+
+    <div class="triggers">
+      <div class="th">현재 <b id="curNm">접수</b> 상태에서 가능한 전이:</div>
+      <div id="fwdWrap"><div class="tgroup">진행</div><div class="tbtns" id="fwdBtns"></div></div>
+      <div id="revWrap"><div class="tgroup">되돌리기 (역전이)</div><div class="tbtns" id="revBtns"></div></div>
+    </div>
+
+    <div class="path"><span class="plbl">거쳐온 경로</span><span id="ptrack"></span></div>
+    <button class="btn-reset" onclick="resetSm()">처음으로</button>
+
+    <div class="note warn"><span class="lbl">합의</span><div><b>어떤 되돌리기가 허용되나요?</b> 완료(CO)에서 배송 취소로 배송대기 복귀가 가능한지, 준비중(PR)을 결제완료(PD)로 보류할 수 있는지, 되돌릴 때 트리거(이벤트·권한)는 무엇인지 — 진행/되돌리기 버튼을 눌러 보며 맞춥니다.</div></div>
+    <div class="note info"><span class="lbl">참고</span><div>진행 전이 트리거(결제·출고 지시·배송)는 실제 규칙 기준으로 두고, <b>역전이(되돌리기)의 허용 여부와 트리거</b>는 대체로 가정(합의 대상)으로 표시합니다.</div></div>
+  </section>
+
+</div>
+
+<script>
+  var STATES = [
+    {cd:'RC', nm:'접수'}, {cd:'PD', nm:'결제완료'}, {cd:'PR', nm:'준비중'},
+    {cd:'DW', nm:'배송대기'}, {cd:'PS', nm:'부분배송'}, {cd:'CO', nm:'완료'}
+  ];
+  // 전이 규칙 (가정 — 합의 포인트). rev:true = 되돌리기(역전이).
+  var TRANS = {
+    RC: [{to:'PD', t:'결제', ev:'결제 완료'}],
+    PD: [{to:'PR', t:'준비 시작', ev:'주문 확정'},
+         {to:'RC', t:'결제 취소', ev:'(트리거 합의 필요)', rev:true}],
+    PR: [{to:'DW', t:'출고 지시', ev:'준비 완료'},
+         {to:'PD', t:'준비 보류', ev:'(트리거 합의 필요)', rev:true}],
+    DW: [{to:'CO', t:'배송 완료', ev:'배송 이벤트'},
+         {to:'PS', t:'부분 배송', ev:'배송 이벤트'},
+         {to:'PR', t:'출고 보류', ev:'(트리거 합의 필요)', rev:true}],
+    PS: [{to:'CO', t:'배송 완료', ev:'배송 이벤트'},
+         {to:'DW', t:'배송 취소', ev:'(트리거 합의 필요)', rev:true}],
+    CO: [{to:'DW', t:'배송 취소', ev:'(트리거 합의 필요)', rev:true}]
+  };
+  var cur='RC', visited=['RC'];
+  function nmOf(cd){ var s=STATES.filter(function(x){return x.cd===cd;})[0]; return s?s.nm:cd; }
+
+  function renderMachine(){
+    var h='';
+    STATES.forEach(function(s, i){
+      var cls = s.cd===cur ? 'current' : (visited.indexOf(s.cd)>=0 ? 'visited' : '');
+      if(s.cd==='CO') cls += ' done';
+      h += '<div class="snode '+cls+'" onclick="jumpTo(\''+s.cd+'\')"><span class="scode">'+s.cd+'</span><span class="snm">'+s.nm+'</span></div>';
+      if(i < STATES.length-1) h += '<span class="sarrow">&#8594;</span>';
+    });
+    document.getElementById('machine').innerHTML = h;
+  }
+  function btnHtml(o){
+    var icon = o.rev ? '&#8617; ' : '';
+    return '<button class="tbtn'+(o.rev?' rev':'')+'" onclick="go(\''+o.to+'\')">'
+      + '<span class="tl">'+icon+o.t+' <span class="tto">&#8594; '+nmOf(o.to)+' ('+o.to+')</span></span>'
+      + '<span class="tt">'+o.ev+'</span></button>';
+  }
+  function renderTriggers(){
+    document.getElementById('curNm').textContent = nmOf(cur);
+    var opts = TRANS[cur] || [];
+    var fwd = opts.filter(function(o){return !o.rev;}), rev = opts.filter(function(o){return o.rev;});
+    document.getElementById('fwdBtns').innerHTML = fwd.length ? fwd.map(btnHtml).join('') : '<span class="nomove">진행할 전이 없음 (종료 상태)</span>';
+    document.getElementById('revBtns').innerHTML = rev.length ? rev.map(btnHtml).join('') : '<span class="nomove">되돌릴 전이 없음</span>';
+    document.getElementById('revWrap').style.display = rev.length ? '' : 'none';
+  }
+  function renderPath(){
+    document.getElementById('ptrack').innerHTML = visited.map(function(s,i){
+      return i===visited.length-1 ? '<span class="pcur">'+s+'</span>' : s;
+    }).join(' &rarr; ');
+  }
+  function render(){ renderMachine(); renderTriggers(); renderPath(); }
+  function go(to){ cur=to; visited.push(to); render(); }
+  function jumpTo(cd){ if(cd===cur) return; cur=cd; visited.push(cd); render(); }
+  function resetSm(){ cur='RC'; visited=['RC']; render(); }
+
+  render();
+</script>
+</body>
+</html>

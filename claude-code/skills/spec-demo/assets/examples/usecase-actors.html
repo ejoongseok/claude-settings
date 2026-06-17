@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<!--
+  spec-demo example — use-case diagram (actors x use-cases + per-role behavior). Generic order/approval case. Self-contained (font CDN only).
+  액터 클릭 = 누가 무슨 기능. 유스케이스 클릭 = 역할별로 어떻게 다르게(범위·제약). 권한 배지(조회/생성/관리).
+  역할-기능 매핑·역할별 동작은 합의 포인트.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>역할별 기능·동작 (유스케이스) — 예시</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#f7f8fa; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e8ebee;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --line:#e5e8eb; --line-2:#eef1f3;
+    --accent:#3182f6; --accent-deep:#1b64da; --accent-soft:#eaf2ff; --accent-line:#c3dafe;
+    --ok:#15b86b; --ok-bg:#e7f7ef; --warn:#c8820a; --warn-bg:#fff6e0; --danger:#e85b48; --danger-bg:#fdeeeb;
+    --r-sm:10px; --r-md:14px; --r-lg:20px; --r-chip:999px;
+    --shadow:0 1px 3px rgba(25,31,40,.05),0 8px 28px rgba(25,31,40,.06);
+    --shadow-soft:0 1px 2px rgba(25,31,40,.04);
+    --sans:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'D2Coding',Consolas,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.72;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .shell{max-width:900px;margin:0 auto;padding:46px 22px 90px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .dot{width:34px;height:34px;border-radius:11px;background:var(--accent);flex:none;display:grid;place-items:center;box-shadow:0 6px 16px rgba(49,130,246,.28)}
+  .dot svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:23px;font-weight:700;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--ink-3);font-size:13.5px;margin:3px 0 0;font-weight:500}
+
+  section{margin-bottom:32px}
+  .sec-h{display:flex;align-items:center;gap:11px;margin:0 0 16px}
+  .sec-h .n{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)}
+  .sec-h h3{font-size:21px;font-weight:700;margin:0;letter-spacing:-.02em}
+
+  .hero{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:30px 34px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#4593fc,#1b64da)}
+  .eyebrow{display:inline-flex;font-size:11.5px;font-weight:700;color:var(--accent-deep);background:var(--accent-soft);padding:5px 13px;border-radius:var(--r-chip);letter-spacing:.03em}
+  .hero h2{font-size:23px;line-height:1.45;font-weight:700;margin:12px 0 0;letter-spacing:-.02em;max-width:44ch}
+  .hero h2 .key{color:var(--accent-deep)}
+  .why{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:9px;max-width:66ch}
+  .why li{position:relative;padding-left:18px;font-size:14.5px;color:var(--ink)}
+  .why li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .why b{color:var(--accent-deep)}
+
+  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+  .btn{font-family:inherit;font-size:13px;font-weight:600;padding:9px 15px;border-radius:var(--r-chip);cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink-2)}
+  .btn:hover{background:var(--surface-2);color:var(--ink);border-color:var(--ink-3)}
+  .hint{font-size:12.5px;color:var(--ink-3)}
+
+  .uc-layout{display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:start}
+  @media(max-width:680px){.uc-layout{grid-template-columns:1fr}}
+  .actors{display:flex;flex-direction:column;gap:10px}
+  .actor{display:flex;align-items:center;gap:10px;padding:14px 16px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--surface);cursor:pointer;transition:all .2s var(--ease)}
+  .actor:hover{border-color:var(--accent-line)}
+  .actor.active{border-color:var(--accent);background:var(--accent-soft);box-shadow:var(--shadow-soft)}
+  .actor.lit{border-color:var(--accent-line);background:var(--accent-soft)}
+  .actor .ava{width:32px;height:32px;border-radius:50%;background:var(--surface-3);flex:none;display:grid;place-items:center;color:var(--ink-3)}
+  .actor.active .ava{background:var(--accent);color:#fff}
+  .actor .anm{font-weight:700;font-size:14px;color:var(--ink)}
+  .actor .arole{font-size:11.5px;color:var(--ink-3)}
+
+  .ucs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:start}
+  @media(max-width:520px){.ucs{grid-template-columns:1fr}}
+  .uc{padding:13px 16px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--surface);transition:all .25s var(--ease);cursor:pointer}
+  .uc:hover{border-color:var(--accent-line)}
+  .uc .ucn{font-weight:700;font-size:14px;color:var(--ink-2)}
+  .uc .perm{font-size:10px;font-weight:800;padding:2px 8px;border-radius:var(--r-chip);display:inline-block;margin-top:8px}
+  .uc .ucactors{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:9px;padding-top:9px;border-top:1px solid var(--line-2)}
+  .uc .ucactors .albl{font-size:10px;font-weight:700;color:var(--ink-3);margin-right:2px}
+  .achip{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:var(--r-chip);background:var(--surface);color:var(--ink-2);border:1px solid var(--line);display:inline-flex;align-items:center;gap:5px}
+  .achip::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--ink-3);flex:none}
+  .uc.lit .achip{border-color:var(--accent-line);color:var(--accent-deep)} .uc.lit .achip::before{background:var(--accent)}
+  .uc.active .achip{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)} .uc.active .achip::before{background:#fff}
+  .uc.active .ucactors{border-top-color:rgba(255,255,255,.28)} .uc.active .albl{color:rgba(255,255,255,.85)}
+  .uc .perm.v{background:var(--surface-3);color:var(--ink-2)}
+  .uc .perm.c{background:var(--accent-soft);color:var(--accent-deep)}
+  .uc .perm.m{background:var(--warn-bg);color:#7a5300}
+  .uc.lit{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 6px 16px rgba(49,130,246,.18)}
+  .uc.lit .ucn{color:var(--accent-deep)}
+  .uc.active{border-color:var(--accent);background:var(--accent);box-shadow:0 6px 16px rgba(49,130,246,.25)}
+  .uc.active .ucn{color:#fff} .uc.active .perm{background:rgba(255,255,255,.25);color:#fff}
+  .uc.dim{opacity:.35}
+
+  .behavior{margin-top:16px;border:1px solid var(--accent-line);border-radius:var(--r-md);background:var(--accent-soft);padding:16px 18px;display:none}
+  .behavior.show{display:block}
+  .behavior .bh{font-size:13px;font-weight:700;color:var(--accent-deep);margin-bottom:10px}
+  .behavior .brow{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--accent-line);font-size:13.5px}
+  .behavior .brow:last-child{border-bottom:0}
+  .behavior .bactor{font-weight:700;color:var(--ink)}
+  .behavior .bact{color:var(--ink-2)} .behavior .bact.no{color:var(--ink-3)}
+
+  .summary{margin-top:14px;font-size:13.5px;color:var(--ink-2)}
+  .summary b{color:var(--accent-deep)}
+
+  .note{display:flex;gap:11px;border-radius:var(--r-md);padding:14px 16px;margin:14px 0 0;font-size:14px;line-height:1.62}
+  .note .lbl{flex:none;font-weight:800;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;border-radius:8px;height:fit-content;white-space:nowrap}
+  .note.warn{background:var(--warn-bg)}.note.warn .lbl{background:#e6a93a;color:#4a3500}
+  .note.info{background:var(--accent-soft)}.note.info .lbl{background:var(--accent);color:#fff}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span>
+    <div><h1>역할별 기능·동작 (유스케이스) — 예시</h1><p class="sub">누가 어떤 기능을 쓰고, 같은 기능도 역할별로 어떻게 다른가</p></div>
+  </header>
+
+  <section>
+    <div class="hero">
+      <span class="eyebrow">상황 — 역할별 기능·권한</span>
+      <h2>각 역할이 <span class="key">무슨 기능</span>을 쓰고, 같은 기능도 <span class="key">어떻게 다르게</span> 동작하나요?</h2>
+      <ul class="why">
+        <li><b>역할(왼쪽)을 클릭</b> → 그 역할이 쓰는 기능 강조 ("누가 무엇을").</li>
+        <li><b>기능(오른쪽)을 클릭</b> → 그 기능을 역할별로 어떻게 다르게 하는지 ("같은 기능, 다른 동작") — 예: 주문 조회를 작성자는 본인 것만, 관리자는 전체.</li>
+        <li>권한 등급(조회·생성·관리)과 역할별 범위·제약을 같이 맞춥니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">01</span><h3>역할 ↔ 기능 ↔ 동작</h3></div>
+
+    <div class="controls">
+      <button class="btn" onclick="clearSel()">전체 보기</button>
+      <span class="hint">역할 클릭 = 누가 무엇을 · 기능 클릭 = 역할별 동작 차이</span>
+    </div>
+
+    <div class="uc-layout">
+      <div class="actors" id="actors"></div>
+      <div>
+        <div class="ucs" id="ucs"></div>
+        <div class="summary" id="summary">역할이나 기능을 클릭해 보세요.</div>
+        <div class="behavior" id="behavior"></div>
+      </div>
+    </div>
+
+    <div class="note warn"><span class="lbl">합의</span><div><b>이 역할-기능-동작이 맞나요?</b> 작성자가 보는 범위(본인 것만? 부서 전체?), 결재자의 승인 범위(자기 차례만?), 관리자가 강제 승인·대리 등록까지 하는지 — 역할과 기능을 눌러 가며 맞춥니다.</div></div>
+    <div class="note info"><span class="lbl">참고</span><div>권한 등급(조회·생성·관리)은 일반적인 권한 축과 같습니다. 역할-기능 매핑과 역할별 동작은 대표 예시 — 실제 권한·범위와 맞춰야 합니다(합의 대상).</div></div>
+  </section>
+
+</div>
+
+<script>
+  var ACTORS = [
+    {id:'writer',  nm:'작성자', role:'영업 담당'},
+    {id:'approver',nm:'결재자', role:'팀장'},
+    {id:'admin',   nm:'관리자', role:'시스템 관리'}
+  ];
+  var UCS = [
+    {id:'view',   nm:'주문 조회', perm:'v', act:{writer:'본인 작성분만', approver:'결재선 포함분', admin:'회사 전체'}},
+    {id:'create', nm:'주문 등록', perm:'c', act:{writer:'직접 등록', approver:null, admin:'대리 등록 가능'}},
+    {id:'submit', nm:'상신',      perm:'c', act:{writer:'본인 문서 상신', approver:null, admin:'대리 상신'}},
+    {id:'approve',nm:'검토·승인', perm:'c', act:{writer:null, approver:'자기 차례만 승인', admin:'강제 승인 가능'}},
+    {id:'reject', nm:'반려',      perm:'c', act:{writer:null, approver:'반려(사유 필수)', admin:'강제 반려'}},
+    {id:'line',   nm:'결재선 설정',perm:'m', act:{writer:null, approver:null, admin:'결재선 생성·변경'}},
+    {id:'perm',   nm:'권한 관리', perm:'m', act:{writer:null, approver:null, admin:'역할·권한 부여'}}
+  ];
+  var MAP = { writer:['view','create','submit'], approver:['view','approve','reject'], admin:['view','create','submit','approve','reject','line','perm'] };
+  var PERMNM = {v:'조회', c:'생성', m:'관리'};
+  var aById={}; ACTORS.forEach(function(a){aById[a.id]=a;});
+  var sel = null;
+
+  function renderActors(){
+    var litActors = (sel && sel.type==='uc') ? Object.keys(UCS.filter(function(u){return u.id===sel.id;})[0].act).filter(function(k){return UCS.filter(function(u){return u.id===sel.id;})[0].act[k];}) : null;
+    document.getElementById('actors').innerHTML = ACTORS.map(function(a){
+      var cls='';
+      if(sel && sel.type==='actor' && sel.id===a.id) cls='active';
+      else if(litActors && litActors.indexOf(a.id)>=0) cls='lit';
+      return '<div class="actor '+cls+'" onclick="pickActor(\''+a.id+'\')">'
+        + '<span class="ava"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span>'
+        + '<div><div class="anm">'+a.nm+'</div><div class="arole">'+a.role+'</div></div></div>';
+    }).join('');
+  }
+  function actorChips(ucId){ return ACTORS.filter(function(a){return MAP[a.id].indexOf(ucId)>=0;}).map(function(a){return '<span class="achip">'+a.nm+'</span>';}).join(''); }
+  function renderUcs(){
+    var litUcs = (sel && sel.type==='actor') ? MAP[sel.id] : null;
+    document.getElementById('ucs').innerHTML = UCS.map(function(u){
+      var cls='';
+      if(sel && sel.type==='uc' && sel.id===u.id) cls='active';
+      else if(litUcs) cls = litUcs.indexOf(u.id)>=0 ? 'lit' : 'dim';
+      return '<div class="uc '+cls+'" onclick="pickUc(\''+u.id+'\')"><div class="ucn">'+u.nm+'</div><span class="perm '+u.perm+'">'+PERMNM[u.perm]+'</span><div class="ucactors"><span class="albl">역할</span>'+actorChips(u.id)+'</div></div>';
+    }).join('');
+  }
+  function renderPanel(){
+    var sm=document.getElementById('summary'), bv=document.getElementById('behavior');
+    if(!sel){ sm.innerHTML='역할이나 기능을 클릭해 보세요.'; bv.classList.remove('show'); return; }
+    if(sel.type==='actor'){
+      var a=aById[sel.id], names=MAP[sel.id].map(function(id){return UCS.filter(function(u){return u.id===id;})[0].nm;});
+      sm.innerHTML='<b>'+a.nm+'</b>('+a.role+')가 쓰는 기능: '+names.join(' · ');
+      bv.classList.remove('show');
+    } else {
+      var u=UCS.filter(function(x){return x.id===sel.id;})[0];
+      sm.innerHTML='<b>'+u.nm+'</b> — 역할별 동작:';
+      var h='<div class="bh">'+u.nm+' · 역할별 동작</div>';
+      ACTORS.forEach(function(a){
+        var act=u.act[a.id];
+        h += '<div class="brow"><div class="bactor">'+a.nm+'</div><div class="bact'+(act?'':' no')+'">'+(act||'권한 없음')+'</div></div>';
+      });
+      bv.innerHTML=h; bv.classList.add('show');
+    }
+  }
+  function render(){ renderActors(); renderUcs(); renderPanel(); }
+  function pickActor(id){ sel = (sel && sel.type==='actor' && sel.id===id) ? null : {type:'actor',id:id}; render(); }
+  function pickUc(id){ sel = (sel && sel.type==='uc' && sel.id===id) ? null : {type:'uc',id:id}; render(); }
+  function clearSel(){ sel=null; render(); }
+
+  render();
+</script>
+</body>
+</html>

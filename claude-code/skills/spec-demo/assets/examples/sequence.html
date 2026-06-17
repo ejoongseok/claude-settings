@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<!--
+  spec-demo example — sequence (save flow with post-commit event). Generic order-save case. Self-contained (font CDN only).
+  기술/업무 모드. 이벤트는 self loop가 아니라 별도 참여자로 가는 화살표 — "저장 후 자동 처리"임을 명확히.
+  화살표: 두 participant 중심 사이(꼬리 + 머리). 양방향 단계 재생. 순서·경계는 합의 포인트.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주문 저장 흐름 (시퀀스) — 예시</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#f7f8fa; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e8ebee;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --line:#e5e8eb; --line-2:#eef1f3;
+    --accent:#3182f6; --accent-deep:#1b64da; --accent-soft:#eaf2ff; --accent-line:#c3dafe;
+    --ok:#15b86b; --ok-bg:#e7f7ef; --warn:#c8820a; --warn-bg:#fff6e0;
+    --purple:#7c5cff; --purple-bg:#f0ecff; --purple-line:#d9b8ff;
+    --r-sm:10px; --r-md:14px; --r-lg:20px; --r-chip:999px;
+    --shadow:0 1px 3px rgba(25,31,40,.05),0 8px 28px rgba(25,31,40,.06);
+    --shadow-soft:0 1px 2px rgba(25,31,40,.04);
+    --sans:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'D2Coding',Consolas,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.72;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .shell{max-width:920px;margin:0 auto;padding:46px 22px 90px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .dot{width:34px;height:34px;border-radius:11px;background:var(--purple);flex:none;display:grid;place-items:center;box-shadow:0 6px 16px rgba(124,92,255,.3)}
+  .dot svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:23px;font-weight:700;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--ink-3);font-size:13.5px;margin:3px 0 0;font-weight:500}
+
+  section{margin-bottom:32px}
+  .sec-h{display:flex;align-items:center;gap:11px;margin:0 0 16px}
+  .sec-h .n{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)}
+  .sec-h h3{font-size:21px;font-weight:700;margin:0;letter-spacing:-.02em}
+
+  .hero{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:30px 34px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--purple),var(--accent-deep))}
+  .eyebrow{display:inline-flex;font-size:11.5px;font-weight:700;color:#5a3fd6;background:var(--purple-bg);padding:5px 13px;border-radius:var(--r-chip);letter-spacing:.03em}
+  .hero h2{font-size:23px;line-height:1.45;font-weight:700;margin:12px 0 0;letter-spacing:-.02em;max-width:42ch}
+  .hero h2 .key{color:#5a3fd6}
+  .why{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:9px;max-width:66ch}
+  .why li{position:relative;padding-left:18px;font-size:14.5px;color:var(--ink)}
+  .why li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--purple)}
+  .why b{color:#5a3fd6}
+
+  .controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:14px;align-items:center}
+  .btn-primary{font-family:inherit;font-size:13px;font-weight:700;padding:9px 16px;border-radius:var(--r-chip);cursor:pointer;border:0;background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(49,130,246,.25)}
+  .btn-primary:hover{background:var(--accent-deep)} .btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+  .btn{font-family:inherit;font-size:13px;font-weight:600;padding:9px 15px;border-radius:var(--r-chip);cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink-2)}
+  .btn:hover{background:var(--surface-2);color:var(--ink)}
+  .step-cnt{font-size:12.5px;color:var(--ink-3);font-family:var(--mono)}
+  .modeseg{display:inline-flex;gap:3px;background:var(--surface-2);padding:3px;border-radius:var(--r-sm);margin-left:auto}
+  .modeseg button{font-family:inherit;font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:7px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;transition:all .15s}
+  .modeseg button.on{background:var(--surface);color:var(--accent-deep);box-shadow:var(--shadow-soft)}
+
+  .seq{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);padding:18px 16px 22px}
+  .participants{display:grid;gap:6px;margin-bottom:6px}
+  .participants .p{text-align:center;font-size:12px;font-weight:700;padding:9px 3px;border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+  .participants .p.evtp{background:var(--purple-bg);color:#5a3fd6;border-color:var(--purple-line)}
+  .participants .p .pt{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);display:block;font-weight:500;margin-top:1px}
+  .seqbody{position:relative;padding-top:8px}
+  .lifeline{position:absolute;top:0;bottom:0;width:1.5px;background:repeating-linear-gradient(180deg,var(--line) 0 5px,transparent 5px 10px);transform:translateX(-50%)}
+  .lifeline.evtl{background:repeating-linear-gradient(180deg,var(--purple-line) 0 5px,transparent 5px 10px)}
+
+  .lane{position:relative;height:50px;opacity:0;transform:translateY(-6px);transition:all .3s var(--ease)}
+  .lane.show{opacity:1;transform:translateY(0)}
+  .arrow{position:absolute;top:30px;height:2px;background:var(--accent)}
+  .arrow.bwd{background:transparent;border-top:2px dashed var(--ink-3)}
+  .arrow.evt{background:transparent;border-top:2px solid var(--purple)}
+  .arrow .tail{position:absolute;top:-3px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .arrow.bwd .tail{background:var(--ink-3)} .arrow.evt .tail{background:var(--purple)}
+  .arrow.fwd .tail,.arrow.evt .tail{left:-3px} .arrow.bwd .tail{right:-3px}
+  .arrow .head{position:absolute;top:-5px;width:10px;height:10px;border-top:2px solid var(--accent);border-right:2px solid var(--accent)}
+  .arrow.bwd .head{border-color:var(--ink-3)} .arrow.evt .head{border-color:var(--purple)}
+  .arrow.fwd .head,.arrow.evt .head{right:-2px;transform:rotate(45deg)}
+  .arrow.bwd .head{left:-2px;transform:rotate(-135deg)}
+  .arrow .lbl{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;color:var(--ink);background:var(--surface);padding:2px 8px;border-radius:6px;border:1px solid var(--line-2)}
+  .arrow.bwd .lbl{color:var(--ink-2)} .arrow.evt .lbl{color:#5a3fd6;border-color:var(--purple-line);background:var(--purple-bg)}
+  .arrow .ft{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:700;color:var(--ink-3);white-space:nowrap}
+  .arrow.evt .ft{color:#8a7ad6}
+
+  .done-banner{margin-top:14px;padding:12px 16px;background:var(--ok-bg);color:var(--ok);border-radius:var(--r-md);font-size:14px;font-weight:600;display:none}
+  .done-banner.show{display:block}
+
+  .note{display:flex;gap:11px;border-radius:var(--r-md);padding:14px 16px;margin:14px 0 0;font-size:14px;line-height:1.62}
+  .note .lbl{flex:none;font-weight:800;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;border-radius:8px;height:fit-content;white-space:nowrap}
+  .note.warn{background:var(--warn-bg)}.note.warn .lbl{background:#e6a93a;color:#4a3500}
+  .note.evt{background:var(--purple-bg)}.note.evt .lbl{background:var(--purple);color:#fff}
+  .note b{color:var(--ink)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-3);margin:10px 0 0}
+  .legend .li{display:flex;align-items:center;gap:6px}
+  .legend .ln{width:20px;height:0;border-top:2px solid var(--accent)} .legend .ln.bwd{border-top:2px dashed var(--ink-3)} .legend .ln.evt{border-top:2px solid var(--purple)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="7" cy="6" r="1.5" fill="#fff"/><circle cx="14" cy="12" r="1.5" fill="#fff"/><circle cx="10" cy="18" r="1.5" fill="#fff"/></svg></span>
+    <div><h1>주문 저장 흐름 (시퀀스) — 예시</h1><p class="sub">요청이 어떤 순서로 흐르나 — 기술/업무 두 언어로</p></div>
+  </header>
+
+  <section>
+    <div class="hero">
+      <span class="eyebrow">상황 — 저장과 후속 처리</span>
+      <h2>저장이 끝나면 <span class="key">자동으로 도는 처리(보라색)</span>까지 한눈에.</h2>
+      <ul class="why">
+        <li><b>파란 실선</b>은 요청, <b>회색 점선</b>은 응답·반환입니다.</li>
+        <li><b>보라색 화살표</b>는 "저장이 끝난 뒤(커밋 후) 시스템이 알아서 도는 별도 처리"입니다 — 여기선 재고 반영. 사용자가 따로 시키지 않아도 자동으로, 별도 흐름으로 실행됩니다.</li>
+        <li>오른쪽 <b>모드 토글</b>로 기술 언어/업무 언어를 바꿔 보세요. 업무 모드면 기획·고객과도 맞출 수 있습니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">01</span><h3>요청 흐름</h3></div>
+
+    <div class="controls">
+      <button class="btn" id="prevBtn" onclick="prev()">&#8592; 이전</button>
+      <button class="btn-primary" id="nextBtn" onclick="next()">다음 &#8594;</button>
+      <button class="btn" onclick="resetSeq()">처음으로</button>
+      <span class="step-cnt" id="stepCnt">0 / 0</span>
+      <span class="modeseg">
+        <button id="mDev" class="on" onclick="setMode('dev')">기술 보기</button>
+        <button id="mBiz" onclick="setMode('biz')">업무 보기</button>
+      </span>
+    </div>
+
+    <div class="seq">
+      <div class="participants" id="participants"></div>
+      <div class="seqbody" id="seqbody"></div>
+      <div class="done-banner" id="doneBanner"></div>
+      <div class="legend">
+        <span class="li"><span class="ln"></span> 요청</span>
+        <span class="li"><span class="ln bwd"></span> 응답·반환</span>
+        <span class="li"><span class="ln evt"></span> 저장 후 자동 처리</span>
+      </div>
+    </div>
+
+    <div class="note evt"><span class="lbl">자동 처리란</span><div>보라색은 <b>"이벤트"</b>입니다 — 저장이 확정(커밋)된 뒤 시스템이 후속 작업(재고 반영)을 <b>자동으로, 별도 흐름</b>으로 실행합니다. 사용자 조작이 아니고, 이게 실패해도 앞의 저장은 유지됩니다.</div></div>
+    <div class="note warn"><span class="lbl">합의</span><div><b>이 순서가 맞나요?</b> 자동 처리(재고 반영)가 저장 완료 후에 도는 게 맞는지, 그게 실패하면 어떻게 알리고 재시도하는지 — 업무 모드로 함께 맞춥니다.</div></div>
+  </section>
+
+</div>
+
+<script>
+  var DATA = {
+    dev: {
+      P:['화면','Controller','Service','Mapper','DB','후속 처리'],
+      pt:['Order.js','OrderCtrl','OrderSvc','OrderMapper','DB','리스너'],
+      evtIdx:5,
+      done:'저장 완료 — 응답 반환. 커밋 후 OrderSavedEvent가 재고 반영을 자동 실행.',
+      MSGS:[
+        {from:0,to:1, label:'POST /api/orders/save'},
+        {from:1,to:2, label:'saveOrder(dto)'},
+        {from:2,to:3, label:'mergeHeader'},
+        {from:3,to:4, label:'MERGE ORDER_HEADER'},
+        {from:4,to:3, label:'ORDER_ID 반환', rev:true},
+        {from:2,to:3, label:'mergeItems (N건)'},
+        {from:3,to:4, label:'MERGE ORDER_ITEM'},
+        {from:2,to:1, label:'저장 결과', rev:true},
+        {from:1,to:0, label:'응답 (JSON)', rev:true},
+        {from:2,to:5, label:'OrderSavedEvent (커밋 후 자동)', evt:true}
+      ]
+    },
+    biz: {
+      P:['담당자','시스템','데이터','후속 처리'],
+      pt:['','','','자동'],
+      evtIdx:3,
+      done:'저장이 끝났습니다. 저장 완료 후 재고가 자동으로 반영됩니다.',
+      MSGS:[
+        {from:0,to:1, label:'주문 저장 요청'},
+        {from:1,to:2, label:'주문 기본정보 저장'},
+        {from:2,to:1, label:'주문번호 발급', rev:true},
+        {from:1,to:2, label:'주문 항목들 저장'},
+        {from:1,to:0, label:'저장 완료 안내', rev:true},
+        {from:1,to:3, label:'재고 자동 반영 (저장 후, 자동)', evt:true}
+      ]
+    }
+  };
+  var MODE='dev', step=0;
+  function cur(){ return DATA[MODE]; }
+  function center(i){ return (i + 0.5) / cur().P.length * 100; }
+
+  function buildAll(){
+    var c=cur();
+    var pd=document.getElementById('participants');
+    pd.style.gridTemplateColumns='repeat('+c.P.length+',1fr)';
+    pd.innerHTML = c.P.map(function(p,i){ return '<div class="p'+(i===c.evtIdx?' evtp':'')+'">'+p+(c.pt[i]?'<span class="pt">'+c.pt[i]+'</span>':'')+'</div>'; }).join('');
+
+    var body=document.getElementById('seqbody'), h='';
+    c.P.forEach(function(_, i){ h += '<div class="lifeline'+(i===c.evtIdx?' evtl':'')+'" style="left:'+center(i)+'%"></div>'; });
+    c.MSGS.forEach(function(m, i){
+      var fc=center(m.from), tc=center(m.to), left=Math.min(fc,tc), width=Math.abs(tc-fc);
+      var dir = m.from<m.to ? 'fwd':'bwd';
+      var ft = c.P[m.from]+' &#8594; '+c.P[m.to];
+      var inner = '<div class="arrow '+dir+(m.evt?' evt':'')+'" style="left:'+left+'%;width:'+width+'%">'
+            + '<span class="lbl">'+m.label+'</span><span class="ft">'+ft+'</span>'
+            + '<span class="tail"></span><span class="head"></span></div>';
+      h += '<div class="lane" data-i="'+i+'">'+inner+'</div>';
+    });
+    body.innerHTML = h;
+    document.getElementById('doneBanner').textContent = c.done;
+  }
+  function refresh(){
+    document.querySelectorAll('.lane').forEach(function(l){ l.classList.toggle('show', (+l.getAttribute('data-i')) < step); });
+    document.getElementById('stepCnt').textContent = step + ' / ' + cur().MSGS.length;
+    var nb=document.getElementById('nextBtn');
+    nb.innerHTML = (step===0 ? '시작 ' : '다음 ') + '&#8594;';
+    nb.disabled = step >= cur().MSGS.length;
+    document.getElementById('prevBtn').disabled = step <= 0;
+    document.getElementById('doneBanner').classList.toggle('show', step >= cur().MSGS.length);
+  }
+  function next(){ if(step<cur().MSGS.length){ step++; refresh(); } }
+  function prev(){ if(step>0){ step--; refresh(); } }
+  function resetSeq(){ step=0; refresh(); }
+  function setMode(m){
+    MODE=m; step=0;
+    document.getElementById('mDev').classList.toggle('on', m==='dev');
+    document.getElementById('mBiz').classList.toggle('on', m==='biz');
+    buildAll(); refresh();
+  }
+
+  buildAll(); refresh();
+</script>
+</body>
+</html>

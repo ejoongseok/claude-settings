@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<!--
+  spec-demo example — screen flow (list + CRUD prototype across pages). Generic e-commerce order-admin case. Self-contained (font CDN only).
+  목록(검색+등록+row삭제+페이징) → 상세(수정·삭제) → 등록/수정 폼. 클릭으로 화면 전환. 화면 요구를 동작하는 와이어로 합의.
+  저충실 와이어 + 흐름 합의용. 화면·버튼·CRUD 위치는 합의 포인트.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주문 화면 흐름 (CRUD 프로토타입) — 예시</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#f7f8fa; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e8ebee;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --line:#e5e8eb; --line-2:#eef1f3;
+    --accent:#3182f6; --accent-deep:#1b64da; --accent-soft:#eaf2ff; --accent-line:#c3dafe;
+    --ok:#15b86b; --ok-bg:#e7f7ef; --warn:#c8820a; --warn-bg:#fff6e0; --danger:#e85b48; --danger-bg:#fdeeeb;
+    --r-sm:10px; --r-md:14px; --r-lg:20px; --r-chip:999px;
+    --shadow:0 1px 3px rgba(25,31,40,.05),0 8px 28px rgba(25,31,40,.06);
+    --shadow-soft:0 1px 2px rgba(25,31,40,.04);
+    --sans:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'D2Coding',Consolas,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .shell{max-width:880px;margin:0 auto;padding:46px 22px 90px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .dot{width:34px;height:34px;border-radius:11px;background:var(--accent);flex:none;display:grid;place-items:center;box-shadow:0 6px 16px rgba(49,130,246,.28)}
+  .dot svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:22px;font-weight:700;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--ink-3);font-size:13.5px;margin:3px 0 0;font-weight:500}
+
+  .hero{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:22px 28px;box-shadow:var(--shadow-soft);margin-bottom:20px}
+  .hero h2{font-size:18px;font-weight:700;margin:0 0 8px}
+  .hero p{font-size:14px;color:var(--ink-2);margin:0}
+  .hero b{color:var(--accent-deep)}
+
+  .app{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow);overflow:hidden}
+  .appbar{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+  .appbar .back{border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:var(--r-sm);cursor:pointer;display:none}
+  .appbar .back:hover{border-color:var(--ink-3);color:var(--ink)}
+  .appbar .crumb{font-size:13.5px;color:var(--ink-3);font-weight:600}
+  .appbar .crumb b{color:var(--ink)}
+  .screen{display:none;padding:18px}
+  .screen.active{display:block}
+
+  .listtop{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .search{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;padding:14px 16px;background:var(--surface-2);border-radius:var(--r-md);flex:1}
+  .fld{display:flex;flex-direction:column;gap:4px}
+  .fld label{font-size:11.5px;font-weight:700;color:var(--ink-3)}
+  .fld select,.fld input{font-family:inherit;font-size:13.5px;padding:8px 11px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface)}
+  .fld select:focus,.fld input:focus{outline:none;border-color:var(--accent)}
+  .sbtn{font-family:inherit;font-size:13.5px;font-weight:700;padding:9px 18px;border-radius:var(--r-sm);border:0;background:var(--accent);color:#fff;cursor:pointer}
+  .sbtn:hover{background:var(--accent-deep)}
+  .addbtn{font-family:inherit;font-size:13.5px;font-weight:700;padding:10px 16px;border-radius:var(--r-sm);border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent-deep);cursor:pointer;white-space:nowrap}
+  .addbtn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  .grid{width:100%;border-collapse:collapse;font-size:13.5px}
+  .grid thead th{text-align:left;padding:11px 13px;background:var(--surface-2);color:var(--ink-2);font-size:12px;font-weight:700;border-bottom:1px solid var(--line)}
+  .grid tbody td{padding:11px 13px;border-bottom:1px solid var(--line-2);color:var(--ink)}
+  .grid tbody tr.clickrow{cursor:pointer;transition:background .15s}
+  .grid tbody tr.clickrow:hover td{background:var(--accent-soft)}
+  .grid .no{font-family:var(--mono);font-size:12.5px;color:var(--accent-deep);font-weight:600}
+  .grid .amt{font-family:var(--mono);text-align:right}
+  .st{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:var(--r-chip)}
+  .st.prog{background:var(--accent-soft);color:var(--accent-deep)} .st.wait{background:var(--surface-3);color:var(--ink-2)} .st.done{background:var(--ok-bg);color:var(--ok)}
+  .rowdel{border:1px solid var(--line);background:var(--surface);color:var(--ink-3);font-family:var(--sans);font-size:11px;font-weight:700;padding:4px 10px;border-radius:var(--r-chip);cursor:pointer}
+  .rowdel:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-bg)}
+  .empty{text-align:center;color:var(--ink-3);padding:30px;font-size:14px}
+
+  .pager{display:flex;gap:6px;justify-content:center;margin-top:16px}
+  .pager button{font-family:var(--mono);font-size:13px;width:32px;height:32px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}
+  .pager button:hover{border-color:var(--accent-line)} .pager button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .listinfo{font-size:12.5px;color:var(--ink-3);margin-top:10px;text-align:center}
+
+  .dt-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .dt-head{font-size:18px;font-weight:700;margin:0}
+  .dt-sub{font-size:13px;color:var(--ink-3);margin-top:3px}
+  .dt-actions{display:flex;gap:8px}
+  .abtn{font-family:inherit;font-size:13px;font-weight:700;padding:8px 15px;border-radius:var(--r-sm);cursor:pointer;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent-deep)}
+  .abtn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .abtn.del{border-color:var(--danger-bg);background:var(--danger-bg);color:var(--danger)} .abtn.del:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .dt-info{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+  @media(max-width:520px){.dt-info{grid-template-columns:1fr}}
+  .dt-info .row{background:var(--surface-2);border-radius:var(--r-sm);padding:11px 14px}
+  .dt-info .k{font-size:11.5px;color:var(--ink-3);font-weight:700}
+  .dt-info .v{font-size:14.5px;font-weight:600;margin-top:2px}
+  .dt-sec{font-size:13px;font-weight:700;color:var(--ink-2);margin:0 0 8px}
+
+  .formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
+  @media(max-width:520px){.formgrid{grid-template-columns:1fr}}
+  .ffld{display:flex;flex-direction:column;gap:5px}
+  .ffld.full{grid-column:1/-1}
+  .ffld label{font-size:12px;font-weight:700;color:var(--ink-2)}
+  .ffld label .req{color:var(--danger)}
+  .ffld input,.ffld select{font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface)}
+  .ffld input:focus,.ffld select:focus{outline:none;border-color:var(--accent)}
+  .ffld input:disabled{background:var(--surface-2);color:var(--ink-3)}
+  .form-actions{display:flex;gap:10px}
+  .save{font-family:inherit;font-size:14px;font-weight:700;padding:11px 22px;border-radius:var(--r-sm);border:0;background:var(--accent);color:#fff;cursor:pointer}
+  .save:hover{background:var(--accent-deep)}
+  .cancel{font-family:inherit;font-size:14px;font-weight:600;padding:11px 18px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}
+  .cancel:hover{background:var(--surface-2)}
+
+  #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;font-size:14px;font-weight:600;padding:12px 22px;border-radius:var(--r-md);opacity:0;pointer-events:none;transition:all .3s var(--ease);box-shadow:var(--shadow)}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .note{display:flex;gap:11px;border-radius:var(--r-md);padding:14px 16px;margin:16px 0 0;font-size:14px;line-height:1.62}
+  .note .lbl{flex:none;font-weight:800;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;border-radius:8px;height:fit-content;white-space:nowrap}
+  .note.warn{background:var(--warn-bg)}.note.warn .lbl{background:#e6a93a;color:#4a3500}
+  .note.info{background:var(--accent-soft)}.note.info .lbl{background:var(--accent);color:#fff}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 9h16M8 13h8M8 16h5"/></svg></span>
+    <div><h1>주문 화면 흐름 (CRUD 프로토타입) — 예시</h1><p class="sub">목록·검색·등록·상세·수정·삭제 — 클릭으로 전환</p></div>
+  </header>
+
+  <div class="hero">
+    <h2>이 화면들·버튼들·흐름이면 되나요?</h2>
+    <p>동작하는 와이어입니다 — <b>검색</b>, <b>[+ 등록]</b>으로 새로 만들기, <b>행 클릭</b>으로 상세, 상세에서 <b>[수정]·[삭제]</b>, 행에서 바로 <b>삭제</b>, 페이징까지. 실제 클릭해 보며 "등록 버튼이 여기 맞나, 삭제는 어디서 하나, 수정 화면은 어떤 필드인가"를 고객·기획과 맞춥니다. (픽셀 디자인 아닌 흐름·동작 합의용)</p>
+  </div>
+
+  <div class="app">
+    <div class="appbar">
+      <button class="back" id="backBtn" onclick="toList()">&#8592; 목록</button>
+      <span class="crumb" id="crumb"><b>주문 관리</b> · 목록</span>
+    </div>
+
+    <div class="screen active" id="screen-list">
+      <div class="listtop">
+        <div class="search">
+          <div class="fld"><label>상태</label>
+            <select id="fStt"><option value="">전체</option><option>결제대기</option><option>처리중</option><option>배송중</option><option>완료</option></select>
+          </div>
+          <div class="fld"><label>고객명</label><input id="fCust" type="text" placeholder="예: ACME" style="width:150px"></div>
+          <button class="sbtn" onclick="doSearch()">검색</button>
+        </div>
+        <button class="addbtn" onclick="openForm('new')">+ 등록</button>
+      </div>
+      <table class="grid">
+        <thead><tr><th>주문번호</th><th>고객</th><th>상태</th><th>금액</th><th>발송예정</th><th></th></tr></thead>
+        <tbody id="listBody"></tbody>
+      </table>
+      <div class="pager" id="pager"></div>
+      <div class="listinfo" id="listInfo"></div>
+    </div>
+
+    <div class="screen" id="screen-detail">
+      <div class="dt-top">
+        <div><h3 class="dt-head" id="dtNo"></h3><div class="dt-sub" id="dtSub"></div></div>
+        <div class="dt-actions">
+          <button class="abtn" onclick="openForm('edit', curNo)">수정</button>
+          <button class="abtn del" onclick="delOrder(curNo)">삭제</button>
+        </div>
+      </div>
+      <div class="dt-info" id="dtInfo"></div>
+      <div class="dt-sec">주문 항목</div>
+      <table class="grid"><thead><tr><th>품목</th><th>수량</th><th>상태</th></tr></thead><tbody id="dtItems"></tbody></table>
+    </div>
+
+    <div class="screen" id="screen-form">
+      <h3 class="dt-head" id="formTitle"></h3>
+      <div class="dt-sub" style="margin-bottom:16px">필수 항목을 입력하고 저장하세요.</div>
+      <div class="formgrid">
+        <div class="ffld"><label>주문번호</label><input id="iNo" type="text" disabled></div>
+        <div class="ffld"><label>고객 <span class="req">*</span></label><input id="iCust" type="text" placeholder="고객명"></div>
+        <div class="ffld"><label>상태</label><select id="iStt"><option>결제대기</option><option>처리중</option><option>배송중</option><option>완료</option></select></div>
+        <div class="ffld"><label>금액</label><input id="iAmt" type="text" placeholder="예: 124,000"></div>
+        <div class="ffld full"><label>발송예정</label><input id="iDue" type="date"></div>
+      </div>
+      <div class="form-actions">
+        <button class="save" onclick="saveForm()">저장</button>
+        <button class="cancel" onclick="cancelForm()">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="note warn"><span class="lbl">합의</span><div><b>이 화면·버튼·흐름이 맞나요?</b> 등록 버튼 위치, 삭제를 상세·행 양쪽에서 다 할지(권한은?), 수정 폼의 필드 구성, 저장 후 목록/상세 어디로 갈지, 삭제 시 확인을 둘지 — 직접 클릭해 화면 요구와 맞춥니다.</div></div>
+  <div class="note info"><span class="lbl">참고</span><div>저충실 와이어 + 동작(흐름) 합의용. 픽셀 디자인은 별도 UI 디자인 영역. 데이터는 예시(삭제해도 "처음으로"로 복구되진 않음 — 새로고침).</div></div>
+
+</div>
+<div id="toast"></div>
+
+<script>
+  var ORDERS = [
+    {no:'ORD-2024-0011', cust:'ACME 상사', stt:'처리중',   amt:'124,000', due:'2024-11-30', items:[['무선 이어폰',1,'처리중'],['보호 케이스',3,'결제대기']]},
+    {no:'ORD-2024-0012', cust:'ACME 상사', stt:'결제대기', amt:'89,000', due:'2024-12-15', items:[['무선 이어폰',1,'결제대기']]},
+    {no:'ORD-2024-0013', cust:'ACME 상사', stt:'완료',     amt:'212,000', due:'2024-10-31', items:[['무선 이어폰',2,'완료'],['충전기',4,'완료']]},
+    {no:'ORD-2024-0021', cust:'글로벌몰', stt:'배송중', amt:'150,000', due:'2024-11-20', items:[['무선 이어폰',1,'완료']]},
+    {no:'ORD-2024-0022', cust:'글로벌몰', stt:'처리중', amt:'70,000', due:'2025-01-10', items:[['보호 케이스',6,'처리중']]},
+    {no:'ORD-2024-0031', cust:'대한유통', stt:'결제대기', amt:'110,000', due:'2025-02-01', items:[['USB 케이블',2,'결제대기']]},
+    {no:'ORD-2024-0032', cust:'대한유통', stt:'완료', amt:'180,000', due:'2024-09-30', items:[['무선 이어폰',3,'완료']]}
+  ];
+  var STT_CLS = {'결제대기':'wait','처리중':'prog','배송중':'prog','완료':'done'};
+  var filtered = ORDERS.slice(), page=1, perPage=5, curNo=null, formMode='new', seq=33;
+
+  function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},1800); }
+
+  function doSearch(){
+    var s=document.getElementById('fStt').value, c=document.getElementById('fCust').value.trim();
+    filtered = ORDERS.filter(function(o){ return (!s||o.stt===s) && (!c||o.cust.indexOf(c)>=0); });
+    page=1; renderList();
+  }
+  function renderList(){
+    filtered = filtered.filter(function(o){ return ORDERS.indexOf(o)>=0; });
+    var total=filtered.length, pages=Math.max(1,Math.ceil(total/perPage));
+    if(page>pages) page=pages;
+    var slice=filtered.slice((page-1)*perPage, page*perPage), tb=document.getElementById('listBody');
+    if(!slice.length){ tb.innerHTML='<tr><td class="empty" colspan="6">결과 없음</td></tr>'; }
+    else tb.innerHTML = slice.map(function(o){
+      return '<tr class="clickrow" onclick="openDetail(\''+o.no+'\')"><td class="no">'+o.no+'</td><td>'+o.cust+'</td>'
+        + '<td><span class="st '+STT_CLS[o.stt]+'">'+o.stt+'</span></td><td class="amt">'+o.amt+'</td><td>'+o.due+'</td>'
+        + '<td><button class="rowdel" onclick="event.stopPropagation();delOrder(\''+o.no+'\')">삭제</button></td></tr>';
+    }).join('');
+    var ph=''; for(var i=1;i<=pages;i++){ ph+='<button class="'+(i===page?'on':'')+'" onclick="goPage('+i+')">'+i+'</button>'; }
+    document.getElementById('pager').innerHTML=ph;
+    document.getElementById('listInfo').textContent = total+'건 중 '+(total?(page-1)*perPage+1:0)+'~'+Math.min(page*perPage,total)+' 표시';
+  }
+  function goPage(p){ page=p; renderList(); }
+
+  function openDetail(no){
+    var o=ORDERS.filter(function(x){return x.no===no;})[0]; if(!o) return;
+    curNo=no;
+    document.getElementById('dtNo').textContent=o.no;
+    document.getElementById('dtSub').textContent=o.cust+' · '+o.stt;
+    document.getElementById('dtInfo').innerHTML =
+      '<div class="row"><div class="k">고객</div><div class="v">'+o.cust+'</div></div>'
+      +'<div class="row"><div class="k">상태</div><div class="v">'+o.stt+'</div></div>'
+      +'<div class="row"><div class="k">금액</div><div class="v">'+o.amt+'</div></div>'
+      +'<div class="row"><div class="k">발송예정</div><div class="v">'+o.due+'</div></div>';
+    document.getElementById('dtItems').innerHTML = (o.items&&o.items.length) ? o.items.map(function(it){
+      return '<tr><td>'+it[0]+'</td><td>'+it[1]+'</td><td><span class="st '+STT_CLS[it[2]]+'">'+it[2]+'</span></td></tr>';
+    }).join('') : '<tr><td class="empty" colspan="3">항목 없음</td></tr>';
+    showScreen('detail'); setCrumb('목록 · '+o.no);
+  }
+
+  function openForm(mode, no){
+    formMode=mode;
+    if(mode==='edit'){
+      var o=ORDERS.filter(function(x){return x.no===no;})[0];
+      document.getElementById('formTitle').textContent='주문 수정';
+      document.getElementById('iNo').value=o.no; curNo=no;
+      document.getElementById('iCust').value=o.cust; document.getElementById('iStt').value=o.stt;
+      document.getElementById('iAmt').value=o.amt; document.getElementById('iDue').value=o.due;
+      setCrumb('목록 · '+o.no+' · 수정');
+    } else {
+      document.getElementById('formTitle').textContent='주문 등록';
+      document.getElementById('iNo').value='(저장 시 자동 발급)';
+      document.getElementById('iCust').value=''; document.getElementById('iStt').value='결제대기';
+      document.getElementById('iAmt').value=''; document.getElementById('iDue').value='';
+      setCrumb('목록 · 등록');
+    }
+    showScreen('form');
+  }
+  function saveForm(){
+    var cust=document.getElementById('iCust').value.trim();
+    if(!cust){ toast('고객을 입력하세요'); return; }
+    var data={cust:cust, stt:document.getElementById('iStt').value, amt:document.getElementById('iAmt').value||'-', due:document.getElementById('iDue').value||'-'};
+    if(formMode==='edit'){
+      var o=ORDERS.filter(function(x){return x.no===curNo;})[0];
+      o.cust=data.cust; o.stt=data.stt; o.amt=data.amt; o.due=data.due;
+      toast('수정되었습니다'); openDetail(curNo);
+    } else {
+      var no='ORD-2024-00'+(seq++); ORDERS.unshift({no:no, cust:data.cust, stt:data.stt, amt:data.amt, due:data.due, items:[]});
+      filtered=ORDERS.slice(); page=1; toast('등록되었습니다: '+no); toList();
+    }
+  }
+  function cancelForm(){ if(formMode==='edit'&&curNo) openDetail(curNo); else toList(); }
+
+  function delOrder(no){
+    var i=ORDERS.findIndex(function(x){return x.no===no;}); if(i<0) return;
+    ORDERS.splice(i,1); filtered=filtered.filter(function(o){return o.no!==no;});
+    toast('삭제되었습니다: '+no); toList();
+  }
+
+  function toList(){ filtered=filtered.length?filtered:ORDERS.slice(); renderList(); showScreen('list'); setCrumb('목록'); }
+  function setCrumb(t){ document.getElementById('crumb').innerHTML='<b>주문 관리</b> · '+t; }
+  function showScreen(name){
+    ['list','detail','form'].forEach(function(s){ document.getElementById('screen-'+s).classList.toggle('active', s===name); });
+    document.getElementById('backBtn').style.display = name==='list' ? 'none' : 'inline-block';
+    window.scrollTo({top:0});
+  }
+
+  renderList();
+</script>
+</body>
+</html>

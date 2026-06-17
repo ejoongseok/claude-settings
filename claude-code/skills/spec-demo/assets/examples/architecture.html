@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<!--
+  spec-demo example — architecture topology (clickable nodes + scenario flow replay). Generic modern e-commerce stack. Self-contained (font CDN only).
+  노드 클릭 → 역할·연결 상세 + 연결 노드 하이라이트. 시나리오 선택 → 요청 흐름 단계 재생(양방향).
+  서비스 경계·캐시/큐 장애 동작은 아키텍처 결정 지점(합의 포인트). 가상의 예시 구성이며 실제 시스템과 무관.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이커머스 서비스 아키텍처 — 예시</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#f7f8fa; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e8ebee;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --line:#e5e8eb; --line-2:#eef1f3;
+    --accent:#3182f6; --accent-deep:#1b64da; --accent-soft:#eaf2ff; --accent-line:#c3dafe;
+    --ok:#15b86b; --ok-bg:#e7f7ef; --ok-line:#a6e5c6; --warn:#c8820a; --warn-bg:#fff6e0;
+    --purple:#7c5cff; --purple-bg:#f0ecff; --purple-line:#d9b8ff;
+    --slate:#5a6b7b; --slate-bg:#eef2f5; --slate-line:#cdd8e0;
+    --r-sm:10px; --r-md:14px; --r-lg:20px; --r-chip:999px;
+    --shadow:0 1px 3px rgba(25,31,40,.05),0 8px 28px rgba(25,31,40,.06);
+    --shadow-soft:0 1px 2px rgba(25,31,40,.04);
+    --sans:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'D2Coding',Consolas,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.72;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .shell{max-width:1000px;margin:0 auto;padding:46px 22px 90px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .dot{width:34px;height:34px;border-radius:11px;background:var(--accent-deep);flex:none;display:grid;place-items:center;box-shadow:0 6px 16px rgba(27,100,218,.3)}
+  .dot svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:23px;font-weight:700;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--ink-3);font-size:13.5px;margin:3px 0 0;font-weight:500}
+
+  section{margin-bottom:30px}
+  .sec-h{display:flex;align-items:center;gap:11px;margin:0 0 16px}
+  .sec-h .n{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)}
+  .sec-h h3{font-size:21px;font-weight:700;margin:0;letter-spacing:-.02em}
+
+  .hero{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:30px 34px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--accent),var(--accent-deep))}
+  .hero h2{font-size:23px;line-height:1.45;font-weight:700;margin:0;letter-spacing:-.02em;max-width:44ch}
+  .hero h2 .key{color:var(--accent-deep)}
+  .why{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:9px;max-width:72ch}
+  .why li{position:relative;padding-left:18px;font-size:14.5px;color:var(--ink)}
+  .why li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .why b{color:var(--accent-deep)}
+
+  .map{display:grid;gap:13px}
+  .zone{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:15px 17px 18px;box-shadow:var(--shadow-soft)}
+  .zone.z-core{background:linear-gradient(180deg,#fbfdff,var(--surface))}
+  .zlbl{display:block;font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:11px}
+  .nodes{display:flex;flex-wrap:wrap;gap:9px}
+  .catwrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:11px}
+  .cat{border:1px dashed var(--line);border-radius:var(--r-md);padding:11px 12px;background:var(--surface-2)}
+  .cat .cl{font-size:11px;font-weight:700;color:var(--ink-2);margin-bottom:8px}
+
+  .node{font-family:inherit;text-align:left;cursor:pointer;border:1px solid var(--line);background:var(--surface);border-left:3px solid var(--slate-line);
+        border-radius:var(--r-md);padding:9px 13px;min-width:118px;transition:all .16s var(--ease);box-shadow:var(--shadow-soft);position:relative}
+  .node:hover{border-color:var(--accent-line);transform:translateY(-1px);box-shadow:var(--shadow)}
+  .node .nm{font-size:14px;font-weight:700;color:var(--ink);display:block;line-height:1.3}
+  .node .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:2px;display:block}
+  .node.big{min-width:150px;padding:13px 16px}
+  .node.big .nm{font-size:16px}
+  .node[data-zone="core"]{border-left-color:var(--accent)}
+  .node[data-zone="data"]{border-left-color:var(--slate)}
+  .node[data-zone="ext"]{border-left-color:var(--purple-line)}
+  .node[data-zone="client"]{border-left-color:var(--ink-3);background:var(--surface-2)}
+  .node.active{border-color:var(--accent);border-left-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .node.related{border-color:var(--accent-line);background:var(--accent-soft)}
+  .node.lit{border-color:var(--accent);background:var(--accent-soft);border-left-color:var(--accent-deep)}
+  .node.lit.now{box-shadow:0 0 0 3px var(--accent-soft),0 8px 20px rgba(49,130,246,.25);transform:translateY(-2px)}
+  .node.lit .nm{color:var(--accent-deep)}
+  .map.dimming .node:not(.lit){opacity:.4}
+  .map.exploring .node:not(.active):not(.related){opacity:.45}
+  .node .cm{position:absolute;top:8px;right:9px;font-family:var(--mono);font-size:9px;font-weight:700;padding:1px 5px;border-radius:5px;background:var(--surface-2);color:var(--ink-3)}
+  .node[data-comm="oauth"] .cm{background:var(--purple-bg);color:#5a3fd6}
+  .node[data-comm="grpc"] .cm{background:var(--ok-bg);color:#0d8a4f}
+  .node[data-comm="queue"] .cm{background:var(--slate-bg);color:var(--slate)}
+
+  .detail{margin-top:13px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow);min-height:96px;overflow:hidden}
+  .detail .ph{padding:26px 22px;color:var(--ink-3);font-size:14px;text-align:center}
+  .dhead{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line-2);background:var(--surface-2)}
+  .dhead .dt{font-size:16.5px;font-weight:700}
+  .dhead .dz{font-size:11px;font-weight:700;padding:3px 9px;border-radius:var(--r-chip);background:var(--accent-soft);color:var(--accent-deep)}
+  .dhead .x{margin-left:auto;border:0;background:transparent;font-size:18px;color:var(--ink-3);cursor:pointer;line-height:1;padding:4px}
+  .dhead .x:hover{color:var(--ink)}
+  .dbody{padding:15px 20px 18px}
+  .drow{display:flex;gap:11px;padding:5px 0;font-size:14px;border-bottom:1px dashed var(--line-2)}
+  .drow:last-child{border-bottom:0}
+  .drow .k{flex:none;width:74px;color:var(--ink-3);font-size:12.5px;font-weight:700;padding-top:2px}
+  .drow .v{color:var(--ink)}
+  .drow .v code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);padding:1px 6px;border-radius:5px}
+  .conns{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .conns button{font-family:inherit;font-size:12px;font-weight:600;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent-deep);padding:3px 10px;border-radius:var(--r-chip);cursor:pointer}
+  .conns button:hover{background:var(--accent);color:#fff}
+  .dnote{margin-top:12px;display:flex;gap:9px;background:var(--warn-bg);border-radius:var(--r-md);padding:11px 13px;font-size:13px;line-height:1.55}
+  .dnote .l{flex:none;font-weight:800;font-size:9.5px;letter-spacing:.04em;padding:3px 8px;border-radius:7px;height:fit-content;background:#e6a93a;color:#4a3500}
+
+  .flow-seg{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+  .flow-seg button{font-family:inherit;font-size:13px;font-weight:600;padding:8px 15px;border-radius:var(--r-chip);border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}
+  .flow-seg button:hover{background:var(--surface-2)}
+  .flow-seg button.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 12px rgba(49,130,246,.25)}
+  .controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:13px}
+  .btn-primary{font-family:inherit;font-size:13px;font-weight:700;padding:9px 16px;border-radius:var(--r-chip);cursor:pointer;border:0;background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(49,130,246,.25)}
+  .btn-primary:hover{background:var(--accent-deep)} .btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+  .btn{font-family:inherit;font-size:13px;font-weight:600;padding:9px 15px;border-radius:var(--r-chip);cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink-2)}
+  .btn:hover{background:var(--surface-2);color:var(--ink)} .btn:disabled{opacity:.4;cursor:not-allowed}
+  .step-cnt{font-size:12.5px;color:var(--ink-3);font-family:var(--mono)}
+  .flow-step{border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:var(--r-md);padding:13px 16px;font-size:14.5px;color:var(--ink);display:none;align-items:center;gap:11px}
+  .flow-step.show{display:flex}
+  .flow-step .seq{font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;background:var(--accent-deep);padding:3px 9px;border-radius:var(--r-chip);flex:none}
+  .flow-step .ar{font-family:var(--mono);color:var(--accent-deep);font-weight:700}
+  .flow-step b{color:var(--accent-deep)}
+
+  .legend{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--ink-3);margin:11px 2px 0}
+  .legend .li{display:flex;align-items:center;gap:6px}
+  .legend .sw{width:13px;height:13px;border-radius:4px;border:1px solid var(--line);border-left-width:3px}
+  .legend .sw.core{border-left-color:var(--accent)} .legend .sw.data{border-left-color:var(--slate)}
+  .legend .sw.ext{border-left-color:var(--purple-line)} .legend .sw.client{border-left-color:var(--ink-3)}
+
+  .note{display:flex;gap:11px;border-radius:var(--r-md);padding:14px 16px;margin:14px 0 0;font-size:14px;line-height:1.62}
+  .note .lbl{flex:none;font-weight:800;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;border-radius:8px;height:fit-content;white-space:nowrap}
+  .note.warn{background:var(--warn-bg)}.note.warn .lbl{background:#e6a93a;color:#4a3500}
+  .note.info{background:var(--accent-soft)}.note.info .lbl{background:var(--accent);color:#fff}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><circle cx="7" cy="7" r="1" fill="#fff"/><circle cx="7" cy="17" r="1" fill="#fff"/></svg></span>
+    <div><h1>이커머스 서비스 아키텍처 — 예시</h1><p class="sub">무엇이 어디서 돌고, 무엇과 연결되나</p></div>
+  </header>
+
+  <section>
+    <div class="hero">
+      <h2>가운데가 우리 서비스, 바깥이 <span class="key">연결된 외부 시스템</span>. 눌러서 확인하세요.</h2>
+      <ul class="why">
+        <li><b>노드를 클릭</b>하면 그 서비스의 역할·연결 대상이 펼쳐지고, 이어진 노드가 함께 밝아집니다.</li>
+        <li>아래 <b>시나리오</b>를 고르면 요청이 어디를 거쳐 도는지 단계별로 따라갑니다.</li>
+        <li>왼쪽 색 띠 = 종류(파랑 우리 서비스 · 회색 데이터·인프라 · 보라 외부 시스템). 오른쪽 작은 배지 = 연결 방식.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">01</span><h3>구성도</h3></div>
+
+    <div class="flow-seg">
+      <span style="font-size:13px;font-weight:600;color:var(--ink-2);align-self:center;margin-right:3px">요청 흐름 따라가기:</span>
+      <button onclick="setFlow('browse',this)">상품 조회</button>
+      <button onclick="setFlow('order',this)">주문·결제</button>
+      <button onclick="setFlow('search',this)">검색</button>
+      <button onclick="setFlow('notify',this)">알림(이벤트)</button>
+      <button class="btn" onclick="clearFlow()" style="margin-left:4px">맵 탐색으로</button>
+    </div>
+
+    <div class="controls" id="flowControls" style="display:none">
+      <button class="btn" id="prevBtn" onclick="flowPrev()">&#8592; 이전</button>
+      <button class="btn-primary" id="nextBtn" onclick="flowNext()">시작 &#8594;</button>
+      <button class="btn" onclick="flowReset()">처음으로</button>
+      <span class="step-cnt" id="stepCnt"></span>
+    </div>
+    <div class="flow-step" id="flowStep"></div>
+
+    <div class="map" id="map" style="margin-top:13px">
+      <div class="zone z-client"><span class="zlbl">클라이언트</span><div class="nodes" id="z-client"></div></div>
+      <div class="zone z-core"><span class="zlbl">서비스 — API 게이트웨이 + 도메인 서비스</span><div class="nodes" id="z-core"></div></div>
+      <div class="zone z-data"><span class="zlbl">데이터 · 캐시 · 검색 · 큐</span><div class="nodes" id="z-data"></div></div>
+      <div class="zone z-ext"><span class="zlbl">외부 연동 시스템</span><div class="catwrap" id="z-ext"></div></div>
+    </div>
+
+    <div class="legend">
+      <span class="li"><span class="sw core"></span> 우리 서비스</span>
+      <span class="li"><span class="sw data"></span> 데이터·인프라</span>
+      <span class="li"><span class="sw ext"></span> 외부 시스템</span>
+      <span class="li"><span class="sw client"></span> 클라이언트</span>
+    </div>
+
+    <div class="detail" id="detail"><div class="ph">노드를 클릭하면 역할·연결을 봅니다.</div></div>
+
+    <div class="note info"><span class="lbl">비동기</span><div><b>주문 후 알림은 메시지 큐로 분리</b>됩니다 — 알림이 느리거나 실패해도 주문 자체는 완료됩니다(이벤트 기반).</div></div>
+    <div class="note warn"><span class="lbl">합의</span><div><b>서비스 경계가 맞나요?</b> 주문·결제를 분리할지 합칠지, 검색을 별도 서비스로 둘지, 캐시·큐가 죽었을 때 폴백을 어떻게 둘지 — 아키텍처 결정 지점입니다.</div></div>
+  </section>
+
+</div>
+
+<script>
+  // zone: client | core | data | ext.  comm 배지: rest(기본 생략) | oauth | grpc | queue
+  var NODES = {
+    web:{zone:'client', nm:'웹 (Next.js)', meta:'SSR', role:'사용자 웹 클라이언트', conn:['gateway','cdn']},
+    mobile:{zone:'client', nm:'모바일 앱', meta:'iOS·Android', role:'모바일 클라이언트', conn:['gateway']},
+    admin:{zone:'client', nm:'관리자 콘솔', meta:'SPA', role:'운영 대시보드', conn:['gateway']},
+
+    gateway:{zone:'core', big:true, nm:'API Gateway', meta:':443', role:'단일 진입 — 인증·라우팅·레이트리밋', conn:['web','mobile','admin','order','catalog','auth','payment','searchsvc']},
+    order:{zone:'core', nm:'주문 서비스', meta:'REST', role:'주문 생성·조회·상태', conn:['gateway','db','queue','payment']},
+    catalog:{zone:'core', nm:'상품 서비스', meta:'REST', role:'상품·재고·카탈로그', conn:['gateway','db','cache','searchsvc','storage']},
+    auth:{zone:'core', nm:'인증 서비스', meta:'OAuth2', comm:'oauth', role:'로그인·토큰·세션', conn:['gateway','db','cache','idp']},
+    payment:{zone:'core', nm:'결제 서비스', meta:'REST', role:'결제 승인·웹훅·정산', conn:['order','pg','queue']},
+    searchsvc:{zone:'core', nm:'검색 서비스', meta:'gRPC', comm:'grpc', role:'상품 검색 위임', conn:['gateway','es','catalog']},
+    notify:{zone:'core', nm:'알림 서비스', meta:'큐 소비', comm:'queue', role:'이메일·푸시 발송', conn:['queue','email','push']},
+
+    db:{zone:'data', nm:'PostgreSQL', meta:'주 DB', role:'트랜잭션 데이터', conn:['order','catalog','auth']},
+    cache:{zone:'data', nm:'Redis', meta:'캐시·세션', role:'캐시·세션·레이트리밋', conn:['catalog','auth']},
+    es:{zone:'data', nm:'Elasticsearch', meta:'검색 인덱스', role:'상품 전문 검색', conn:['searchsvc']},
+    storage:{zone:'data', nm:'Object Storage', meta:'S3 호환', role:'이미지·파일', conn:['catalog','cdn']},
+    queue:{zone:'data', nm:'Message Queue', meta:'이벤트 버스', comm:'queue', role:'비동기 이벤트(주문→알림 등)', conn:['order','payment','notify']},
+
+    pg:{zone:'ext', cat:'결제', nm:'결제 PG', meta:'REST+웹훅', role:'외부 결제 게이트웨이', conn:['payment']},
+    idp:{zone:'ext', cat:'인증', nm:'소셜 로그인 IdP', meta:'OAuth2', comm:'oauth', role:'소셜 로그인 제공자', conn:['auth']},
+    email:{zone:'ext', cat:'메시지', nm:'이메일 발송', meta:'REST', role:'트랜잭션 이메일', conn:['notify']},
+    push:{zone:'ext', cat:'메시지', nm:'푸시 알림', meta:'FCM/APNs', role:'모바일 푸시', conn:['notify']},
+    cdn:{zone:'ext', cat:'전송·분석', nm:'CDN', meta:'엣지 캐시', role:'정적 자산·이미지 가속', conn:['web','storage']},
+    analytics:{zone:'ext', cat:'전송·분석', nm:'Analytics', meta:'SDK', role:'사용자 행동 분석', conn:['web','mobile']}
+  };
+  var COMM_LABEL = {oauth:'OAuth2', grpc:'gRPC', queue:'Queue'};
+
+  function nodeHTML(id){
+    var n=NODES[id];
+    var cm = n.comm ? '<span class="cm">'+(COMM_LABEL[n.comm]||n.comm)+'</span>' : '';
+    return '<button class="node'+(n.big?' big':'')+'" data-id="'+id+'" data-zone="'+n.zone+'"'+(n.comm?' data-comm="'+n.comm+'"':'')+' onclick="selectNode(\''+id+'\')">'
+      + cm + '<span class="nm">'+n.nm+'</span>'+(n.meta?'<span class="meta">'+n.meta+'</span>':'')+'</button>';
+  }
+  function renderMap(){
+    var byZone={client:[],core:[],data:[]}, byCat={};
+    Object.keys(NODES).forEach(function(id){
+      var n=NODES[id];
+      if(n.zone==='ext'){ (byCat[n.cat]=byCat[n.cat]||[]).push(id); }
+      else byZone[n.zone].push(id);
+    });
+    document.getElementById('z-client').innerHTML = byZone.client.map(nodeHTML).join('');
+    document.getElementById('z-core').innerHTML = byZone.core.map(nodeHTML).join('');
+    document.getElementById('z-data').innerHTML = byZone.data.map(nodeHTML).join('');
+    document.getElementById('z-ext').innerHTML = Object.keys(byCat).map(function(c){
+      return '<div class="cat"><div class="cl">'+c+'</div><div class="nodes">'+byCat[c].map(nodeHTML).join('')+'</div></div>';
+    }).join('');
+  }
+
+  var selected=null;
+  function selectNode(id){
+    if(FLOW){ clearFlow(); }
+    selected=id;
+    var n=NODES[id];
+    document.querySelectorAll('.node').forEach(function(el){
+      var eid=el.getAttribute('data-id');
+      el.classList.toggle('active', eid===id);
+      el.classList.toggle('related', n.conn.indexOf(eid)>=0);
+      el.classList.remove('lit','now');
+    });
+    document.getElementById('map').classList.add('exploring');
+    document.getElementById('map').classList.remove('dimming');
+
+    var rows='';
+    rows+='<div class="drow"><span class="k">역할</span><span class="v">'+n.role+'</span></div>';
+    if(n.meta) rows+='<div class="drow"><span class="k">메타</span><span class="v"><code>'+n.meta+'</code></span></div>';
+    var connBtns=n.conn.map(function(c){ return '<button onclick="selectNode(\''+c+'\')">'+NODES[c].nm+'</button>'; }).join('');
+    rows+='<div class="drow"><span class="k">연결</span><span class="v"><div class="conns">'+connBtns+'</div></span></div>';
+    var zoneLabel={client:'클라이언트',core:'우리 서비스',data:'데이터·인프라',ext:'외부 시스템'}[n.zone];
+    document.getElementById('detail').innerHTML =
+      '<div class="dhead"><span class="dt">'+n.nm+'</span><span class="dz">'+zoneLabel+'</span><button class="x" onclick="clearNode()">&times;</button></div>'
+      + '<div class="dbody">'+rows+'</div>';
+  }
+  function clearNode(){
+    selected=null;
+    document.querySelectorAll('.node').forEach(function(el){ el.classList.remove('active','related'); });
+    document.getElementById('map').classList.remove('exploring');
+    document.getElementById('detail').innerHTML='<div class="ph">노드를 클릭하면 역할·연결을 봅니다.</div>';
+  }
+
+  var FLOWS = {
+    browse:{name:'상품 조회', steps:[
+      {f:'web', t:'gateway', d:'사용자가 상품 목록 요청'},
+      {f:'gateway', t:'catalog', d:'게이트웨이가 상품 서비스로 라우팅'},
+      {f:'catalog', t:'cache', d:'캐시 확인 — hit이면 즉시 반환'},
+      {f:'catalog', t:'db', d:'미스 시 DB 조회'},
+      {f:'catalog', t:'web', d:'상품 데이터 반환', rev:1}
+    ]},
+    order:{name:'주문·결제', steps:[
+      {f:'web', t:'gateway', d:'주문 요청'},
+      {f:'gateway', t:'order', d:'주문 서비스로'},
+      {f:'order', t:'db', d:'주문 저장'},
+      {f:'order', t:'payment', d:'결제 서비스 호출'},
+      {f:'payment', t:'pg', d:'외부 PG로 결제 승인'},
+      {f:'payment', t:'queue', d:'결제 완료 이벤트 발행'},
+      {f:'queue', t:'notify', d:'알림 서비스가 이벤트 소비 → 발송'}
+    ]},
+    search:{name:'검색', steps:[
+      {f:'web', t:'gateway', d:'검색어 입력'},
+      {f:'gateway', t:'searchsvc', d:'검색 서비스로'},
+      {f:'searchsvc', t:'es', d:'Elasticsearch 질의'},
+      {f:'searchsvc', t:'web', d:'검색 결과 반환', rev:1}
+    ]},
+    notify:{name:'알림(이벤트)', steps:[
+      {f:'order', t:'queue', d:'주문 완료 이벤트 발행'},
+      {f:'queue', t:'notify', d:'알림 서비스가 비동기 소비'},
+      {f:'notify', t:'email', d:'주문 확인 이메일'},
+      {f:'notify', t:'push', d:'모바일 푸시'}
+    ]}
+  };
+  var FLOW=null, fstep=0;
+
+  function setFlow(key, btn){
+    clearNode();
+    FLOW=key; fstep=0;
+    document.querySelectorAll('.flow-seg button').forEach(function(b){ b.classList.remove('on'); });
+    if(btn) btn.classList.add('on');
+    document.getElementById('flowControls').style.display='flex';
+    document.getElementById('map').classList.add('dimming');
+    document.getElementById('map').classList.remove('exploring');
+    flowRefresh();
+  }
+  function clearFlow(){
+    FLOW=null; fstep=0;
+    document.querySelectorAll('.flow-seg button').forEach(function(b){ b.classList.remove('on'); });
+    document.getElementById('flowControls').style.display='none';
+    document.getElementById('flowStep').classList.remove('show');
+    document.getElementById('map').classList.remove('dimming');
+    document.querySelectorAll('.node').forEach(function(el){ el.classList.remove('lit','now'); });
+  }
+  function flowRefresh(){
+    var steps=FLOWS[FLOW].steps, N=steps.length;
+    var litSet={}, nowNode=null;
+    for(var i=0;i<fstep;i++){ litSet[steps[i].f]=1; litSet[steps[i].t]=1; if(i===fstep-1) nowNode=steps[i].t; }
+    document.querySelectorAll('.node').forEach(function(el){
+      var id=el.getAttribute('data-id');
+      el.classList.toggle('lit', !!litSet[id]);
+      el.classList.toggle('now', id===nowNode);
+    });
+    var fs=document.getElementById('flowStep');
+    if(fstep>0){
+      var s=steps[fstep-1];
+      fs.classList.add('show');
+      fs.innerHTML='<span class="seq">'+fstep+'</span><span><b>'+NODES[s.f].nm+'</b> <span class="ar">&#8594;</span> <b>'+NODES[s.t].nm+'</b> &nbsp; '+s.d+'</span>';
+    } else {
+      fs.classList.remove('show');
+    }
+    document.getElementById('stepCnt').textContent = fstep+' / '+N+'  ·  '+FLOWS[FLOW].name;
+    var nb=document.getElementById('nextBtn');
+    nb.innerHTML=(fstep===0?'시작 ':'다음 ')+'&#8594;';
+    nb.disabled = fstep>=N;
+    document.getElementById('prevBtn').disabled = fstep<=0;
+  }
+  function flowNext(){ if(fstep<FLOWS[FLOW].steps.length){ fstep++; flowRefresh(); } }
+  function flowPrev(){ if(fstep>0){ fstep--; flowRefresh(); } }
+  function flowReset(){ fstep=0; flowRefresh(); }
+
+  renderMap();
+</script>
+</body>
+</html>

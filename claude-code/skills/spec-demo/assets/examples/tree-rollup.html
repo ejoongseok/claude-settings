@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!--
+  spec-demo example — multi-level tree + quantity rollup. Generic meal-kit case. Self-contained (font CDN only).
+  생산 수량 입력 → 모든 레벨 필요량 자동 재계산(상위수량 × 단위소요 × 여유분). 펼침/접기. 노드 클릭 → 상세.
+  다단계 여유분 누적·구성 기준(버전)·대체 재료는 합의 포인트. 수치는 예시 가정.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>밀키트 구성 전개 (다단계 소요량) — 예시</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#f7f8fa; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e8ebee;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --line:#e5e8eb; --line-2:#eef1f3;
+    --accent:#3182f6; --accent-deep:#1b64da; --accent-soft:#eaf2ff; --accent-line:#c3dafe;
+    --warn:#c8820a; --warn-bg:#fff6e0; --warn-line:#f0d28a; --warn-deep:#9a5e00;
+    --purple:#7c5cff; --purple-bg:#f0ecff; --purple-deep:#5a3fd6;
+    --grn:#2f9e44; --grn-bg:#ebfbee; --grn-line:#b2e9bd; --grn-deep:#218838;
+    --r-sm:10px; --r-md:14px; --r-lg:20px; --r-chip:999px;
+    --shadow:0 1px 3px rgba(25,31,40,.05),0 8px 28px rgba(25,31,40,.06);
+    --shadow-soft:0 1px 2px rgba(25,31,40,.04);
+    --sans:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'D2Coding',Consolas,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.72;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .shell{max-width:920px;margin:0 auto;padding:46px 22px 90px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .dot{width:34px;height:34px;border-radius:11px;background:var(--grn);flex:none;display:grid;place-items:center;box-shadow:0 6px 16px rgba(47,158,68,.3)}
+  .dot svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:23px;font-weight:700;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--ink-3);font-size:13.5px;margin:3px 0 0;font-weight:500}
+
+  section{margin-bottom:30px}
+  .sec-h{display:flex;align-items:center;gap:11px;margin:0 0 16px}
+  .sec-h .n{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--grn)}
+  .sec-h h3{font-size:21px;font-weight:700;margin:0;letter-spacing:-.02em}
+
+  .hero{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:30px 34px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--grn),var(--grn-deep))}
+  .hero h2{font-size:23px;line-height:1.45;font-weight:700;margin:0;letter-spacing:-.02em;max-width:46ch}
+  .hero h2 .key{color:var(--grn-deep)}
+  .why{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:9px;max-width:72ch}
+  .why li{position:relative;padding-left:18px;font-size:14.5px;color:var(--ink)}
+  .why li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--grn)}
+  .why b{color:var(--grn-deep)}
+
+  .qbar{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 20px;box-shadow:var(--shadow-soft)}
+  .qbar .ql{font-size:14px;font-weight:600;color:var(--ink-2)}
+  .qbar .qv{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--grn-deep);min-width:84px}
+  .qbar input[type=range]{flex:1;min-width:200px;accent-color:var(--grn);height:6px}
+  .qbar .seg{display:inline-flex;gap:4px}
+  .qbar .seg button{font-family:inherit;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:var(--r-chip);border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}
+  .qbar .seg button:hover{background:var(--surface-2)}
+
+  .tree{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow-soft);overflow:hidden}
+  .thead{display:flex;align-items:center;padding:10px 16px;background:var(--surface-2);border-bottom:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--ink-3);letter-spacing:.03em}
+  .thead .h-need{margin-left:auto;text-align:right;width:130px}
+  .thead .h-unit{width:130px;text-align:right}
+  .trow{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line-2);cursor:pointer;transition:background .13s;position:relative}
+  .trow:last-child{border-bottom:0}
+  .trow:hover{background:var(--surface-2)}
+  .trow.sel{background:var(--grn-bg);box-shadow:inset 3px 0 0 var(--grn)}
+  .tw{flex:none;width:24px;height:24px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;color:var(--ink-2);display:grid;place-items:center;border-radius:7px;transition:all .14s;padding:0}
+  .tw:hover{background:var(--grn-bg);border-color:var(--grn-line);color:var(--grn-deep)}
+  .tw svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .16s var(--ease)}
+  .tw.open svg{transform:rotate(90deg)}
+  .tw-sp{flex:none;width:24px}
+  .tnm{font-size:14.5px;font-weight:600;color:var(--ink)}
+  .trow.lv0 .tnm{font-weight:700;font-size:15.5px}
+  .tg{font-size:10px;font-weight:700;padding:2px 8px;border-radius:var(--r-chip)}
+  .tg.assy{background:var(--grn-bg);color:var(--grn-deep)}
+  .tg.pur{background:var(--accent-soft);color:var(--accent-deep)}
+  .tg.out{background:var(--purple-bg);color:var(--purple-deep)}
+  .tg.pdt{background:var(--ink);color:#fff}
+  .tsp{flex:1}
+  .tunit{font-family:var(--mono);font-size:12px;color:var(--ink-3);width:128px;text-align:right;white-space:nowrap}
+  .tunit .ls{color:var(--warn-deep)}
+  .tar{flex:none;color:var(--grn-line);font-family:var(--mono);margin:0 2px}
+  .tneed{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--grn-deep);width:118px;text-align:right;white-space:nowrap}
+  .trow.lv0 .tneed{font-size:15px}
+
+  .detail{margin-top:14px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow);overflow:hidden;min-height:84px}
+  .detail .ph{padding:24px 22px;color:var(--ink-3);font-size:14px;text-align:center}
+  .dhead{display:flex;align-items:center;gap:9px;padding:14px 20px;border-bottom:1px solid var(--line-2);background:var(--surface-2);flex-wrap:wrap}
+  .dhead .dt{font-size:16px;font-weight:700}
+  .dhead .dc{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+  .dbody{padding:14px 20px 17px;display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}
+  .drow{display:flex;gap:10px;font-size:14px;padding:3px 0}
+  .drow .k{flex:none;width:78px;color:var(--ink-3);font-size:12.5px;font-weight:700;padding-top:1px}
+  .drow .v{color:var(--ink);font-weight:600}
+  .drow .v.hl{color:var(--grn-deep)}
+  .drow .v code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);padding:1px 6px;border-radius:5px;font-weight:400}
+
+  .note{display:flex;gap:11px;border-radius:var(--r-md);padding:14px 16px;margin:14px 0 0;font-size:14px;line-height:1.62}
+  .note .lbl{flex:none;font-weight:800;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;border-radius:8px;height:fit-content;white-space:nowrap}
+  .note.warn{background:var(--warn-bg)}.note.warn .lbl{background:#e6a93a;color:#4a3500}
+  .note.info{background:var(--grn-bg)}.note.info .lbl{background:var(--grn);color:#fff}
+  .note b{color:var(--ink)} .note code{font-family:var(--mono);font-size:13px;background:rgba(0,0,0,.05);padding:1px 6px;border-radius:5px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-3);margin:11px 2px 0}
+  .legend .li{display:flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M8.5 6H13a3 3 0 0 1 3 3v1M8.5 18H13a3 3 0 0 0 3-3v-1"/></svg></span>
+    <div><h1>밀키트 구성 전개 (다단계 소요량) — 예시</h1><p class="sub">완제품 → 구성팩 → 재료, 단계별 소요량</p></div>
+  </header>
+
+  <section>
+    <div class="hero">
+      <h2>밀키트 생산 수량을 바꾸면 <span class="key">모든 단계의 재료 필요량이 자동으로</span> 다시 계산됩니다.</h2>
+      <ul class="why">
+        <li>트리를 펼치면 밀키트가 어떤 구성팩으로, 그 구성팩이 또 어떤 재료로 구성되는지 단계별로 보입니다.</li>
+        <li>위에서 <b>생산 수량</b>을 바꾸면 각 단계 필요량이 <b>상위 수량 × 단위 소요 × 여유분</b>으로 다시 계산됩니다.</li>
+        <li>노드를 누르면 품목 코드·단위 소요·여유분·구매/외주 구분을 봅니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">01</span><h3>구성 전개</h3></div>
+
+    <div class="qbar">
+      <span class="ql">생산 수량</span>
+      <span class="qv" id="qv">10세트</span>
+      <input type="range" id="qSlider" min="1" max="100" value="10" oninput="setQty(this.value)">
+      <span class="seg">
+        <button onclick="setQty(1)">1세트</button>
+        <button onclick="setQty(10)">10세트</button>
+        <button onclick="setQty(100)">100세트</button>
+      </span>
+    </div>
+
+    <div class="tree">
+      <div class="thead"><span style="margin-left:28px">구성품 / 재료</span><span class="h-unit">단위 소요</span><span class="h-need">필요량</span></div>
+      <div id="treeBody"></div>
+    </div>
+    <div class="legend">
+      <span class="li"><span class="tg pdt">완제품</span></span>
+      <span class="li"><span class="tg assy">구성팩(하위 구성)</span></span>
+      <span class="li"><span class="tg pur">구매</span></span>
+      <span class="li"><span class="tg out">외주</span></span>
+    </div>
+
+    <div class="detail" id="detail"><div class="ph">노드를 클릭하면 품목 코드·단위 소요·여유분·단가를 봅니다.</div></div>
+
+    <div class="note warn"><span class="lbl">합의</span><div><b>여유분(Loss)을 단계마다 곱해 누적하는 게 맞나요?</b> 여기서는 각 단계의 여유분(<code>(1+loss)</code>)을 위에서 아래로 곱해 내려갑니다. 실제로 다단계 여유분을 어떻게 쌓을지는 합의가 필요합니다.</div></div>
+    <div class="note info"><span class="lbl">기준 구성</span><div>이 전개는 <b>어떤 구성 기준</b>인지에 따라 달라집니다 — 레시피 버전·시즌 구성. 대체 재료 소요 처리도 별도 합의 대상이며, 최신 확정 구성 기준입니다. 수치는 예시 가정값입니다.</div></div>
+  </section>
+
+</div>
+
+<script>
+  // 밀키트 구성 예시 (qty=단위소요, loss=여유분%, type 완제품/구성팩/구매/외주)
+  var BOM = {
+    id:'kit', name:'감바스 밀키트', code:'KIT-GB-01', type:'pdt', qty:1, loss:0, unit:'세트', price:12900,
+    children:[
+      {id:'sauce', name:'소스팩', code:'SUB-SAUCE', type:'assy', qty:1, loss:0, unit:'팩', price:3200, children:[
+        {id:'oil', name:'올리브유', code:'M-OIL', type:'pur', qty:40, loss:3, unit:'mL', price:35, children:[]},
+        {id:'garlic', name:'다진 마늘', code:'M-GAR', type:'pur', qty:25, loss:5, unit:'g', price:18, children:[]},
+        {id:'pepper', name:'페퍼론치노', code:'M-PEP', type:'pur', qty:3, loss:0, unit:'g', price:60, children:[]}
+      ]},
+      {id:'main', name:'재료팩', code:'SUB-MAIN', type:'assy', qty:1, loss:0, unit:'팩', price:5200, children:[
+        {id:'shrimp', name:'냉동 새우', code:'M-SHR', type:'pur', qty:120, loss:8, unit:'g', price:38, children:[]},
+        {id:'tomato', name:'방울토마토', code:'M-TOM', type:'pur', qty:60, loss:6, unit:'g', price:9, children:[]}
+      ]},
+      {id:'bread', name:'바게트', code:'M-BRD', type:'pur', qty:1, loss:0, unit:'개', price:1500, children:[]},
+      {id:'box', name:'포장 박스', code:'M-BOX', type:'pur', qty:1, loss:2, unit:'개', price:700, children:[]},
+      {id:'card', name:'조리 카드 인쇄', code:'OP-PRT', type:'out', qty:1, loss:0, unit:'식', price:300, children:[]}
+    ]
+  };
+  var TYPE_LABEL = {pdt:'완제품', assy:'구성팩', pur:'구매', out:'외주'};
+  var Q = 10;
+  var expanded = {kit:1, sauce:1, main:1};
+  var byId = {};
+  (function idx(n){ byId[n.id]=n; (n.children||[]).forEach(idx); })(BOM);
+  var selId = null;
+
+  function fmt(v){
+    if(v==null) return '-';
+    if(v % 1 === 0) return v.toLocaleString('en-US');
+    return (Math.round(v*10)/10).toLocaleString('en-US', {minimumFractionDigits:1, maximumFractionDigits:1});
+  }
+  function needOf(node, parentNeed, lv){
+    return lv===0 ? Q : parentNeed * node.qty * (1 + node.loss/100);
+  }
+
+  function rowsHTML(node, lv, parentNeed){
+    var need = needOf(node, parentNeed, lv);
+    node._need = need;
+    var has = node.children && node.children.length;
+    var exp = !!expanded[node.id];
+    var tw = has ? '<button class="tw'+(exp?' open':'')+'" onclick="event.stopPropagation();toggle(\''+node.id+'\')"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>' : '<span class="tw-sp"></span>';
+    var unitTxt = lv>0 ? (fmt(node.qty)+' '+node.unit+(node.loss?' <span class="ls">+'+node.loss+'%</span>':'')) : '기준';
+    var sel = node.id===selId ? ' sel' : '';
+    var row = '<div class="trow lv'+lv+sel+'" style="padding-left:'+(16+lv*22)+'px" data-id="'+node.id+'" onclick="selectNode(\''+node.id+'\')">'
+      + tw
+      + '<span class="tnm">'+node.name+'</span>'
+      + '<span class="tg '+node.type+'">'+TYPE_LABEL[node.type]+'</span>'
+      + '<span class="tsp"></span>'
+      + '<span class="tunit">'+unitTxt+'</span>'
+      + '<span class="tar">→</span>'
+      + '<span class="tneed">'+fmt(need)+' '+node.unit+'</span>'
+      + '</div>';
+    var ch = (has && exp) ? node.children.map(function(c){ return rowsHTML(c, lv+1, need); }).join('') : '';
+    return row + ch;
+  }
+  function render(){
+    document.getElementById('treeBody').innerHTML = rowsHTML(BOM, 0, Q);
+  }
+  function toggle(id){ expanded[id] = !expanded[id]; render(); }
+  function setQty(v){
+    Q = +v;
+    document.getElementById('qSlider').value = Q;
+    document.getElementById('qv').textContent = Q+'세트';
+    render();
+    if(selId) selectNode(selId);
+  }
+  function selectNode(id){
+    selId = id; render();
+    var n = byId[id];
+    var amount = n._need * (n.price||0);
+    var rows = '';
+    rows += '<div class="drow"><span class="k">구분</span><span class="v">'+TYPE_LABEL[n.type]+(n.children&&n.children.length?' (하위 구성 있음)':'')+'</span></div>';
+    rows += '<div class="drow"><span class="k">단위</span><span class="v">'+n.unit+'</span></div>';
+    if(n.type!=='pdt'){
+      rows += '<div class="drow"><span class="k">단위 소요</span><span class="v">'+fmt(n.qty)+' '+n.unit+'</span></div>';
+      rows += '<div class="drow"><span class="k">여유분</span><span class="v">'+(n.loss?n.loss+'%':'없음')+'</span></div>';
+    }
+    rows += '<div class="drow"><span class="k">필요량</span><span class="v hl">'+fmt(n._need)+' '+n.unit+' <span style="color:var(--ink-3);font-weight:400">('+Q+'세트 기준)</span></span></div>';
+    rows += '<div class="drow"><span class="k">단가</span><span class="v">'+(n.price?fmt(n.price)+' 원':'-')+'</span></div>';
+    rows += '<div class="drow"><span class="k">금액</span><span class="v hl">'+(n.price?fmt(amount)+' 원':'-')+'</span></div>';
+    document.getElementById('detail').innerHTML =
+      '<div class="dhead"><span class="dt">'+n.name+'</span><span class="dc">'+n.code+'</span></div>'
+      + '<div class="dbody">'+rows+'</div>';
+  }
+
+  render();
+</script>
+</body>
+</html>

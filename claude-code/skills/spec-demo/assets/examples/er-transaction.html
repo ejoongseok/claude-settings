@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<!--
+  spec-demo example — ER + transaction propagation (create 1+N / change two-way / delete root cascade). Generic order case. Self-contained (font CDN only).
+  생성: 주문 생성 → 헤더1 + 항목N 동시(트랜잭션 원자성)
+  변경: 프로젝트 취소 → 항목 cascade → 헤더 재집계(하향 연쇄) / 항목 STT → 헤더 집계(상향)
+  삭제: root(헤더) 삭제 → 헤더+항목 cascade. 집계·cascade 규칙은 가정(합의). 상품=마스터(전파 X).
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주문 트랜잭션 전파 (ER) — 예시</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#f7f8fa; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e8ebee;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --line:#e5e8eb; --line-2:#eef1f3;
+    --accent:#3182f6; --accent-deep:#1b64da; --accent-soft:#eaf2ff; --accent-line:#c3dafe;
+    --ok:#15b86b; --ok-bg:#e7f7ef; --warn:#c8820a; --warn-bg:#fff6e0; --danger:#e85b48; --danger-bg:#fdeeeb;
+    --fk1:#7c5cff; --fk1-bg:#f0ecff; --fk2:#e0820a; --fk2-bg:#fff3df;
+    --r-sm:10px; --r-md:14px; --r-lg:20px; --r-chip:999px;
+    --shadow:0 1px 3px rgba(25,31,40,.05),0 8px 28px rgba(25,31,40,.06);
+    --shadow-soft:0 1px 2px rgba(25,31,40,.04);
+    --sans:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'D2Coding',Consolas,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.72;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .shell{max-width:880px;margin:0 auto;padding:46px 22px 90px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .dot{width:34px;height:34px;border-radius:11px;background:var(--accent);flex:none;display:grid;place-items:center;box-shadow:0 6px 16px rgba(49,130,246,.28)}
+  .dot svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:23px;font-weight:700;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--ink-3);font-size:13.5px;margin:3px 0 0;font-weight:500}
+
+  section{margin-bottom:32px}
+  .sec-h{display:flex;align-items:center;gap:11px;margin:0 0 16px}
+  .sec-h .n{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)}
+  .sec-h h3{font-size:21px;font-weight:700;margin:0;letter-spacing:-.02em}
+
+  .hero{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:30px 34px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#4593fc,#1b64da)}
+  .eyebrow{display:inline-flex;font-size:11.5px;font-weight:700;color:var(--accent-deep);background:var(--accent-soft);padding:5px 13px;border-radius:var(--r-chip);letter-spacing:.03em}
+  .hero h2{font-size:23px;line-height:1.45;font-weight:700;margin:12px 0 0;letter-spacing:-.02em;max-width:44ch}
+  .hero h2 .key{color:var(--accent-deep)}
+  .why{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:9px;max-width:66ch}
+  .why li{position:relative;padding-left:18px;font-size:14.5px;color:var(--ink)}
+  .why li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .why b{color:var(--accent-deep)}
+
+  .controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px;align-items:center}
+  .btn-primary{font-family:inherit;font-size:13px;font-weight:700;padding:9px 16px;border-radius:var(--r-chip);cursor:pointer;border:0;background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(49,130,246,.25)}
+  .btn-primary:hover{background:var(--accent-deep)}
+  .btn-danger{font-family:inherit;font-size:13px;font-weight:600;padding:9px 16px;border-radius:var(--r-chip);cursor:pointer;border:1px solid var(--danger-bg);background:var(--danger-bg);color:var(--danger)}
+  .btn-danger:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-3);margin-bottom:14px}
+  .legend .li{display:flex;align-items:center;gap:6px}
+  .legend .sw{width:11px;height:11px;border-radius:3px}
+
+  .er{display:flex;flex-direction:column;align-items:center;gap:0;transition:opacity .3s}
+  .er.empty-so{opacity:.55}
+  .ercard{width:100%;max-width:600px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow-soft);transition:all .25s var(--ease);overflow:hidden}
+  .ercard .tname{padding:11px 16px;background:var(--surface-2);font-family:var(--mono);font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line-2)}
+  .ercard .tname .tdesc{font-family:var(--sans);font-size:12px;font-weight:500;color:var(--ink-3)}
+  .ercard .tname .cnt{margin-left:auto;font-family:var(--sans);font-size:12px;font-weight:700;color:var(--accent-deep);background:var(--accent-soft);padding:2px 10px;border-radius:var(--r-chip)}
+  @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(49,130,246,.45)}70%{box-shadow:0 0 0 9px rgba(49,130,246,0)}100%{box-shadow:0 0 0 0 rgba(49,130,246,0)}}
+  .ercard.pulse{animation:pulseRing .9s var(--ease);border-color:var(--accent)}
+  .ercard.pulse .tname{background:var(--accent-soft);color:var(--accent-deep)}
+
+  .body{padding:12px 16px 14px}
+  .schema-hint{font-size:11px;color:var(--ink-3);font-family:var(--mono);margin-bottom:8px}
+  .schema-hint .pk{color:var(--ink);font-weight:700}
+  .minirow{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px}
+  .minirow th{background:var(--surface-3);color:var(--ink-2);font-weight:700;padding:6px 10px;text-align:left;font-size:10.5px;white-space:nowrap}
+  .minirow th:first-child{border-radius:6px 0 0 6px}.minirow th:last-child{border-radius:0 6px 6px 0}
+  .minirow td{padding:7px 10px;border-bottom:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+  .minirow tbody tr:last-child td{border-bottom:0}
+  .minirow tbody tr.fresh td{animation:flash 1.1s var(--ease)}
+  @keyframes flash{0%{background:var(--ok-bg)}100%{background:transparent}}
+  .emptyrow td{color:var(--ink-3);text-align:center;padding:14px;font-family:var(--sans)}
+  .hrstt{font-weight:700;padding:2px 9px;border-radius:var(--r-chip);background:var(--accent-soft);color:var(--accent-deep);transition:all .3s}
+  .hrstt.changed{background:var(--accent);color:#fff}
+  .vk{padding:1px 6px;border-radius:5px;font-weight:700}
+  .vk.so{background:var(--accent-soft);color:var(--accent-deep)}
+  .vk.pjt{background:var(--fk1-bg);color:var(--fk1)}
+  .vk.mat{background:var(--fk2-bg);color:var(--fk2)}
+  .clk{cursor:pointer;border-bottom:1.5px dotted var(--ink-3);transition:color .15s}
+  .clk:hover{color:var(--accent-deep)}
+  .delbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink-3);font-family:var(--sans);font-size:11px;font-weight:700;padding:3px 9px;border-radius:var(--r-chip);cursor:pointer}
+  .delbtn:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-bg)}
+  .addbtn{font-family:inherit;font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:var(--r-chip);cursor:pointer;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent-deep);margin-top:10px}
+  .addbtn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .addbtn:disabled{opacity:.4;cursor:not-allowed}
+
+  .pjtctl{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--ink-3)}
+  .seg{display:inline-flex;gap:3px;background:var(--surface-2);padding:3px;border-radius:var(--r-sm)}
+  .segbtn{font-family:inherit;font-size:12px;font-weight:600;padding:5px 11px;border-radius:7px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;transition:all .15s}
+  .segbtn:hover{color:var(--ink)} .segbtn.on{background:var(--surface);color:var(--accent-deep);box-shadow:var(--shadow-soft)}
+
+  .rel{display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 0;color:var(--ink-3);font-size:12px;font-weight:700;transition:all .25s;font-family:var(--mono)}
+  .rel .card-line{width:1.5px;height:13px;background:var(--line);transition:all .25s}
+  .rel .rlabel{background:var(--surface);border:1px solid var(--line);padding:3px 10px;border-radius:var(--r-chip);transition:all .25s}
+  .rel.pulse .card-line{background:var(--accent);width:2.5px}
+  .rel.pulse .rlabel{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 12px rgba(49,130,246,.35)}
+  .rel .propnote{font-family:var(--sans);font-size:11px;color:var(--accent-deep);opacity:0;transition:opacity .25s;margin-left:6px}
+  .rel.pulse .propnote{opacity:1}
+  .relsplit{display:flex;width:100%;max-width:600px;justify-content:space-around;padding:8px 0;color:var(--ink-3);font-size:12px;font-weight:700;font-family:var(--mono)}
+  .relsplit span{transition:all .25s;padding:3px 10px;border-radius:var(--r-chip)}
+  .relsplit span.pulse{background:var(--accent);color:#fff}
+  .botrow{display:flex;gap:16px;width:100%;max-width:600px;justify-content:center;align-items:flex-start}
+  .botrow .ercard{flex:1}
+
+  .note{display:flex;gap:11px;border-radius:var(--r-md);padding:14px 16px;margin:14px 0 0;font-size:14px;line-height:1.62}
+  .note .lbl{flex:none;font-weight:800;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;border-radius:8px;height:fit-content;white-space:nowrap}
+  .note.warn{background:var(--warn-bg)}.note.warn .lbl{background:#e6a93a;color:#4a3500}
+  .note.info{background:var(--accent-soft)}.note.info .lbl{background:var(--accent);color:#fff}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="6" rx="1"/><rect x="13" y="14" width="8" height="6" rx="1"/><path d="M7 10v4h10"/></svg></span>
+    <div><h1>주문 트랜잭션 전파 (ER) — 예시</h1><p class="sub">생성·변경·삭제가 관계선을 타고 위아래로 전파된다</p></div>
+  </header>
+
+  <section>
+    <div class="hero">
+      <span class="eyebrow">상황 — 주문 생성·변경·삭제</span>
+      <h2>주문 한 건을 만들면 <span class="key">헤더와 항목이 함께</span> 생기고, root를 바꾸거나 지우면 하위로 전파됩니다.</h2>
+      <ul class="why">
+        <li><b>생성</b> — "주문 생성"하면 헤더 1 + 항목 N이 한 트랜잭션으로 동시에 생깁니다(함께 깜빡, 1:N 관계선 펄스).</li>
+        <li><b>변경</b> — 항목 상태를 바꾸면 헤더로 집계(상향), 프로젝트를 취소하면 항목으로 cascade되고 다시 헤더로 재집계(하향+연쇄).</li>
+        <li><b>삭제</b> — root(헤더)를 지우면 항목까지 cascade 삭제됩니다. 상품은 마스터라 전파 대상이 아닙니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">01</span><h3>트랜잭션 전파</h3></div>
+
+    <div class="controls">
+      <button class="btn-primary" onclick="createTrx()">주문 생성 (헤더 1 + 항목 N 동시)</button>
+      <button class="btn-danger" onclick="deleteRoot()">주문 삭제 (root → 하위 cascade)</button>
+    </div>
+    <div class="legend">
+      <span class="li"><span class="sw" style="background:var(--accent-soft)"></span> ORDER_ID</span>
+      <span class="li"><span class="sw" style="background:var(--fk1-bg)"></span> PROJECT_ID</span>
+      <span class="li"><span class="sw" style="background:var(--fk2-bg)"></span> PRODUCT_ID</span>
+    </div>
+
+    <div class="er" id="er">
+      <div class="ercard" data-t="hr">
+        <div class="tname">ORDER_HEADER <span class="tdesc">주문 헤더</span><span class="cnt" id="hrCnt">항목 0건</span></div>
+        <div class="body">
+          <div class="schema-hint"><span class="pk">PK ORDER_ID</span> · CUST_NM · ORDER_STT_CD</div>
+          <table class="minirow">
+            <thead><tr><th>ORDER_ID</th><th>CUST_NM</th><th>ORDER_STT_CD (항목 집계)</th></tr></thead>
+            <tbody id="hrBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="rel" data-r="hr-dt"><div class="card-line"></div><span class="rlabel">1 : N</span><div class="card-line"></div><span class="propnote" id="hrdtNote">항목 → 헤더</span></div>
+
+      <div class="ercard" data-t="dt">
+        <div class="tname">ORDER_ITEM <span class="tdesc">주문 항목</span></div>
+        <div class="body">
+          <div class="schema-hint"><span class="pk">PK ITEM_NO</span> · FK ORDER_ID · FK PROJECT_ID · FK PRODUCT_ID · ITEM_STT_CD</div>
+          <table class="minirow">
+            <thead><tr><th>ORDER_ID</th><th>ITEM_NO</th><th>PROJECT_ID</th><th>PRODUCT_ID</th><th>STT (클릭)</th><th></th></tr></thead>
+            <tbody id="dtBody"></tbody>
+          </table>
+          <button class="addbtn" id="addBtn" onclick="addDt()">+ 항목 행 추가</button>
+        </div>
+      </div>
+
+      <div class="relsplit"><span data-r="dt-pjt">N : 1 (PROJECT_ID) · 프로젝트→항목</span><span>N : 1 (PRODUCT_ID)</span></div>
+
+      <div class="botrow">
+        <div class="ercard" data-t="pjt">
+          <div class="tname">프로젝트 <span class="tdesc">캠페인</span></div>
+          <div class="body">
+            <table class="minirow"><thead><tr><th>PROJECT_ID</th><th>PROJECT_NM</th></tr></thead>
+              <tbody><tr><td><span class="vk pjt">11</span></td><td>봄 프로모션</td></tr></tbody></table>
+            <div class="pjtctl">상태
+              <div class="seg">
+                <button class="segbtn on" onclick="setPjt('NM',this)">정상</button>
+                <button class="segbtn" onclick="setPjt('CS',this)">취소</button>
+                <button class="segbtn" onclick="setPjt('DE',this)">보류</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ercard" data-t="mat">
+          <div class="tname">상품 <span class="tdesc">마스터</span></div>
+          <div class="body"><table class="minirow"><thead><tr><th>PRODUCT_ID</th><th>PRODUCT_NM</th></tr></thead>
+            <tbody><tr><td><span class="vk mat">5001</span></td><td>무선 이어폰</td></tr><tr><td><span class="vk mat">5002</span></td><td>보호 케이스</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note warn"><span class="lbl">합의</span><div><b>이 전파 규칙들이 맞나요?</b> 생성 시 항목 몇 건을 기본으로 함께 만들지, root 삭제 시 항목을 정말 cascade 삭제할지(아니면 막을지), 상향 집계·하향 cascade의 우선순위는 어떻게 둘지 — 데이터를 움직여 보며 맞춥니다.</div></div>
+    <div class="note info"><span class="lbl">참고</span><div><b>헤더·항목</b>의 1:N, 프로젝트→항목 전파는 정해진 규칙 기준으로 둡니다. <b>생성 건수·집계·cascade의 구체 규칙</b>은 가정(합의 대상). 상품은 마스터라 전파 대상 아님.</div></div>
+  </section>
+
+</div>
+
+<script>
+  var STTS = ['접수','처리중','배송대기','완료'];
+  var soExists = true;
+  var dt = [ {itemNo:1, pjt:11, mat:5001, stt:'처리중'}, {itemNo:2, pjt:11, mat:5002, stt:'접수'} ];
+  var seq = 3, freshAll = false, freshNo = -1, prevHr = null, pjtStt = 'NM';
+
+  function rollupHr(){
+    if(!dt.length) return '접수';
+    if(dt.every(function(r){return r.stt==='완료';})) return '완료';
+    if(dt.some(function(r){return r.stt==='처리중';})) return '처리중';
+    if(dt.some(function(r){return r.stt==='배송대기';})) return '배송대기';
+    return '접수';
+  }
+
+  function render(){
+    var er=document.getElementById('er'); er.classList.toggle('empty-so', !soExists);
+    document.getElementById('addBtn').disabled = !soExists;
+
+    if(!soExists){
+      document.getElementById('hrBody').innerHTML = '<tr class="emptyrow"><td colspan="3">주문 없음 — "주문 생성"으로 헤더+항목 동시 생성</td></tr>';
+      document.getElementById('dtBody').innerHTML = '<tr class="emptyrow"><td colspan="6">주문 없음</td></tr>';
+      document.getElementById('hrCnt').textContent = '항목 0건';
+      prevHr = null; return;
+    }
+
+    var hr = rollupHr();
+    document.getElementById('hrBody').innerHTML =
+      '<tr class="'+(freshAll?'fresh':'')+'"><td><span class="vk so">1001</span></td><td>ACME 상사</td><td><span class="hrstt" id="hrStt">'+hr+'</span></td></tr>';
+    var h='';
+    dt.forEach(function(r){
+      h += '<tr class="'+((freshAll||r.itemNo===freshNo)?'fresh':'')+'">'
+        + '<td><span class="vk so">1001</span></td>'
+        + '<td>'+r.itemNo+'</td>'
+        + '<td><span class="vk pjt">'+r.pjt+'</span></td>'
+        + '<td><span class="vk mat clk" onclick="cycleMat('+r.itemNo+')">'+r.mat+'</span></td>'
+        + '<td><span class="clk" onclick="cycleStt('+r.itemNo+')">'+r.stt+'</span></td>'
+        + '<td><button class="delbtn" onclick="delDt('+r.itemNo+')">삭제</button></td></tr>';
+    });
+    if(!dt.length) h='<tr class="emptyrow"><td colspan="6">항목 없음</td></tr>';
+    document.getElementById('dtBody').innerHTML = h;
+    document.getElementById('hrCnt').textContent = '항목 '+dt.length+'건';
+
+    if(prevHr!==null && prevHr!==hr){ pulseHeader(); }
+    prevHr = hr; freshAll = false; freshNo = -1;
+  }
+
+  function pulseHeader(){
+    var hrCard=document.querySelector('[data-t=hr]'), rel=document.querySelector('[data-r=hr-dt]'), hrEl=document.getElementById('hrStt');
+    hrCard.classList.add('pulse'); rel.classList.add('pulse'); if(hrEl) hrEl.classList.add('changed');
+    setTimeout(function(){ hrCard.classList.remove('pulse'); rel.classList.remove('pulse'); if(hrEl) hrEl.classList.remove('changed'); }, 950);
+  }
+  function pulseRel(r){ var el=document.querySelector('[data-r='+r+']'); if(!el)return; el.classList.add('pulse'); setTimeout(function(){el.classList.remove('pulse');}, 900); }
+
+  function createTrx(){
+    soExists = true;
+    dt = [ {itemNo:1, pjt:11, mat:5001, stt:'접수'}, {itemNo:2, pjt:11, mat:5002, stt:'접수'} ];
+    seq = 3; pjtStt='NM'; prevHr=null; freshAll = true;
+    document.querySelectorAll('.pjtctl .segbtn').forEach(function(b,i){ b.classList.toggle('on', i===0); });
+    render();
+    pulseRel('hr-dt');
+  }
+  function deleteRoot(){
+    if(!soExists) return;
+    pulseRel('hr-dt'); pulseRel('dt-pjt');
+    setTimeout(function(){ soExists=false; dt=[]; render(); }, 450);
+  }
+
+  function cycleStt(no){ if(!soExists)return; dt.forEach(function(r){ if(r.itemNo===no) r.stt = STTS[(STTS.indexOf(r.stt)+1)%STTS.length]; }); render(); }
+  function cycleMat(no){ if(!soExists)return; dt.forEach(function(r){ if(r.itemNo===no) r.mat = (r.mat===5001)?5002:5001; }); render(); }
+  function addDt(){ if(!soExists)return; var n={itemNo:seq++, pjt:11, mat:5001, stt:'접수'}; dt.push(n); freshNo=n.itemNo; render(); }
+  function delDt(no){ if(!soExists)return; dt = dt.filter(function(r){return r.itemNo!==no;}); render(); }
+
+  function setPjt(v, btn){
+    pjtStt = v;
+    btn.parentNode.querySelectorAll('.segbtn').forEach(function(b){b.classList.remove('on');});
+    btn.classList.add('on');
+    if(!soExists) return;
+    if(v==='CS' || v==='DE'){
+      var affected = dt.filter(function(r){return r.stt!=='완료';});
+      if(affected.length){
+        pulseRel('dt-pjt');
+        setTimeout(function(){ affected.forEach(function(r){ r.stt='접수'; }); render(); }, 480);
+      }
+    }
+  }
+
+  render();
+</script>
+</body>
+</html>

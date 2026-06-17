@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<!--
+  spec-demo example — flowchart (2D conditional branch + loop). Generic approval-workflow case. Self-contained (font CDN only).
+  주 경로 세로 + 분기 곁가지(반려→종료, 아니오→완료) + 예 루프(검토로). 판단에서 선택하면 경로 하이라이트.
+  분기·루프는 대표 흐름 가정 — 합의 포인트.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결재 승인 워크플로우 (플로우차트) — 예시</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#f7f8fa; --surface:#ffffff; --surface-2:#f2f4f6; --surface-3:#e8ebee;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --line:#e5e8eb; --line-2:#eef1f3;
+    --accent:#3182f6; --accent-deep:#1b64da; --accent-soft:#eaf2ff; --accent-line:#c3dafe;
+    --ok:#15b86b; --ok-bg:#e7f7ef; --warn:#c8820a; --warn-bg:#fff6e0; --danger:#e85b48; --danger-bg:#fdeeeb;
+    --r-sm:10px; --r-md:14px; --r-lg:20px; --r-chip:999px;
+    --shadow:0 1px 3px rgba(25,31,40,.05),0 8px 28px rgba(25,31,40,.06);
+    --shadow-soft:0 1px 2px rgba(25,31,40,.04);
+    --sans:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'D2Coding',Consolas,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.72;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .shell{max-width:840px;margin:0 auto;padding:46px 22px 90px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .dot{width:34px;height:34px;border-radius:11px;background:var(--accent);flex:none;display:grid;place-items:center;box-shadow:0 6px 16px rgba(49,130,246,.28)}
+  .dot svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:23px;font-weight:700;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--ink-3);font-size:13.5px;margin:3px 0 0;font-weight:500}
+
+  section{margin-bottom:32px}
+  .sec-h{display:flex;align-items:center;gap:11px;margin:0 0 16px}
+  .sec-h .n{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)}
+  .sec-h h3{font-size:21px;font-weight:700;margin:0;letter-spacing:-.02em}
+
+  .hero{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:30px 34px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#4593fc,#1b64da)}
+  .eyebrow{display:inline-flex;font-size:11.5px;font-weight:700;color:var(--accent-deep);background:var(--accent-soft);padding:5px 13px;border-radius:var(--r-chip);letter-spacing:.03em}
+  .hero h2{font-size:23px;line-height:1.45;font-weight:700;margin:12px 0 0;letter-spacing:-.02em;max-width:42ch}
+  .hero h2 .key{color:var(--accent-deep)}
+  .why{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:9px;max-width:64ch}
+  .why li{position:relative;padding-left:18px;font-size:14.5px;color:var(--ink)}
+  .why li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .why b{color:var(--accent-deep)}
+
+  .flow-wrap{display:flex;justify-content:center;padding:10px 0 4px;overflow-x:auto}
+  .flow{display:inline-grid;grid-template-columns:auto 120px auto;align-items:center;justify-items:center;row-gap:2px;
+    grid-template-areas:
+      "write   .   ."
+      "a1      .   ."
+      "submit  .   ."
+      "a2      .   ."
+      "review  b1  reject"
+      "a3      .   ."
+      "nextchk b2  done"
+      "a4      .   .";}
+  .fnode{padding:12px 18px;border:1.5px solid var(--line);background:var(--surface);font-size:14px;font-weight:700;color:var(--ink-2);text-align:center;transition:all .3s var(--ease);white-space:nowrap}
+  .fnode.start,.fnode.end{border-radius:var(--r-chip)}
+  .fnode.proc{border-radius:var(--r-md)}
+  .fnode.decision{border-radius:var(--r-md);border-color:var(--warn);background:var(--warn-bg);color:#7a5300}
+  .fnode.decision::before{content:"? ";font-family:var(--mono)}
+  .fnode.visited{border-color:var(--accent-line);background:var(--accent-soft);color:var(--accent-deep)}
+  .fnode.current{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(49,130,246,.32);transform:scale(1.05)}
+  .fnode.current.decision{border-color:var(--warn);background:var(--warn);color:#fff}
+  .fnode.end.done{border-color:var(--ok)} .fnode.current.end.done{background:var(--ok)}
+  .fnode.end.rej{border-color:var(--danger)} .fnode.current.end.rej{background:var(--danger)}
+  .farr{color:var(--ink-3);font-size:15px;display:flex;flex-direction:column;align-items:center;line-height:1.2}
+  .farr .al{font-size:10.5px;font-weight:700;font-family:var(--sans)}
+  .farr.h{flex-direction:row;gap:5px} .farr.h .al{color:var(--danger);font-weight:700}
+  .farr.h.no .al{color:var(--ink-3)}
+  .farr.loop{color:var(--accent-deep)} .farr.loop .al{color:var(--accent-deep)}
+  .farr.taken{color:var(--accent)} .farr.taken .al{color:var(--accent-deep)}
+  .ga1{grid-area:a1}.ga2{grid-area:a2}.ga3{grid-area:a3}.ga4{grid-area:a4}
+  .gb1{grid-area:b1}.gb2{grid-area:b2}
+
+  .choices{margin-top:18px;padding:18px;background:var(--surface-2);border-radius:var(--r-md)}
+  .choices .ch{font-size:12.5px;font-weight:700;color:var(--ink-2);margin-bottom:10px}
+  .choices .ch b{color:var(--accent-deep)} .choices .ch .dec{color:#7a5300}
+  .cbtns{display:flex;flex-wrap:wrap;gap:8px}
+  .cbtn{font-family:inherit;font-size:13.5px;font-weight:700;padding:10px 16px;border-radius:var(--r-md);cursor:pointer;border:1px solid var(--accent-line);background:var(--surface);color:var(--accent-deep);transition:all .18s var(--ease)}
+  .cbtn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .cbtn.rej{border-color:var(--danger);color:var(--danger)} .cbtn.rej:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .done-msg{font-size:13.5px;color:var(--ink-2)}
+
+  .path{margin-top:16px;font-size:13px;color:var(--ink-3);font-family:var(--mono);line-height:1.9}
+  .path .plbl{font-family:var(--sans);font-size:12px;font-weight:600;display:block;margin-bottom:4px}
+  .path .pcur{color:var(--accent-deep);font-weight:700}
+  .btn-reset{font-family:inherit;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:var(--r-chip);cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);margin-top:14px}
+  .btn-reset:hover{background:var(--surface-2);color:var(--ink)}
+
+  .note{display:flex;gap:11px;border-radius:var(--r-md);padding:14px 16px;margin:14px 0 0;font-size:14px;line-height:1.62}
+  .note .lbl{flex:none;font-weight:800;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;border-radius:8px;height:fit-content;white-space:nowrap}
+  .note.warn{background:var(--warn-bg)}.note.warn .lbl{background:#e6a93a;color:#4a3500}
+  .note.info{background:var(--accent-soft)}.note.info .lbl{background:var(--accent);color:#fff}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="dot" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v6M12 14v6"/><rect x="8" y="9" width="8" height="6" rx="1"/><path d="M6 7l-2 2 2 2M18 7l2 2-2 2"/></svg></span>
+    <div><h1>결재 승인 워크플로우 (플로우차트) — 예시</h1><p class="sub">업무가 어떤 판단에서 갈라지나</p></div>
+  </header>
+
+  <section>
+    <div class="hero">
+      <span class="eyebrow">상황 — 결재 승인 흐름</span>
+      <h2>결재는 <span class="key">어디서 승인·반려로 갈라지고</span>, 다음 결재자로 되돌아 도나요?</h2>
+      <ul class="why">
+        <li>주 경로는 세로, <b>분기는 옆으로 갈라집니다</b> — 검토에서 반려는 오른쪽 종료로, 다음 결재자 "아니오"는 완료로.</li>
+        <li>판단 노드(노란색)에서 <b>승인/반려, 예/아니오</b>를 선택하면 그 경로를 따라가고, "예"는 검토로 되돌아가는 루프를 직접 돌려볼 수 있습니다.</li>
+        <li>이 분기·루프가 실제 결재 업무와 맞는지 같이 맞춥니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="n">01</span><h3>업무 흐름</h3></div>
+
+    <div class="flow-wrap">
+      <div class="flow">
+        <div class="fnode start" data-n="write" style="grid-area:write">문서 작성</div>
+        <div class="farr ga1" data-e="write-submit"><span>&#8595;</span></div>
+        <div class="fnode proc" data-n="submit" style="grid-area:submit">상신</div>
+        <div class="farr ga2" data-e="submit-review"><span>&#8595;</span></div>
+        <div class="fnode decision" data-n="review" style="grid-area:review">결재선 검토</div>
+        <div class="farr h gb1" data-e="review-reject"><span>&#8594;</span><span class="al">반려</span></div>
+        <div class="fnode end rej" data-n="reject" style="grid-area:reject">반려 (작성자에게)</div>
+        <div class="farr ga3" data-e="review-nextchk"><span>&#8595;</span><span class="al">승인</span></div>
+        <div class="fnode decision" data-n="nextchk" style="grid-area:nextchk">다음 결재자 있음</div>
+        <div class="farr h no gb2" data-e="nextchk-done"><span>&#8594;</span><span class="al">아니오</span></div>
+        <div class="fnode end done" data-n="done" style="grid-area:done">결재 완료</div>
+        <div class="farr loop ga4" data-e="nextchk-review"><span>&#8593;</span><span class="al">예 (검토로)</span></div>
+      </div>
+    </div>
+
+    <div class="choices" id="choices"></div>
+    <div class="path"><span class="plbl">거쳐온 경로</span><span id="ptrack"></span></div>
+    <button class="btn-reset" id="backBtn" onclick="back()">&#8592; 뒤로</button>
+    <button class="btn-reset" onclick="resetFc()">처음으로</button>
+
+    <div class="note warn"><span class="lbl">합의</span><div><b>이 분기가 맞나요?</b> 반려되면 작성자에게 바로 가는지(이전 결재자로?), 결재선이 몇 단계인지, 전결·합의 같은 예외 경로가 있는지 — 판단 지점을 눌러 보며 맞춥니다.</div></div>
+    <div class="note info"><span class="lbl">참고</span><div>이건 <b>업무 프로세스 흐름</b>(판단·분기)입니다. 데이터 상태 전이는 상태도로 따로 봅니다. 결재 세부 흐름은 대표 흐름 가정(합의 대상).</div></div>
+  </section>
+
+</div>
+
+<script>
+  var NODES = {
+    write:  {label:'문서 작성', type:'start', next:'submit'},
+    submit: {label:'상신', type:'proc', next:'review'},
+    review: {label:'결재선 검토', type:'decision', branches:[{to:'nextchk', label:'승인', edge:'review-nextchk'},{to:'reject', label:'반려', rej:true, edge:'review-reject'}]},
+    nextchk:{label:'다음 결재자 있음', type:'decision', branches:[{to:'review', label:'예 (다음 검토로)', edge:'nextchk-review'},{to:'done', label:'아니오 (최종 승인)', edge:'nextchk-done'}]},
+    done:   {label:'결재 완료', type:'end'},
+    reject: {label:'반려', type:'end'}
+  };
+  var cur='write', visited=['write'], edges=[];
+  function nmOf(k){ return NODES[k].label; }
+
+  function render(){
+    document.querySelectorAll('.fnode').forEach(function(el){
+      var k=el.getAttribute('data-n');
+      el.classList.toggle('current', k===cur);
+      el.classList.toggle('visited', k!==cur && visited.indexOf(k)>=0);
+    });
+    document.querySelectorAll('.farr').forEach(function(el){
+      el.classList.toggle('taken', edges.indexOf(el.getAttribute('data-e'))>=0);
+    });
+    var n=NODES[cur], box=document.getElementById('choices');
+    if(n.type==='end'){
+      box.innerHTML = '<div class="done-msg">흐름 종료: <b>'+n.label+'</b>. "처음으로"로 다시 시작하세요.</div>';
+    } else if(n.type==='decision'){
+      var h='<div class="ch">판단 <span class="dec">'+n.label+'</span> — 선택:</div><div class="cbtns">';
+      n.branches.forEach(function(b){ h += '<button class="cbtn'+(b.rej?' rej':'')+'" onclick="choose(\''+b.to+'\',\''+b.edge+'\')">'+b.label+'</button>'; });
+      box.innerHTML = h+'</div>';
+    } else {
+      box.innerHTML = '<div class="ch">현재: <b>'+n.label+'</b></div><div class="cbtns"><button class="cbtn" onclick="choose(\''+n.next+'\',\''+cur+'-'+n.next+'\')">다음 &#8594; '+nmOf(n.next)+'</button></div>';
+    }
+    document.getElementById('ptrack').innerHTML = visited.map(function(k,i){ return i===visited.length-1 ? '<span class="pcur">'+nmOf(k)+'</span>' : nmOf(k); }).join(' &rarr; ');
+    document.getElementById('backBtn').disabled = visited.length<=1;
+  }
+  function choose(to, edge){ if(edge) edges.push(edge); cur=to; visited.push(to); render(); }
+  function back(){ if(visited.length>1){ visited.pop(); edges.pop(); cur=visited[visited.length-1]; render(); } }
+  function resetFc(){ cur='write'; visited=['write']; edges=[]; render(); }
+
+  render();
+</script>
+</body>
+</html>
