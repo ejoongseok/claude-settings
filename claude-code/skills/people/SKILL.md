@@ -42,6 +42,14 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 - **[OK]** "최근 동적 SQL 활용이 능숙해짐" (성장 관찰)
 - **[FAIL]** "언어 X 실력이 부족하다" (부정적 일반화)
 
+## 외부 데이터 의존
+
+| 데이터 | 경로 | 필수/선택 | 부재 시 동작 |
+|--------|------|:------:|------------|
+| 팀원 매핑 (닉네임-실명-부서-대응톤) | `.local.claude/team.md` | 선택 | 기본 정보 자동 채움 생략 — 사용자 입력에만 의존 |
+| 기존 인물 프로필 | `.local.claude/people/{닉네임}.md` | 선택 | 신규 프로필 생성 모드 |
+| 프로필 템플릿 | `.local.claude/people/TEMPLATE.md` | 선택 | 본문 골격으로 fallback |
+
 ## 파일 구조
 
 사람당 하나: `.local.claude/people/{닉네임}.md`
@@ -93,7 +101,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 ls .local.claude/people/ 2>/dev/null
 ```
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
 > - Read: `.local.claude/team.md`, `.local.claude/people/{닉네임}.md` (있을 시)
 > - Glob: `.local.claude/people/*.md` 전체 목록 (관계 맵 파악)
 > - Bash: 입력에 언급된 닉네임을 team.md 매핑과 대조
@@ -154,6 +162,15 @@ Frontmatter (CONTRACT §7-2 표준): `category: people, retention: permanent`
 - 변경 이력은 삭제하지 않음 (축적).
 - 민감도 원칙을 항상 준수 — 위반 감지 시 경고하고 수정.
 - team.md 와 중복되는 기본 정보 (닉네임-실명-부서-대응톤) 는 **team.md 가 정본 (source of truth)**. people 프로필에는 **team.md 에 없는 심층 정보** (업무 스타일·기술 프로필·협업 메모) 만 기록.
+
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| 함께 일하는 사람의 업무 스타일·기술 프로필·협업 메모 관리 | **이 스킬** | 핵심 — 인물 프로필 SSOT |
+| 닉네임-실명-부서-대응톤 기본 매핑 | team.md (`/on-boarding` 관리) | 정본 참조만 — 중복 기록 안 함 |
+| 코드 리뷰에서 관찰된 패턴을 피드백으로 전달 | /team-review | 관찰 사실만 기록 — 리뷰 수행은 위임 |
+| 고객사 담당자의 고객사 측 특성·이력 | /customer-profile | 인물 업무 스타일만 — 고객사 맥락은 위임 |
 
 ## 검증 시나리오
 

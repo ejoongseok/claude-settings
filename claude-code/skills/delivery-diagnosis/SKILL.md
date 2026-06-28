@@ -91,10 +91,10 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 
 ### Phase 1: 데이터 수집
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
 > - Read: `.local.claude/team.md`, `.local.claude/projects/*/STATUS.md`, 이전 /delivery-diagnosis + /business-diagnosis + /tech-diagnosis 보고서
 > - Glob: `.local.claude/daily/*.md` (최근 14), `.local.claude/daily-todos/*.md` (최근 14), `.local.claude/briefing/*.md` (최근 4), `.local.claude/issues/*.md`
-> - Bash: `git log --since="30 days ago"`, `git shortlog -sn`, `gh pr list --state merged --json ...`, `gh issue list --json ...`, 차단 키워드 grep 전부 동시
+> - Bash: `git log --since="30 days ago"`, `git shortlog -sn`, `gh pr list --state merged --json number,createdAt,mergedAt`, `gh issue list --json number,createdAt,closedAt,labels`, 차단 키워드 grep 전부 동시
 
 **1-1. 기존 보고서 확인**
 

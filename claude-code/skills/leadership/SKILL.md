@@ -2,7 +2,7 @@
 name: leadership
 description: 아침 리더십 코칭 — 초보 팀장/중간관리자를 위한 매일 실천 가능한 리더십 조언. 기준일 기반으로 단계별 성장을 안내합니다.
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Bash
+allowed-tools: Read, Write, Glob, Grep, Bash
 ---
 
 ## 역할
@@ -16,6 +16,16 @@ allowed-tools: Read, Glob, Grep, Bash
 - 매일 다른 주제. 반복하지 않음.
 
 톤: 시니어 멘토. 솔직·구체·간결.
+
+## 외부 데이터 의존
+
+| 데이터 | 경로 | 필수/선택 | 부재 시 동작 |
+|--------|------|:------:|------------|
+| 기준일 설정 | `.local.claude/leadership/config.md` | 선택 | 첫 실행 시 기준일 질문 후 생성 |
+| 이전 코칭 기록 | `.local.claude/leadership/` | 선택 | 주제 중복 방지 생략 — 단계 기준만으로 선택 |
+| 오늘 할 일 | `.local.claude/daily-todos/{date}.md` | 선택 | 상황 연결 섹션 생략 |
+| 최근 브리핑 (팀 현황) | `.local.claude/briefing/` | 선택 | 팀 맥락 연결 생략 |
+| 팀원/상사 프로필 | `.local.claude/people/` | 선택 | 일반 조언 — 구체적 인물 맞춤 생략 |
 
 ## 기준일
 
@@ -70,7 +80,7 @@ ls .local.claude/people/ 2>/dev/null
 
 단계를 엄격히 따르지는 않음 — 오늘의 맥락에 맞는 주제가 있으면 그걸 우선.
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
 > - Read: `.local.claude/leadership/config.md`, 이전 `.local.claude/leadership/*.md` 최근 10건
 > - Bash: `cat .local.claude/daily-todos/$(date +%Y-%m-%d).md`
 > - Glob: `.local.claude/briefing/*.md` 최신 1건, `.local.claude/people/*.md` 전체
@@ -193,6 +203,14 @@ start_date: 2026-04-13
 - 오늘 할 일 정리 → `/daily-todos`
 - 팀 현황 파악 → `/briefing`
 - 특정 팀원과의 1:1 준비가 필요하면 → `/coaching` (팀원 성장 코칭) 또는 `/meeting-notes` (1:1 회의록)
+
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| 매일 아침 단계별 리더십 주제를 짧게 푸시받기 (기준일 기반) | **이 스킬** | 핵심 — 일일 리더십 루틴 |
+| 구체적 고민을 가져와 진단·복수 방안을 받는 1:1 상담 | /coaching | 주제 연결만 — 심층 상담은 위임 |
+| 오늘 할 일을 정리·구체화 | /daily-todos | 상황 연결 참고만 — 할 일 관리는 위임 |
 
 ## 제약조건
 

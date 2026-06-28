@@ -21,7 +21,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 - 진짜로 만든다 (없으면 데모 불가)
 - 가짜로 만든다 (하드코딩/더미/스킵)
 
-톤: 시니어. 스코프를 잘라주는 역할.
+톤: 스코프를 좁히는 실무 관점.
 
 ## 외부 데이터 의존
 
@@ -33,6 +33,16 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 | 모듈 상세 | `.local.claude/modules/{name}.md` | 선택 | 코드 Grep 직접 fallback |
 | PRD/SRS | `.local.claude/prd/`, `.local.claude/srs/` | 선택 | PoC 목적·성공 기준을 사용자에게 직접 질문 |
 | 이전 PoC | `.local.claude/poc/` | 선택 | 유사 PoC 재사용 불가 — 처음부터 구성 |
+
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| "시간 촉박한 검증용 최소 구현 TODO·데모 시나리오·기술 부채" | **이 스킬** | ✓ 핵심 (검증 우선, 폐기 가능 전제) |
+| "제품 요구사항·범위·성공 지표 정의" | /prd | 다루지 않음 (이 스킬은 검증 스코프만, 완전한 요구사항은 prd) |
+| "기술 요구사항·설계 명세" | /srs | 다루지 않음 (PoC 는 명세가 아니라 빠른 검증) |
+| "본구현 개발 작업 분해(Outside-In)" | /todo | 다루지 않음 (PoC 기술 부채를 /todo 입력으로 전환) |
+| "확정 기능의 시연용 데모·발표 자료" | /spec-demo | 다루지 않음 (PoC 는 미확정 가설 검증, spec-demo 는 확정 스펙 시연) |
 
 ## 프로젝트 컨텍스트 (필수 — PoC 작성 전 read)
 
@@ -88,7 +98,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 
 ### Step 0: 멈추고 생각하기 — PoC를 만들기 전에
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
 > - Read: `$ARGUMENTS` 입력, `CLAUDE.md`, 관련 PRD `.local.claude/projects/*/PRD-*.md`, SRS `.local.claude/projects/*/SRS-*.md`
 > - Glob: `.local.claude/modules/*.md`, `.local.claude/customers/*.md` (데모 대상 고객)
 > - Read: `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md`
@@ -131,7 +141,7 @@ PoC 착수 전에 명확히 정의:
 
 ### 3단계: 기존 기능 영향 체크
 
-> **[Opus 4.7 / 1M 활용]** 서브 분할 없이 메인에서 직접 **다중 파일 동시 로드** 후 교차:
+> **[1M 활용]** 서브 분할 없이 메인에서 직접 **다중 파일 동시 로드** 후 교차:
 > - 로드: 수정 대상 Service/DAO/Controller/Mapper, 해당 메서드/쿼리를 참조하는 다른 파일들 (Grep로 수집 후 전부 Read)
 > - 대조: 같은 메서드·쿼리·테이블을 쓰는 다른 기능 감지, 기존 고객사 운영에 영향 주는 지점 탐지
 

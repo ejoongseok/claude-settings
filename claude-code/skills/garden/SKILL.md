@@ -32,7 +32,7 @@ Phase 1: 스캔 → Phase 2: 만료 식별 → Phase 3: 수확 점검
 
 ## Phase 1: 스캔
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**하여 컨텍스트 효율화:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**하여 컨텍스트 효율화:
 > - Glob 병렬: `.local.claude/**/*.md` (archive 제외), 카테고리별 경로 패턴(`daily/*.md`, `meetings/*.md`, `customers/*.md`, `modules/*.md`, `projects/**/STATUS.md` 등) 동시 수집
 > - Bash: mtime 수집(`find ... -printf "%T@ %p\n"` 또는 `stat`), 파일 수·줄 수 집계(`wc -l`) 를 카테고리별로 동시 실행
 > - Read: `CLAUDE.md`, `.local.claude/INDEX.md`, `.local.claude/docs/absorb-log.md`, 자동 로드 후보(biz-rules.md, customers/*.md, modules/*.md) 분량 임계 검사용 병렬 로드
@@ -164,10 +164,10 @@ frontmatter에 `retention`이 있으면 그것을 우선 사용한다.
 
 ### 수확 실행 방법
 
-> **[Opus 4.7 / 1M 활용]** 서브에이전트 분할 대신(또는 병행하여) 메인에서 직접 **다중 파일 동시 Read** 후 교차 분석:
+> **[1M 활용]** 서브에이전트 분할 대신(또는 병행하여) 메인에서 직접 **다중 파일 동시 Read** 후 교차 분석:
 > - 로드: 만료 소스 파일(daily/*, meetings/*, learn/*, reports/*, cs/*, memo/*) 과 반영처 sink 문서(biz-rules.md, modules/*.md, customers/*.md, team.md, people/*.md, INFRASTRUCTURE.md) 를 **동시에** 로드
 > - 교차 분석: {소스의 추출 후보} vs {sink 의 기존 내용} — 이미 반영된 것(SKIP) / 미반영 신규(NEW) / 기존 보강(ENRICH) / 모순(CONFLICT) 한 번에 분류
-> - 서브에이전트 병렬 위임은 만료 파일 20개+ 또는 총 로드량 600K줄 초과 시로 보류. 1M context 내면 메인에서 한꺼번에 처리가 더 정확(소스-싱크 교차 정확도 증가).
+> - 서브에이전트 병렬 위임은 만료 파일 20개+ 또는 총 로드 추정 토큰 ~600K(1M 컨텍스트의 60%; 줄 수로 대략 가늠) 근접 시로 보류. 1M context 내면 메인에서 한꺼번에 처리가 더 정확(소스-싱크 교차 정확도 증가).
 
 만료 파일이 **10개 이상**이면 서브에이전트에 병렬 위임한다:
 

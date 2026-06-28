@@ -5,6 +5,8 @@ disable-model-invocation: true
 allowed-tools: Read, Write, Glob, Grep, Bash
 ---
 
+## 역할
+
 하루의 할 일을 기록하고, 업무 중간에 들어온 일을 추가하는 TODO 트래커.
 하루에 파일 하나. 이미 있으면 업데이트, 없으면 새로 생성.
 
@@ -12,17 +14,19 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 
 톤: 빠름, 유용한 정보, 접근 방법까지.
 
-## 코드베이스 참조
+## 외부 데이터 의존
 
 할 일을 구체화할 때 아래 문서를 참조:
 
-| 문서 | 경로 | 용도 |
-|------|------|------|
-| 도메인 약어/모듈 | `CLAUDE.md` | 용어 매핑, 모듈 위치 |
-| 아키텍처 흐름 | `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md` | 핵심 사용자 여정, 요청 흐름, 이벤트 |
-| 모듈 상세 | `.local.claude/modules/{name}.md` | 서비스, 테이블, Mapper, 컨트롤러 |
-| 프로젝트 산출물 | `.local.claude/projects/*/` | 관련 PRD, SRS, AS-IS 등 |
-| 비즈니스 규칙 | `.local.claude/biz-rules.md` | 상태 전이, 비즈니스 규칙 — 할 일 구체화 시 관련 규칙/주의사항 포함 |
+| 데이터 | 경로 | 필수/선택 | 부재 시 동작 |
+|--------|------|:------:|------------|
+| 도메인 약어/모듈 | `CLAUDE.md` | 선택 | 용어 매핑 없이 입력 그대로 기록, 구체화 수준 하향 |
+| 아키텍처 흐름 | `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md` | 선택 | 진입점 제안 생략, Glob/Grep 직접 fallback |
+| 모듈 상세 | `.local.claude/modules/{name}.md` | 선택 | 코드 직접 Grep 으로 진입점·테이블 추정 |
+| 프로젝트 산출물 | `.local.claude/projects/*/` | 선택 | 관련 PRD/SRS 연계 생략 |
+| 비즈니스 규칙 | `.local.claude/biz-rules.md` | 선택 | 규칙/주의사항 주석 생략 |
+
+부재 시 graceful degrade — 빈 프로젝트에서도 입력을 그대로 기록하되 구체화 수준만 낮아진다.
 
 ## 동작
 
@@ -46,7 +50,7 @@ ls .local.claude/daily-todos/$(date +%Y-%m-%d).md 2>/dev/null
 
 ### 2. 입력 구체화
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
 > - Glob: `.local.claude/modules/*.md`, `src/**/{관련모듈}/**/*.java`, `**/*Mapper.xml`
 > - Read: `CLAUDE.md`, `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md`, `.local.claude/biz-rules.md`, 입력에 언급된 관련 `.local.claude/modules/{name}.md`
 > - Grep: 입력 키워드로 실제 Service/Ctrl/Mapper 위치 확인
@@ -147,7 +151,7 @@ ls .local.claude/daily-todos/$(date +%Y-%m-%d).md 2>/dev/null
 (아직 없음)
 ```
 
-### 4. 파일이 있으면 → 업데이트
+### 5. 파일이 있으면 → 업데이트
 
 기존 파일을 Read한 뒤, `$ARGUMENTS` 내용을 분석하여 적절한 섹션에 추가.
 
@@ -156,7 +160,7 @@ ls .local.claude/daily-todos/$(date +%Y-%m-%d).md 2>/dev/null
 - 메모/맥락 → "메모" 섹션에 시간과 함께 추가
 - 우선순위 변경 → 해당 항목 이동
 
-### 5. 입력 해석
+### 6. 입력 해석
 
 | 입력 패턴 | 동작 |
 |-----------|------|
@@ -169,7 +173,7 @@ ls .local.claude/daily-todos/$(date +%Y-%m-%d).md 2>/dev/null
 | `메모: ~`, `참고로 ~` | 메모 섹션에 시간과 함께 추가 |
 | (인자 없이 호출) | 현재 파일 표시 + 진행 상황 요약 |
 
-### 6. 인자 없이 호출 시
+### 7. 인자 없이 호출 시
 
 현재 파일을 읽어서 진행 상황을 우선순위별로 요약:
 ```
@@ -202,6 +206,14 @@ Frontmatter (CONTRACT §7-2 표준): `category: daily-todos, retention: 14d`
 - 완료 체크 시 완료 시간도 기록 (예: `[OK] 11:20`)
 - 구체화할 수 없을 만큼 추상적이면 **재질문**한다. 추측으로 채우지 않음.
 - 구체화 시 코드베이스 문서를 참조하되, 실제 파일 존재 여부를 Glob/Grep으로 검증.
+
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| 하루 끝 회고·심층 분석 | `/daily` | [다루지 않음] (계획 vs 실제 비교에 본 파일 참조) |
+| SRS/요구사항을 Outside-In 개발 TODO로 변환 | `/todo` | [다루지 않음] |
+| 오늘 할 일 기록 + 코드베이스 기반 구체화 | **이 스킬** | [핵심] |
 
 ## 검증 시나리오
 

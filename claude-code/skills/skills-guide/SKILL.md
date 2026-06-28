@@ -7,13 +7,13 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ## 역할
 
-38개 스킬의 발견성 문제를 해결한다. 사용자가:
+55개 스킬의 발견성 문제를 해결한다. 사용자가:
 - "지금 컨텍스트에서 어떤 스킬 호출하면 좋을까?"
 - "스킬 목록 보여줘"
 - "신규 프로젝트 들어왔는데 뭐부터 해야 해?"
 - "회고 관련 스킬 뭐 있지?"
 
-질문할 때 **38개 카탈로그를 횡단 분석**하여 top 3~5 추천 + 시나리오별 그룹 안내.
+질문할 때 **55개 카탈로그를 횡단 분석**하여 top 3~5 추천 + 시나리오별 그룹 안내.
 
 ## 외부 데이터 의존
 
@@ -27,13 +27,13 @@ allowed-tools: Read, Glob, Grep, Bash
 
 | 입력 | 모드 | 동작 |
 |------|------|------|
-| `/skills-guide` (기본) | **카탈로그** | 38개 전체 + 그룹별 보기 |
+| `/skills-guide` (기본) | **카탈로그** | 55개 전체 + 그룹별 보기 |
 | `/skills-guide {자유 텍스트}` | **추천** | 컨텍스트 분석 → top 3~5 추천 |
 | `/skills-guide --group {그룹명}` | **그룹 필터** | core / diagnosis / write / review / plan / data 등 |
 | `/skills-guide --new` | **신규 프로젝트** | 첫 진입 추천 흐름 (/on-boarding → /setup-guide → ...) |
 | `/skills-guide --search {키워드}` | **검색** | description grep |
 
-## 카탈로그 (38개 — 그룹별)
+## 카탈로그 (55개 — 그룹별)
 
 > 최신 카탈로그는 호출 시점에 `ls skills/` + frontmatter description 추출로 자동 생성. 아래는 **현재 분류**.
 
@@ -42,7 +42,7 @@ allowed-tools: Read, Glob, Grep, Bash
 |------|------|--------------|
 | `/on-boarding` | 6산출물 자동 생성 (CLAUDE.md, bot/INDEX.md, human/README.md, biz-rules.md, team.md, SETUP.md) | 1 |
 | `/setup-guide` | 환경 셋업 가이드 살아있는 문서로 유지 | 2 (수시) |
-| `/skill-check` | 38개 계약 준수 점검 | 3 (월 1회) |
+| `/skill-check` | 55개 계약 준수 점검 | 3 (월 1회) |
 | `/skills-guide` | 이 스킬 — 카탈로그·추천 | 4 (수시) |
 
 ### 2. 진단 (관점별 정기 보고)
@@ -68,6 +68,9 @@ allowed-tools: Read, Glob, Grep, Bash
 | `/adr` | 아키텍처 의사결정 기록 |
 | `/poc` | PoC 계획·실행 |
 | `/brainstorm` | 아이디어 발산 |
+| `/rfc` | 기술/비기술 의사결정 RFC (복수안 비교→결정) |
+| `/spec-demo` | 동작하는 명세 — 도메인 규칙을 인터랙티브 HTML로 정렬·합의 |
+| `/html-explain` | 코드·문서를 인터랙티브 HTML로 설명·시각화 |
 
 ### 4. 리뷰·검증
 | 스킬 | 용도 |
@@ -79,6 +82,7 @@ allowed-tools: Read, Glob, Grep, Bash
 | `/qa-run-deep` | QA 1M context 깊이 실행 |
 | `/convention-audit` | 컨벤션 준수 감사 |
 | `/deploy-checklist` | 배포 전 체크리스트 |
+| `/pitfall` | 반복되는 함정·실수 패턴 점검·예방 |
 
 ### 5. 회고·학습
 | 스킬 | 용도 |
@@ -89,6 +93,8 @@ allowed-tools: Read, Glob, Grep, Bash
 | `/memo` | 검증 없이 일단 적기 |
 | `/meeting-notes` | 회의록 구조화 |
 | `/briefing` | 아침 브리핑 (최근 변경 요약) |
+| `/session-handoff` | 세션 인계 문서 생성 (다음 세션·모델용) |
+| `/session-glean` | 세션에서 지식·결정·할일 수확 |
 
 ### 6. 데이터·고객·팀 관리
 | 스킬 | 용도 |
@@ -110,18 +116,21 @@ allowed-tools: Read, Glob, Grep, Bash
 | `/dualize-docs` | 사람용·AI용 문서 분리 |
 | `/optimize-claude-md` | CLAUDE.md 최적화 (200줄 룰) |
 | `/analyze-dir` | 디렉터리 구조 분석 |
+| `/rewrite-external` | 외부 공유용 문서로 재작성 (민감정보 제거·저맥락화) |
+| `/memory-garden` | 메모리(.claude/memory) 정원 관리 |
 
 ### 8. 메타 (스킬 시스템 자체)
 | 스킬 | 용도 |
 |------|------|
 | `/skill-check` | CONTRACT.md 준수 자동 점검 |
+| `/skill-modernize` | 모델 세대 전환 시 전 스킬 최신화 메타-스킬 |
 | `/skills-guide` | 이 스킬 (카탈로그·추천) |
 
 ## 추천 모드 (자유 텍스트 → top 3~5)
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**하여 컨텍스트 효율화:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**하여 컨텍스트 효율화:
 > - Glob: `skills/*/SKILL.md` — 전체 스킬 파일 경로 수집
-> - Read 병렬: 모든 `skills/*/SKILL.md` (48개+) 의 frontmatter + 상단 description/역할 섹션 동시 로드 — 1M context 내 충분
+> - Read 병렬: 모든 `skills/*/SKILL.md` (55개) 의 frontmatter + 상단 description/역할 섹션 동시 로드 — 1M context 내 충분
 > - Bash: `git status --short`, 최근 `.local.claude/*` mtime 체크를 병렬로
 > - Grep: 사용자 입력 키워드를 전체 스킬 description 에 동시 매칭
 
@@ -175,7 +184,7 @@ allowed-tools: Read, Glob, Grep, Bash
 2. /setup-guide              # SETUP.md 환경 점검
    → 빈 프로젝트 환경 vs 자동 추출 결과 일치 검증
 
-3. /skill-check              # 38개 계약 준수 첫 점검
+3. /skill-check              # 55개 계약 준수 첫 점검
    → P1 0건 / P2 N건 / P3 N건 보고서
 
 4. (작업하며 점진적으로)
@@ -198,7 +207,7 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ### 카탈로그 모드
 ```markdown
-## 사용 가능한 스킬 — 38개 (그룹별)
+## 사용 가능한 스킬 — 55개 (그룹별)
 
 ### 1. 신규 프로젝트 진입 (4개)
 - `/on-boarding` — ...
@@ -232,12 +241,13 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ## 다른 스킬과의 경계
 
-| 질문 | 담당 |
-|------|------|
-| "어떤 스킬 있어?" | **/skills-guide** (핵심) |
-| "스킬 위반 점검" | /skill-check |
-| "스킬 신규 작성" | 사용자 (CONTRACT.md 참조) |
-| "특정 스킬 실행" | 해당 스킬 직접 호출 |
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| "어떤 스킬 있어?" | **이 스킬** | ✓ 핵심 |
+| "스킬 위반 점검" | /skill-check | 다루지 않음 |
+| "모델 세대 전환 전 스킬 최신화" | /skill-modernize | 다루지 않음 |
+| "스킬 신규 작성" | 사용자 (CONTRACT.md 참조) | 다루지 않음 |
+| "특정 스킬 실행" | 해당 스킬 직접 호출 | 다루지 않음 |
 
 ## 다음 스킬 연결
 
@@ -247,7 +257,7 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ## 분량 임계
 
-이 스킬 자체는 카탈로그 + 추천 로직. 38개 → 60개+ 늘어나면 그룹별 sub-doc 분리 검토.
+이 스킬 자체는 카탈로그 + 추천 로직. 55개 → 70개+ 늘어나면 그룹별 sub-doc 분리 검토.
 
 ## 검증 시나리오
 

@@ -20,6 +20,18 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 
 ## 핵심 원칙
 
+### 다른 진단과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| "고객 문제를 잘 풀고 있나, 무엇을 만들까?" | **/product-diagnosis** | [OK] 핵심 — 고객 신호·제품화·로드맵 |
+| "기술적으로 어떻게 만드나, 코드가 건강한가?" | /tech-diagnosis | [FAIL] 다루지 않음 — 기술 실현 가능성만 참조 |
+| "사업적으로 어디에 배팅하나?" | /business-diagnosis | [FAIL] 다루지 않음 — 사업 임팩트만 참조 |
+| "전환율·리텐션을 어떻게 올릴까?" | /growth-diagnosis | [FAIL] 다루지 않음 — 깔때기·채널 축 |
+| "지표를 정확히 측정하고 있나?" | /data-diagnosis | [FAIL] 다루지 않음 — 측정 인프라 축 |
+
+제품 관점은 "고객에게 무엇을". 기술(어떻게)·사업(돈·시간·사람)·성장(유입·전환)·데이터(측정)는 각 축으로 위임.
+
 ### 기술 스킬과의 차이
 
 | | 기술 | 제품 |
@@ -95,10 +107,10 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 
 ### Phase 1: 고객 접점 수집
 
-> **[Opus 4.7 / 1M 활용]** **다중 파일 동시 Read** 후 교차 분석:
+> **[1M 활용]** **다중 파일 동시 Read** 후 교차 분석:
 > - 로드: `customers/*.md` 전체, `.local.claude/cs/` 전체, `.local.claude/issues/` 전체, `.local.claude/projects/*/PRD-*.md`, `.local.claude/meetings/` 고객 관련, `biz-rules.md`, `bot/INDEX.md` 또는 `ONBOARDING.md`
 > - 교차 분석: {고객사 A Pain Point vs 고객사 B 유사 요청 → 제품화 후보}, {CS 불만 vs 이슈 백로그 일관성}, {PRD 의도 vs CS 실제 이탈 모순 탐지}, {biz-rules 상태전이 vs 고객 여정 병목 매핑}
-> - 한계: 총 로드량이 600K줄 초과 시 AskUserQuestion 으로 범위 축소 권장 (우선순위: customers > CS > 이슈 > PRD > 회의록).
+> - 한계: 총 로드량이 컨텍스트 윈도우 용량에 근접하면 AskUserQuestion 으로 범위 축소 권장 (우선순위: customers > CS > 이슈 > PRD > 회의록).
 
 **1-1. 데이터 충분성 체크**
 
@@ -295,7 +307,7 @@ biz-rules.md의 상태 전이를 고객 여정으로 읽어서, 어디서 막히
 ```
 [현재]                       [Q+1]                         [Q+2]
 [제품화 후보 #1]         →   [기능 공백 #1]             →   [차별화 강화]
-[고객 병목 해소]         →   [커스터마이징 제품화 #2]    →   ...
+[고객 병목 해소]         →   [커스터마이징 제품화 #2]    →   [경쟁 취약점 보완]
 ```
 
 이전 보고서가 있으면 로드맵 진행 상황 추적.
@@ -305,7 +317,7 @@ biz-rules.md의 상태 전이를 고객 여정으로 읽어서, 어디서 막히
 | 기능 | Build | Buy/통합 | Partner | 권고 | 근거 |
 |------|-------|---------|---------|------|------|
 
-**→ 의사결정 포인트:** 다음 분기에 반드시 해야 할 제품 투자 1줄
+**→ 의사결정 포인트:** 다음 분기에 가장 우선해야 할 제품 투자 1줄
 
 ---
 

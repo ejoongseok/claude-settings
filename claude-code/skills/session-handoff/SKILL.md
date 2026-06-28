@@ -7,8 +7,6 @@ recommended-effort: max
 fallback-effort: high
 ---
 
-# 세션 인계 스킬 (session-handoff)
-
 ## 역할
 
 본 세션 종료 시점에 호출되어, **다음 세션의 모델**이 컨텍스트를 재구성할 수 있도록 인계 문서를 작성한다. 인계 문서는 사람이 아닌 **다음 세션 모델 독자 기준** — 명령형 지시문 + frontmatter 메타 + structured data 위주. 콘솔 출력만 사람 친화 한국어로.
@@ -32,6 +30,17 @@ fallback-effort: high
 - **독자 분리**:
   - 인계 문서 = 다음 세션 모델 → 명령형 + structured data
   - 콘솔 출력 = 사람 → 한국어 친화 + 사용자 입력 명령어 안내
+
+## 외부 데이터 의존
+
+| 데이터 | 경로 | 필수/선택 | 부재 시 동작 |
+|--------|------|:------:|------------|
+| 본 대화 컨텍스트 | (대화 내 — 채널 A) | 필수 | 흡수 대상 없음 → 인계 가치 낮음, 사용자 확인 후 진행 |
+| git 상태 | `git status` / `git log` / `git symbolic-ref HEAD` | 선택 | git 아님 → frontmatter `N/A`, 환경 상태 섹션에 명시 |
+| 진척 추적 파일 (sprint) | 프로젝트별 진척 추적 문서 | 선택 | 부재 시 sprint → `mixed` 강등 (엣지케이스 #3) |
+| 메모리 인덱스 (채널 C) | `MEMORY.md`, `CLAUDE.md`, 노트 파일 등 | 선택 | 미유지 시 채널 C 생략, A/B 채널만으로 자산 식별 |
+| PR 데이터 (pr) | `gh pr view {N}` (github CLI/MCP) | 선택 | 미연결 시 PR 정량 지표 `[미측정]`, 본 대화 read 로 대체 |
+| 출력 디렉터리 | `.claude/handoff/` (LATEST.md, INDEX.md) | 필수 | `mkdir -p` 생성, 실패 시 작성 중단 + 기존 상태 보호 (엣지케이스 #9) |
 
 ## 자동 추론 경로
 
@@ -579,6 +588,14 @@ INDEX append: .claude/handoff/INDEX.md
 - INDEX.md 는 append-only (expired 정리 별도)
 - 민감 정보 redact 의무 — 누설 위험 시 작성 중단
 - 본 세션 작업이 destructive op (git reset --hard 등) 직후면 인계 문서에 명시 + 사용자 트리거 대기로 분류
+
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| 세션 학습을 작업 디렉터리 문서에 증분 반영 | `/session-glean` | [다루지 않음] (영속 문서 갱신 X) |
+| auto memory 엔트리 정리·아카이브 | `/memory-garden` | [다루지 않음] |
+| 다음 세션 모델용 인계 문서 작성 (휘발 컨텍스트 보존) | **이 스킬** | [핵심] |
 
 ## 사람용 사용법
 

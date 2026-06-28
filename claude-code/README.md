@@ -2,19 +2,19 @@
 
 Claude Code 를 업무에 본격 활용하기 위한 **스킬·계약·메타-인프라** 모음.
 
-52개 스킬 + 계약 문서 + 메타-스킬 (`/skill-check`, `/skills-guide`) 로 구성. 신규 프로젝트에 바로 적용 가능하며, 받은 후 자기 도메인에 맞춰 점진 커스텀.
+55개 스킬 + 계약 문서 + 메타-스킬 (`/skill-check`, `/skills-guide`, `/skill-modernize`) 로 구성. 신규 프로젝트에 바로 적용 가능하며, 받은 후 자기 도메인에 맞춰 점진 커스텀.
 
 ## 무엇이 들어있나
 
 ```
 Claude-code-settings/
 ├── README.md         (이 파일)
-├── CONTRACT.md       스킬 작성 단일 진실 원천 (12 항목)
-├── skills/           52개 스킬 (CONTRACT 100% 준수)
+├── CONTRACT.md       스킬 작성 단일 진실 원천 (13 항목)
+├── skills/           55개 스킬 (CONTRACT 100% 준수)
 └── agents/           특화 서브에이전트
 ```
 
-### 스킬 카탈로그 (52개)
+### 스킬 카탈로그 (55개)
 
 8 그룹으로 분류 (`/skills-guide` 가 자동 생성):
 
@@ -22,18 +22,18 @@ Claude-code-settings/
 |------|---------|
 | **신규 프로젝트 진입** | `/on-boarding`, `/setup-guide`, `/skill-check`, `/skills-guide` |
 | **진단 (관점별 정기 보고)** | `/business-diagnosis`, `/product-diagnosis`, `/tech-diagnosis`, `/delivery-diagnosis`, `/security-diagnosis`, `/growth-diagnosis`, `/data-diagnosis` |
-| **작성·생성** | `/prd`, `/srs`, `/todo`, `/pr`, `/issue`, `/draft`, `/adr`, `/poc`, `/brainstorm`, `/rfc`, `/pm-brief` |
+| **작성·생성** | `/prd`, `/srs`, `/todo`, `/pr`, `/issue`, `/draft`, `/adr`, `/poc`, `/brainstorm`, `/rfc`, `/spec-demo` |
 | **리뷰·검증** | `/review`, `/team-review`, `/qa`, `/qa-run-light`, `/qa-run-deep`, `/convention-audit`, `/deploy-checklist` |
 | **회고·학습** | `/daily`, `/daily-todos`, `/learn`, `/memo`, `/meeting-notes`, `/briefing` |
 | **데이터·고객·팀 관리** | `/biz-rules`, `/customer-profile`, `/cs`, `/people`, `/coaching`, `/leadership`, `/analyze-request` |
 | **정원·정리** | `/garden`, `/absorb`, `/parse-doc`, `/dualize-docs`, `/optimize-claude-md`, `/analyze-dir` |
-| **메타** | `/skill-check`, `/skills-guide` |
+| **메타** | `/skill-check`, `/skills-guide`, `/skill-modernize` |
 
 ## 핵심 개념 4가지
 
 ### 1. CONTRACT.md = 단일 진실 원천
 
-모든 스킬이 따라야 할 12 항목 계약. frontmatter·본문 구조·도메인 가정 외부화·분량 임계·검증 시나리오 등 정의. 신규 스킬 추가 시 이 계약을 먼저 읽고 작성.
+모든 스킬이 따라야 할 13 항목 계약. frontmatter·본문 구조·도메인 가정 외부화·분량 임계·검증 시나리오 등 정의. 신규 스킬 추가 시 이 계약을 먼저 읽고 작성.
 
 ### 2. Tier 1/Tier 2 분리 (도메인 가정 외부화)
 
@@ -87,7 +87,7 @@ cd {프로젝트 루트}
 # 2. setup-guide — SETUP.md 환경 점검
 /setup-guide
 
-# 3. skill-check — 52개 계약 준수 첫 점검
+# 3. skill-check — 55개 계약 준수 첫 점검
 /skill-check
 # → P1 0건 / P2 N건 / P3 N건 보고서
 
@@ -111,7 +111,7 @@ cd {프로젝트 루트}
 
 ## 자기 도메인에 맞춰 커스텀
 
-받은 직후 52개가 모두 활성. 본인 프로젝트 성격에 따라 **빼거나 비활성화** 권장:
+받은 직후 55개가 모두 활성. 본인 프로젝트 성격에 따라 **빼거나 비활성화** 권장:
 
 | 프로젝트 유형 | 권장 활성화 | 보류 권장 |
 |------------|----------|---------|

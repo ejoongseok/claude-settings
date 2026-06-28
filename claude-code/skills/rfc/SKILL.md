@@ -25,7 +25,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 |------|------|-----------|
 | 발산만 (비교·추천 없음) | `/brainstorm` | [FAIL] 다루지 않음 |
 | 이미 결정된 것을 기록 | `/adr` | [FAIL] 다루지 않음 |
-| 이미 정해진 **단일** 방향 공유 | `/pm-brief` | [FAIL] 다루지 않음 |
+| 이미 정해진 **단일** 방향 공유 | `/briefing` | [FAIL] 다루지 않음 |
 | 결정 전 복수안 비교 → 논의 → 결정까지 한 파일 완결 | **이 스킬** | [OK] 핵심 |
 
 ## 외부 데이터 의존
@@ -75,13 +75,13 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 
 ### Step 0: 멈추고 생각하기
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
 > - Read: `$ARGUMENTS` 입력, `CLAUDE.md`, 관련 brainstorm `.local.claude/brainstorm/*.md`, PRD `.local.claude/prd/*.md`, SRS `.local.claude/srs/*.md`, 기존 ADR `.local.claude/adr/*.md`
 > - Glob: `.local.claude/modules/*.md`, `.local.claude/customers/*.md`, `.local.claude/INFRASTRUCTURE.md`
 > - Bash: `ls .local.claude/rfc/` 및 프로젝트 RFC (업데이트 모드 판별)
 
 1. **정말 RFC가 맞나?**
-   - 단일 방향이 확실 → `/pm-brief` 또는 `/srs`
+   - 단일 방향이 확실 → `/briefing` 또는 `/srs`
    - 이미 결정 난 사안 → `/adr` 또는 그냥 결정 기록
    - "몇 가지 안이 있는데 같이 봐줘" → RFC
 2. **결정 유형**: 기술 / 비기술 / 혼합. 비기술이어도 OK.
@@ -175,7 +175,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 - [FAIL] "A와 B 중 어느 쪽이 좋을까요?"
 - [OK] "A안을 추천드립니다. 이유는 X. 다른 시각이나 반대 의견 있으면 알려주세요. 별다른 피드백이 없으면 A로 진행하겠습니다."
 
-> **[Opus 4.7 / 메타인지]** 선언형 톤 변환 후 Adversarial review:
+> **[메타인지]** 선언형 톤 변환 후 Adversarial review:
 > 1. 근거 재점검 — 각 안의 소요·장단점·2차 비용·확신도에 근거가 있는가? 덕테이프 안의 2차 비용이 생략되지 않았는가?
 > 2. 전제 검증 — 추천안이 유효하려면 어떤 전제(팀 역량, 기술 스택, 일정, 비용)가 성립해야 하는가? 전제가 깨지면 재고할 트리거는 명시되었는가?
 > 3. 반대 증거 — "수신자가 '이 안이 왜 추천?'에 반박할 여지는?" 특히 **정석 편향**(덕테이프 저평가)·**현상 유지 편향**(기존 재활용 과평가) 반박 1개 이상 생성 후 반영
@@ -336,7 +336,7 @@ Frontmatter (CONTRACT §7-2 표준 + updated·revision·status·decided_at·deci
 
 - **외부-가시 문서 공통 원칙 준수** — `rules/external-doc.md` (가독성 5 + 정직성 5)
 - **입력 부족 시 문서 작성 금지** — Step 0.5 충분도 체크 4항목 중 **2개 이상 파악 불가**면 구체화 질문으로 먼저 해소
-- **대안 최소 2개** — 단일안이면 RFC가 아님. `/pm-brief` 또는 `/adr` 권장
+- **대안 최소 2개** — 단일안이면 RFC가 아님. `/briefing` 또는 `/adr` 권장
 - **내부 경로 링크 금지** (공유본 기준) — `.claude/`, `.local.claude/`, `CLAUDE.md`, `modules/`, `projects/` 같은 로컬 경로는 링크·경로 노출 모두 금지. 파일명만 허용 (`SRS-{기능명}.md` OK). frontmatter `source_docs`는 메타데이터라 절대 경로 유지 가능
 - **선언형 + 피드백 열기** 톤 — "~맞을까요?", "~확인 부탁드립니다" 같은 질문형 금지. "~추천드립니다. 다르면 알려주세요" 사용
 - **정석 vs 덕테이프 동등 저울질** — 덕테이프를 열등하게 표기 금지. 시급성·영향도에 따라 덕테이프가 정답
@@ -351,7 +351,7 @@ Frontmatter (CONTRACT §7-2 표준 + updated·revision·status·decided_at·deci
 
 - 결정 난 사안 공식 알림 → `/draft`
 - 결정 이후 구현 단계 → `/srs` → `/todo`
-- 결정 이후 프로젝트 진행 공유 → `/pm-brief`
+- 결정 이후 프로젝트 진행 공유 → `/briefing`
 - 시급 시연/PoC → `/poc`
 - 결정을 조직 전체 ADR로도 남기고 싶으면 → `/adr` (선택)
 

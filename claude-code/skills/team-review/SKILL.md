@@ -86,7 +86,7 @@ git log develop...{브랜치명} --oneline
 - 변경된 Controller가 참조하는 Service의 다른 호출자 Grep
 - 변경된 테이블/컬럼을 참조하는 다른 Mapper Grep
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬 호출**:
 > - Read: `.local.claude/people/{작성자닉네임}.md`, `.local.claude/team.md`
 > - Glob: `.local.claude/briefing/*.md` 최신 3건
 > - Bash: `git log --author={author} --since="1 month ago" --oneline` + 변경 파일 Grep
@@ -219,6 +219,13 @@ Frontmatter (CONTRACT §7-2 표준): `category: project-docs, retention: 30d, ha
 - 칭찬도 구체적으로. "잘했습니다" 대신 "이 부분에서 ~한 처리는 ~한 이유로 좋습니다"
 - 작성자의 경험 수준을 고려 — people 프로필이 있으면 참고하여 설명 깊이 조절
 - `/review`와 동일한 점검 항목이지만, 출력의 톤과 구조가 다름. 내부적으로 동일한 기준으로 점검.
+
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬 |
+|---|---|---|
+| 내 변경분 단독 셀프 리뷰 (PR 전 자가 점검) | `/review` | [다루지 않음] |
+| 팀원 PR 다관점 리뷰 + 근거 설명 + 잘한 점 피드백 | 이 스킬 | [핵심] |
 
 ## 검증 시나리오
 

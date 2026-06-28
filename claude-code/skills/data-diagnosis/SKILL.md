@@ -88,11 +88,11 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 
 ### Phase 1: 측정 인프라 매핑
 
-> **[Opus 4.7 / 1M 활용]** **다중 파일 동시 Read** 후 교차 분석:
+> **[1M 활용]** **다중 파일 동시 Read** 후 교차 분석:
 > - 로드: 트래킹 코드(analytics/tracking/metrics 디렉터리), `biz-rules.md`, `bot/*.md` 지표 정의 섹션, `.local.claude/analytics/*`, 이전 /data-diagnosis 보고서, auto memory
 > - 교차 분석: {코드의 track() 호출 지표 이름} vs {biz-rules 지표 정의} vs {bot/*.md 기술 지표} — **SSOT 충돌 탐지** (같은 이름 다른 로직 / 같은 의미 다른 이름)
 > - 추가 교차: {대시보드 설정 JSON} vs {실제 트래킹 코드} vs {문서 정의} — 3자 일치 확인
-> - 한계: 총 로드량이 600K줄 초과 시 AskUserQuestion 으로 범위 축소 권장 (우선순위: 지표 정의 문서 > 트래킹 코드 > 대시보드).
+> - 한계: 총 로드량이 컨텍스트 윈도우 용량에 근접하면 AskUserQuestion 으로 범위 축소 권장 (우선순위: 지표 정의 문서 > 트래킹 코드 > 대시보드).
 
 **1-1. 측정 코드 스캔**
 

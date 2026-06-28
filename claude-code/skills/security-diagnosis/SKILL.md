@@ -117,7 +117,7 @@ ls .local.claude/cs/ .local.claude/incidents/ 2>/dev/null | head
 
 **1-3. 코드 보안 스캔 (read-only Grep)**
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
 > - Grep 병렬: 자격 정보(`password|api_key|secret|token`), 위험 함수(`eval|exec|Runtime.exec`), DOM XSS(`innerHTML|document.write`), SQL 동적 구성, 약한 암호화(`MD5|SHA1|DES`), 권한 어노테이션(`@PreAuthorize|@PermitAll`), 로그 민감 정보(`log.*password|token`) 을 동시에 수행
 > - Read: `CLAUDE.md`, `biz-rules.md`, `application.yml`/`application-*.properties`, `.env.example`, `docker-compose.yml`, 의존성 파일(`package.json`, `pom.xml` 등), auto memory 병렬 로드
 > - Bash: `ls -la .env*`, `find . -name "*.example"`, `grep "ENC\["` 등 환경 점검 명령 병렬

@@ -250,7 +250,7 @@ Frontmatter (CONTRACT §7-2 표준): `category: cs, retention: 30d, harvest_targ
 - **사람 비난 금지** (시스템·패턴 분석)
 - **추정값 표기** (`(추정, ★★)`)
 - **권고 우선순위 명확** (P1/P2/P3)
-- **외부-가시 스킬은 `rules/external-doc.md` 준수** — 외부 제3자(동료 개발자·의사결정자·이해관계자·고객)가 읽을 가능성이 있는 산출물을 생성하는 스킬(issue, pr, adr, prd, srs, cs, draft, poc, meeting-notes, rfc, pm-brief 등)은 10원칙(가독성 5 + 정직성 5) 공통 준수. 스킬 본문에는 참조 라인만 박고 원칙 재작성 금지
+- **외부-가시 스킬은 `rules/external-doc.md` 준수** — 외부 제3자(동료 개발자·의사결정자·이해관계자·고객)가 읽을 가능성이 있는 산출물을 생성하는 스킬(issue, pr, adr, prd, srs, cs, draft, poc, meeting-notes, rfc 등)은 10원칙(가독성 5 + 정직성 5) 공통 준수. 스킬 본문에는 참조 라인만 박고 원칙 재작성 금지
 
 ## 11. 신규 스킬 작성 체크리스트
 

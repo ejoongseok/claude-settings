@@ -22,6 +22,15 @@ allowed-tools: Read, Write, Bash, Glob
 | 파서 도구 | `pptx2md.py`, `pdf_images.py`, Tesseract | 선택 | 미설치 시 "미지원" + 설치 가이드 제공 |
 | OCR 언어팩 | Tesseract `kor` / `eng` 팩 | 선택 | 미설치 시 OCR 생략 — 이미지 텍스트 인식 불가 |
 
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| "바이너리·외부 문서(HWP/PDF/XLSX 등)를 Markdown 으로 변환" | **이 스킬** | ✓ 핵심 (포맷 변환까지) |
+| "변환된 문서에서 지식 추출·지식 베이스 반영" | /absorb | 다루지 않음 (parse-doc 산출물을 absorb 입력으로 사용) |
+| "parsed/ 누적 문서 흡수 확인·아카이브·만료 관리" | /garden | 다루지 않음 (수명 관리는 garden) |
+| "사람용·AI용 이중 문서 분리·재구성" | /dualize-docs | 다루지 않음 (이 스킬은 원본→Markdown 변환만) |
+
 ## 디렉터리 구조
 
 ```
@@ -42,7 +51,7 @@ allowed-tools: Read, Write, Bash, Glob
 
 ## 동작
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
 > - Bash 병렬: `ls .local.claude/docs/original/`, `ls .local.claude/docs/parsed/`, `which tesseract` / `which npx` / `py --version` 등 파서 도구 가용성 확인, 각 파일 확장자별 파싱 명령(kordoc / pptx2md / officeparser) 을 여러 파일에 대해 동시 실행
 > - Read: 이미 파싱된 `.local.claude/docs/parsed/*.md` 목록을 병렬로 확인(스킵 판단)
 > - Glob: 인자가 패턴(`*.pdf` 등)일 때 원본 디렉터리에서 병렬 매칭
@@ -245,6 +254,15 @@ original/ 디렉터리의 모든 파일을 스캔하여:
 | 기타 | — | → "파싱 완료. 이 문서로 무엇을 하시겠습니까?" |
 
 안내는 **제안만** 한다. 자동 실행하지 않음.
+
+## 분량 임계
+
+| 산출물 | 임계 1 (알림) | 임계 2 (분리) |
+|--------|:----------:|:----------:|
+| `parsed/{file}.md` (변환 결과) | 500줄 | 원본 페이지·시트·섹션 단위로 분할 출력 (예: `{file}-part1.md`) |
+| `parsed/images/` 누적 | 50개 | 문서별 하위 디렉터리(`parsed/images/{문서명}/`)로 그룹화 |
+
+parsed/ 산출물은 즉시 자동 로드 대상이 아니므로(`@` 미사용) 임계는 가독성·후속 흡수 효율 기준. 대용량 PDF(100MB+ / 200페이지+)는 `pages` 분할로 변환 자체를 나눈다 (검증 시나리오 참조). 누적 정리·아카이브는 `/garden` 위임.
 
 ## 제약조건
 

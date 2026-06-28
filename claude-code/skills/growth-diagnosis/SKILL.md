@@ -86,7 +86,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 
 ### Phase 1: 측정 인프라 점검
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
 > - Grep 병렬: 트래킹 라이브러리(`mixpanel|amplitude|segment|posthog|gtag`), 이벤트 호출(`track\(|logEvent|analytics\.`), A/B 테스트/feature flag 감지 동시
 > - Read: `customers/*.md` 전체, `.local.claude/cs/*.md` 최근, `biz-rules.md` (사용자 여정 = 깔때기 후보), 이전 /growth-diagnosis 보고서, `.local.claude/memo/` 중 #고객·#성장 태그
 > - Glob: `.local.claude/analytics/*`, `.local.claude/customers/*.md`, `.local.claude/cs/*.md` 동시 탐색

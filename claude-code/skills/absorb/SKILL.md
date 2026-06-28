@@ -54,7 +54,7 @@ effort: high
 
 ### Phase 1: 정찰 (Reconnaissance)
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
 > - Glob: `{path}/**/*.md`, `{path}/**/*.txt`, 하위 디렉터리 전체 재귀 탐색
 > - Read 병렬: `.local.claude/docs/absorb-log.md`, `CLAUDE.md`, `bot/INDEX.md`/`ONBOARDING.md`, `biz-rules.md`, `team.md` (역읽기 후보 sink 파일 사전 로드)
 > - Bash: `wc -l` 규모 집계, mtime 비교(`stat` 또는 `find -newer`) 등 파일 메타데이터 병렬 수집
@@ -157,10 +157,10 @@ OCR 파싱 문서 등에서 다음을 감지하면 해당 영역의 신뢰도를
 
 ### Phase 2.5: 기존 지식 베이스 역읽기 (Reverse Scan)
 
-> **[Opus 4.7 / 1M 활용]** 메인에서 직접 **다중 파일 동시 Read** 후 교차 분석:
+> **[1M 활용]** 메인에서 직접 **다중 파일 동시 Read** 후 교차 분석:
 > - 로드: Phase 2 추출 결과에 등장한 카테고리별 sink 문서를 한꺼번에 — `team.md`, `customers/{name}.md` 전체, `biz-rules.md`, `biz-rules-detail.md`, `modules/{name}.md` 관련, `INFRASTRUCTURE.md`, `be-guide/be-convention-final.md`, `fe-guide/fe-convention-final.md`
 > - 교차 분석: {새 추출 지식} vs {기존 sink 내용} — 낡은 지식(STALE) 감지, 커버리지 갭 감지, 순환 참조(기존이 이미 인용) 방지
-> - 한계: 총 로드량이 600K줄 초과 시 추출 카테고리별로 Phase 2.5 를 분리 실행 권장.
+> - 한계: 총 로드 추정 토큰 ~600K(1M 컨텍스트의 60%; 줄 수로 대략 가늠) 근접 시 추출 카테고리별로 Phase 2.5 를 분리 실행 권장.
 
 흡수 대상만 읽는 것이 아니라, **기존 지식 베이스의 관련 문서도 함께 읽는다**.
 

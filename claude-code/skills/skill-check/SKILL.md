@@ -38,7 +38,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 
 ### Phase 2: 자동 점검 (스킬당)
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
 > - Glob 병렬: `skills/*/SKILL.md`, `skills/*/templates/*`, `.local.claude/skill-check-domain-words.md`
 > - Read 병렬: `CONTRACT.md`, 모든 `skills/*/SKILL.md` 를 한 번에 로드 (40~60개 스킬도 1M context 내)
 > - Grep 병렬:

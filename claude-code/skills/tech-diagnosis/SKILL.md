@@ -19,9 +19,22 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 
 ## 핵심 원칙
 
+### 다른 진단과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| "코드/아키텍처가 건강한가?" | **/tech-diagnosis** | [OK] 핵심 — 아키텍처·기술부채·버스팩터 |
+| "데이터 파이프라인이 안정적인가, 지표가 정확한가?" | /data-diagnosis | [FAIL] 다루지 않음 — 측정 인프라 축 |
+| "전체 코드베이스 보안 자세는?" | /security-diagnosis | [FAIL] 다루지 않음 — 보안 1.5절은 신호만, 심층은 위임 |
+| "일이 예측 가능하게 흘러가는가?" | /delivery-diagnosis | [FAIL] 다루지 않음 — WIP·리드타임 축 |
+| "고객/사업/성장 관점은?" | /product·business·growth-diagnosis | [FAIL] 다루지 않음 — 기술 임팩트만 1줄 참조 |
+| "컨벤션 이탈 패턴은?" | /convention-audit | [FAIL] 다루지 않음 — 커밋 단위 스타일 감사 축 |
+
+기술 관점은 "기술적으로 건강한가". 측정 인프라(data)·공격면(security)·흐름(delivery)·스타일(convention)은 각 축으로 위임.
+
 ### 검증과 정확성
 
-1. **정량 데이터는 코드/git에서 직접 측정.** 문서 기술을 사실로 단정하지 않는다. 코드로 검증 가능한 주장은 반드시 검증.
+1. **정량 데이터는 코드/git에서 직접 측정.** 문서 기술을 사실로 단정하지 않는다. 코드로 검증 가능한 주장은 직접 검증한다.
 2. **공수 추정은 범위(min~max)로.** "1인월"이 아니라 "1~2인월(선행 조건에 따라)". 전제조건을 함께 명시.
 3. **숨은 전제조건 점검.** 권고(예: Blue-Green) 시 기술적 전제를 코드에서 확인 (세션 의존성, 인메모리 상태 등).
 4. **git log 기반 지표의 한계 인식.** 커밋 수 = 생산성이 아님. 개인 평가에 사용 금지. 맥락(Git 도입 시기, PR 문화 성숙도 등) 함께 기술.
@@ -100,14 +113,14 @@ ls .local.claude/reports/ 2>/dev/null | grep -iE '(심층진단|회사진단)' |
 
 **1-2. 코드베이스 정량 측정**
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
-> - Bash: 코드 규모 측정(`find *.java | wc -l`, `find *.xml | wc -l`, `find *.js | wc -l`), git 활동(`git log --since=... | wc -l`, `git shortlog`, `git log --name-only`), 보안 grep, deprecated API grep, 의존성 파일 추출을 전부 동시에
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
+> - Bash: 코드 규모 측정(`find *.java | wc -l`, `find *.xml | wc -l`, `find *.js | wc -l`), git 활동(`git log --since=<date> | wc -l`, `git shortlog`, `git log --name-only`), 보안 grep, deprecated API grep, 의존성 파일 추출을 전부 동시에
 > - Glob: `pom.xml`, `build.gradle*`, `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml` 병렬 탐색
 > - Read: `CLAUDE.md`, `bot/INDEX.md` 또는 `ONBOARDING.md`, `INFRASTRUCTURE.md`, `biz-rules.md`, `team.md`, auto memory 를 Bash 측정과 병렬 로드
 > - (옵션) WebSearch: 감지된 스택별 EOL/마이그레이션 2~3 쿼리 동시
 
-> [WARN] **Windows/Git Bash 호환 주의**: `find ... -exec wc -l {} +`는 배치 분할 시 부정확. `xargs -0 cat | wc -l` 패턴 사용.
-> [WARN] **JS 측정 시 반드시 thirdparty/, fw/ 제외.** 벤더 라이브러리가 수백 MB.
+> [WARN] **Windows/Git Bash 호환 주의**: `find <path> -exec wc -l {} +`는 배치 분할 시 부정확. `xargs -0 cat | wc -l` 패턴 사용.
+> [WARN] **JS 측정 시 thirdparty/, fw/ 제외.** 벤더 라이브러리가 수백 MB라 포함하면 측정값이 크게 왜곡된다.
 
 ```bash
 # 전체 코드 규모 (정확한 측정)
@@ -225,7 +238,7 @@ Phase 1의 정량 데이터와 핵심 가정을 사용자에게 제시하고 교
 |------|----------|---------|
 | {언어} | N | [상태] |
 | {프레임워크} | N | [상태] |
-| ... | | |
+| {DB/런타임} | N | [상태] |
 
 ### 조직 (team.md 기준)
 - 개발 인력: N명 / 전체 N명
@@ -501,7 +514,10 @@ Java: ~Nk줄 (N개) | XML: ~Nk줄 | JS: ~Nk줄 | 테스트: N개
 
 ## 핵심 지표
 | KPI | 현재 | 이전 | 추세 | 목표 |
-...
+|-----|:----:|:----:|:----:|:----:|
+| PR 머지 비율 | | | | |
+| 테스트 커버리지 | | | | |
+| Lead time p50 | | | | |
 
 ## 주의 신호
 - [항목]

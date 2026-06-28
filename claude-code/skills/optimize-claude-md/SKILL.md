@@ -22,6 +22,15 @@ CLAUDE.md로 해결할 수 없는 문제는 적합한 대안(Hook, Skill, 서브
 | 서브에이전트 | `claude-md-analyzer` | **필수** | 에이전트 미설치 시 메인에서 직접 분석 fallback |
 | 메모리·훅·규칙 | `~/.claude/memory/`, `settings.json` hooks, `rules/` | 선택 | 재배치 후보 그룹 B/C 중 Hook/Memory 옵션 제외 |
 
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| "CLAUDE.md가 200줄 넘는데 어떻게 줄여?" | **이 스킬** | ✓ 핵심 (수정·재배치·확장 수단 제안) |
+| "신규 프로젝트 CLAUDE.md 처음 생성" | /on-boarding | 다루지 않음 (생성은 on-boarding, 이 스킬은 기존 파일 개선) |
+| ".local.claude/ 문서 정원·만료·아카이브" | /garden | 다루지 않음 (이 스킬은 CLAUDE.md·메모리 설정에 한정) |
+| "디렉터리 구조 자체를 분석" | /analyze-dir | 다루지 않음 (구조 스캔은 analyze-dir) |
+
 ## 동작 모드
 
 $ARGUMENTS 유무에 따라 모드를 선택하세요:
@@ -31,11 +40,11 @@ $ARGUMENTS 유무에 따라 모드를 선택하세요:
 
 ## 1단계: 수집 및 진단 위임
 
-> **[Opus 4.7 / 1M 활용]** 서브에이전트가 부재하거나 메인에서 직접 분석 fallback 하는 경우 **다중 파일 동시 Read** 후 교차 분석:
+> **[1M 활용]** 서브에이전트가 부재하거나 메인에서 직접 분석 fallback 하는 경우 **다중 파일 동시 Read** 후 교차 분석:
 > - 로드: 프로젝트 `CLAUDE.md`, `~/.claude/CLAUDE.md`, `~/.claude/memory/**/*.md`, `~/.claude/settings.json`, `~/.claude/settings.local.json`, `.claude/rules/**/*.md`, `~/.claude/rules/**/*.md`, `.claude/settings.json`, `.claude/settings.local.json`, `.mcp.json`, auto memory
 > - 교차 분석: {CLAUDE.md 규칙} vs {hooks} vs {rules/ 정책} — 중복 지시, 모순, Hook 으로 옮겨야 할 규칙, rules/ 로 분리할 도메인 지식 식별
 > - 200줄 초과 시 어떤 부분이 (a) 자명한 지시 (b) 도메인 지식 (c) Hook 대상 (d) rules/ 대상 인지 한 번에 분류 가능
-> - 한계: 총 로드량이 600K줄 초과 시 CLAUDE.md + 최근 변경 memory/ 만 우선 로드.
+> - 한계: 총 로드 추정 토큰 ~600K(1M 컨텍스트의 60%; 줄 수로 대략 가늠) 근접 시 CLAUDE.md + 최근 변경 memory/ 만 우선 로드.
 
 claude-md-analyzer 서브에이전트에게 분석을 위임하세요.
 위임할 때 아래 정보를 전달하세요:
@@ -110,12 +119,28 @@ claude-md-analyzer 서브에이전트에게 분석을 위임하세요.
 - 각 변경 후 해당 파일의 줄 수를 확인하여 200줄 이내인지 검증하세요.
 - 모든 적용이 끝나면 변경 요약을 보고하세요.
 
-## 주의사항
+## 분량 임계
 
-- CLAUDE.md를 절대 200줄 넘게 만들지 마세요. 넘칠 경우 @import나 .claude/rules/로 분리하세요.
-- "깔끔한 코드 작성", "베스트 프랙티스 따르기" 같은 자명한 지시는 추가하지 마세요.
-- auto memory(MEMORY.md)는 읽기만 하고 직접 수정하지 마세요. 충돌이 있으면 CLAUDE.md 쪽을 조정하세요.
-- 그룹 C의 확장 수단은 설명과 예시만 제공하세요. 파일을 직접 생성하지 마세요.
+| 대상 파일 | 임계 1 (알림) | 임계 2 (강제 분리) |
+|----------|:----------:|:--------------:|
+| `CLAUDE.md` (자동 로드) | 200줄 | @import / `.claude/rules/` 로 분리 |
+| `.claude/rules/{name}.md` | 200줄 | 영역별 추가 분리 권장 |
+
+CONTRACT §5 기준. 자동 로드(`@`)는 핵심 파일만 — detail/ref 는 `@` 대상에서 제외하고 수동 참조로 전환.
+
+## 다음 스킬 연결
+
+- CLAUDE.md 200줄 초과 분리 필요 → 이 스킬 내에서 @import / `.claude/rules/` 제안
+- 분리 대상이 도메인 규칙 → `/biz-rules` (별도 파일로 이전)
+- `.local.claude/` 문서 전반 정리·만료 → `/garden`
+- 대상 CLAUDE.md 부재 (미생성 프로젝트) → `/on-boarding`
+
+## 제약조건
+
+- CLAUDE.md는 200줄 이내로 유지하세요. 초과 시 @import나 .claude/rules/로 분리하세요.
+- "깔끔한 코드 작성", "베스트 프랙티스 따르기" 같은 자명한 지시는 추가하지 않습니다.
+- auto memory(MEMORY.md)는 읽기 전용으로 다루며, 충돌이 있으면 CLAUDE.md 쪽을 조정하세요.
+- 그룹 C의 확장 수단은 설명과 예시만 제공하며, 파일은 직접 생성하지 않습니다.
 
 ## 검증 시나리오
 

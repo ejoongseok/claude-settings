@@ -14,6 +14,14 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 - **트러블슈팅** 은 누적만, 삭제 금지 (다음 사람이 같은 문제 안 겪게)
 - SETUP.md 가 없으면 `/on-boarding` 먼저 실행하라고 안내
 
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| "신규 프로젝트 첫 온보딩 분석·6산출물 생성" | /on-boarding | 다루지 않음 (SETUP.md 최초 생성은 on-boarding) |
+| "SETUP.md 환경 점검·갱신·암묵지식·트러블슈팅 누적" | **이 스킬** | ✓ 핵심 |
+| "트러블슈팅이 도메인 규칙·코드 버그로 판명" | /learn 또는 /cs | 다루지 않음 (검증·이슈 추적은 해당 스킬) |
+
 ## 외부 데이터 의존
 
 | 데이터 | 경로 | 필수/선택 | 부재 시 동작 |
@@ -37,7 +45,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 ## 사전 체크 (모든 모드 공통)
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**하여 컨텍스트 효율화:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**하여 컨텍스트 효율화:
 > - Read 병렬: `.nvmrc`, `.python-version`, `.tool-versions`, `package.json`, `pom.xml`, `build.gradle*`, `go.mod`, `Cargo.toml`, `requirements.txt`, `pyproject.toml`, `Pipfile`, `.mcp.json`, `.claude/settings.json`, `.claude/settings.local.json`, `docker-compose.yml`, `.env.example`, `Dockerfile`, `.vscode/extensions.json`, `.editorconfig`, `Makefile`, `README.md`, 기존 `human/SETUP.md` 전부 동시 로드
 > - Glob: 위 파일들 존재 여부 일괄 탐색
 > - Bash: 각 런타임 `--version` 확인 명령을 동시 실행 (점검 모드에서)

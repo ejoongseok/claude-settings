@@ -51,7 +51,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash
 
 ## 정보 수집
 
-> **[Opus 4.7 / 1M 활용]** 아래 5개 스텝은 **단일 메시지에서 병렬 호출**로 처리:
+> **[1M 활용]** 아래 5개 스텝은 **단일 메시지에서 병렬 호출**로 처리:
 > - Bash: `git branch --show-current`, `git log --since="N days ago" --oneline --format="%h %an %ad %s"`, `git log --since="N days ago" --name-only`, `git log --merges`, `git shortlog -s -n`
 > - Read: `CLAUDE.md`, `.local.claude/biz-rules.md`, `.local.claude/team.md`, 관련 `.local.claude/modules/*.md`
 > - Glob/Bash: `ls .local.claude/briefing/ | tail -5`, 이전 브리핑 3~5개 Read
@@ -426,6 +426,15 @@ Frontmatter (CONTRACT §7-2 표준): `category: briefing, retention: 30d, harves
 - 변경과 충돌 가능한 내 작업 → `/review`
 - 오늘 할 일 정리 → `/daily-todos`
 - 컨벤션 이탈 반복 → `/convention-audit`
+
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬에서 |
+|------|------|-----------|
+| 최근 커밋·diff 기반 오늘의 변경·영향·주의사항 요약 | **이 스킬** | 핵심 — 아침 브리핑 SSOT |
+| 회의 메모를 구조화된 회의록으로 정리 | /meeting-notes | 다루지 않음 — 회의 기록은 위임 |
+| 하루/주간 업무를 회고·종합 (성장 스냅샷) | /daily | 다루지 않음 — 회고는 위임 |
+| 단계별 리더십 주제·매니징 조언 | /leadership | 다루지 않음 — 리더십 코칭은 위임 |
 
 ## 제약조건
 

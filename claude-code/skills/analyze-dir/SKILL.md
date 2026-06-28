@@ -35,7 +35,7 @@ structure-scanner 에이전트에게 다음을 요청하세요:
 
 ### 2단계: 상세 분석 위임
 
-> **[Opus 4.7 / 1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
+> **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**:
 > - Agent 병렬: structure-scanner(1단계 완료 후), content-analyzer, relation-mapper 를 **단일 메시지 내에서 동시 호출**
 > - 에이전트 미설치 fallback 시 Glob + Read 병렬: 디렉터리 트리 탐색, 주요 파일(README/package.json/pom.xml/index 진입점) Read, import/require/include grep 을 한 번에
 > - Bash: `du -sh`, 파일 유형별 `find | wc -l` 병렬 실행
@@ -82,6 +82,14 @@ relation-mapper에게:
 저장 실패 시 (권한 부족 등) 오류를 보고하고, 대화로 결과를 출력하세요.
 `--save`가 없으면 대화로만 보고하세요.
 
+## 다른 스킬과의 경계
+
+| 질문 | 담당 | 이 스킬 |
+|---|---|---|
+| 받은 업무 요청 메시지(슬랙·메일) 분석·판정 | `/analyze-request` | [다루지 않음] |
+| CLAUDE.md·메모리 설정 진단·최적화 | `/optimize-claude-md` | [다루지 않음] |
+| 임의 디렉터리의 목적·구조·파일 관계 분석 | 이 스킬 | [핵심] |
+
 ## 검증 시나리오
 
 공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT §6-1** 참조.
@@ -92,6 +100,6 @@ relation-mapper에게:
 - 신호: `find . -type f | wc -l` ≥ 100k
 - 대응: structure-scanner 만 먼저 수행해 규모·분포 파악 후, 규모별 분석 전략(샘플링·구역화) 결정
 
-**[의존성 부재]** 서브에이전트 3종(structure-scanner / code-reader / pattern-finder) 미설치
+**[의존성 부재]** 서브에이전트 3종(structure-scanner / content-analyzer / relation-mapper) 미설치
 - 신호: `.claude/agents/` 내 해당 에이전트 파일 부재
 - 대응: 메인 세션에서 Glob + Read 로 순차 fallback 수행 + 시간 경고 표시
