@@ -1,6 +1,6 @@
 # Claude-code-settings
 
-Claude Code 를 업무에 본격 활용하기 위한 **스킬·계약·메타-인프라** 모음.
+Claude Code 를 업무에 본격 활용하기 위한 **스킬, 계약, 메타-인프라** 모음.
 
 55개 스킬 + 계약 문서 + 메타-스킬 (`/skill-check`, `/skills-guide`, `/skill-modernize`) 로 구성. 신규 프로젝트에 바로 적용 가능하며, 받은 후 자기 도메인에 맞춰 점진 커스텀.
 
@@ -22,18 +22,18 @@ Claude-code-settings/
 |------|---------|
 | **신규 프로젝트 진입** | `/on-boarding`, `/setup-guide`, `/skill-check`, `/skills-guide` |
 | **진단 (관점별 정기 보고)** | `/business-diagnosis`, `/product-diagnosis`, `/tech-diagnosis`, `/delivery-diagnosis`, `/security-diagnosis`, `/growth-diagnosis`, `/data-diagnosis` |
-| **작성·생성** | `/prd`, `/srs`, `/todo`, `/pr`, `/issue`, `/draft`, `/adr`, `/poc`, `/brainstorm`, `/rfc`, `/spec-demo` |
-| **리뷰·검증** | `/review`, `/team-review`, `/qa`, `/qa-run-light`, `/qa-run-deep`, `/convention-audit`, `/deploy-checklist` |
-| **회고·학습** | `/daily`, `/daily-todos`, `/learn`, `/memo`, `/meeting-notes`, `/briefing` |
-| **데이터·고객·팀 관리** | `/biz-rules`, `/customer-profile`, `/cs`, `/people`, `/coaching`, `/leadership`, `/analyze-request` |
-| **정원·정리** | `/garden`, `/absorb`, `/parse-doc`, `/dualize-docs`, `/optimize-claude-md`, `/analyze-dir` |
+| **작성과 생성** | `/prd`, `/srs`, `/todo`, `/pr`, `/issue`, `/draft`, `/adr`, `/poc`, `/brainstorm`, `/rfc`, `/spec-demo` |
+| **리뷰와 검증** | `/review`, `/team-review`, `/qa`, `/qa-run-light`, `/qa-run-deep`, `/convention-audit`, `/deploy-checklist` |
+| **회고와 학습** | `/daily`, `/daily-todos`, `/learn`, `/memo`, `/meeting-notes`, `/briefing` |
+| **데이터, 고객, 팀 관리** | `/biz-rules`, `/customer-profile`, `/cs`, `/people`, `/coaching`, `/leadership`, `/analyze-request` |
+| **정원과 정리** | `/garden`, `/absorb`, `/parse-doc`, `/dualize-docs`, `/optimize-claude-md`, `/analyze-dir` |
 | **메타** | `/skill-check`, `/skills-guide`, `/skill-modernize` |
 
 ## 핵심 개념 4가지
 
-### 1. CONTRACT.md = 단일 진실 원천
+### 1. CONTRACT.md 는 단일 진실 원천
 
-모든 스킬이 따라야 할 13 항목 계약. frontmatter·본문 구조·도메인 가정 외부화·분량 임계·검증 시나리오 등 정의. 신규 스킬 추가 시 이 계약을 먼저 읽고 작성.
+모든 스킬이 따라야 할 13 항목 계약. frontmatter, 본문 구조, 도메인 가정 외부화, 분량 임계, 검증 시나리오 등 정의. 신규 스킬 추가 시 이 계약을 먼저 읽고 작성.
 
 ### 2. Tier 1/Tier 2 분리 (도메인 가정 외부화)
 
@@ -41,10 +41,10 @@ Claude-code-settings/
 
 | Tier | 영역 | 예시 |
 |------|------|------|
-| Tier 1 (도메인 무관) | 본문에 박힘 | 페이징·N+1·SQL injection·일반 워크플로우 |
-| Tier 2 (도메인 특화) | `biz-rules.md` 의 도메인 카테고리 섹션 위임 | 멀티테넌트 격리·승인 연동·도메인 정합성 |
+| Tier 1 (도메인 무관) | 본문에 박힘 | 페이징, N+1, SQL injection, 일반 워크플로우 |
+| Tier 2 (도메인 특화) | `biz-rules.md` 의 도메인 카테고리 섹션 위임 | 멀티테넌트 격리, 승인 연동, 도메인 정합성 |
 
-**장점**: 신규 프로젝트는 빈 `biz-rules.md` 로 시작 → 작업하며 도메인 카테고리를 채움 → review·qa·briefing 등 모든 스킬이 자동 활용.
+**장점**: 신규 프로젝트는 빈 `biz-rules.md` 로 시작해서 작업하며 도메인 카테고리를 채우면, review, qa, briefing 등 모든 스킬이 자동 활용.
 
 ### 3. 외부 데이터 진입점 표
 
@@ -57,7 +57,7 @@ Claude-code-settings/
 | 팀원 매핑 | team.md | 선택 | git author 그대로 표기 |
 ```
 
-빈 프로젝트에서도 graceful degrade — 안내 메시지로 끝남, 강제 동작 안 함.
+빈 프로젝트에서도 graceful degrade. 안내 메시지로 끝나며, 강제 동작 안 함.
 
 ### 4. 분량 임계 + 자동 분리
 
@@ -66,9 +66,9 @@ Claude-code-settings/
 | 산출물 | 임계 1 (알림) | 임계 2 (강제 분리) |
 |----------|:----------:|:--------------:|
 | `CLAUDE.md` (자동 로드) | 200줄 | optimize-claude-md |
-| `biz-rules.md` | 200 | 400 → biz-rules-detail.md |
-| `human/SETUP.md` | 300 | 500 → SETUP-TROUBLESHOOTING.md |
-| `customers/*.md` | 300 | 500 → 디렉터리 패턴 |
+| `biz-rules.md` | 200 | 400, biz-rules-detail.md 로 분리 |
+| `human/SETUP.md` | 300 | 500, SETUP-TROUBLESHOOTING.md 로 분리 |
+| `customers/*.md` | 300 | 500, 디렉터리 패턴으로 분리 |
 | 진단 보고서 | 500 | PART 별 분리 |
 
 이중 안전망: 각 스킬 자체 검사 + `/garden` 전수 검사.
@@ -115,11 +115,11 @@ cd {프로젝트 루트}
 
 | 프로젝트 유형 | 권장 활성화 | 보류 권장 |
 |------------|----------|---------|
-| **B2B SaaS** | 전부 (원래 가정) | — |
-| **회사 내부 시스템** | 진단·작성·리뷰·회고 | `cs`, `customer-profile` |
+| **B2B SaaS** | 전부 (원래 가정) | 없음 |
+| **회사 내부 시스템** | 진단, 작성, 리뷰, 회고 | `cs`, `customer-profile` |
 | **B2C 단일 회사** | 대부분 | `customer-profile` (사용자 ≠ 고객사) |
-| **팀 프로젝트 (소규모)** | 회고·작성·리뷰·학습 | 진단 (분기 단위), `coaching`, `leadership` |
-| **1인 OSS/개인 프로젝트** | `on-boarding`, `setup-guide`, `learn`, `memo`, `pr`, `review`, `qa`, `daily` | 팀·고객·진단 대부분 |
+| **팀 프로젝트 (소규모)** | 회고, 작성, 리뷰, 학습 | 진단 (분기 단위), `coaching`, `leadership` |
+| **1인 OSS/개인 프로젝트** | `on-boarding`, `setup-guide`, `learn`, `memo`, `pr`, `review`, `qa`, `daily` | 팀, 고객, 진단 대부분 |
 
 비활성화는 **디렉터리 삭제 또는 `disable-model-invocation: true` 유지** (`/skills-guide` 카탈로그에 안 보이게).
 
@@ -137,16 +137,16 @@ cd {프로젝트 루트}
 │   ├── README.md              # 사람 진입점
 │   └── SETUP.md               # 환경 셋업 가이드
 └── .local.claude/
-    ├── biz-rules.md           # 도메인 규칙·점검 카테고리
+    ├── biz-rules.md           # 도메인 규칙과 점검 카테고리
     └── team.md                # 조직 + 멤버 매핑
 ```
 
 ## 작성 원칙 (요약)
 
 1. **신규 스킬 작성 전 `CONTRACT.md` 읽기**
-2. **도메인 가정 본문 박힘 금지** — 외부 데이터 위임
-3. **부재 시 동작 명시** — graceful degrade
-4. **분량 임계 정의** — 누적되는 산출물은 자동 분리 규칙
-5. **검증 시나리오 명시** — 빈/부분/풀 데이터 환경별 동작
-6. **다른 스킬과의 경계 명시** — 영역 침범 금지
+2. **도메인 가정 본문 박힘 금지**: 외부 데이터 위임
+3. **부재 시 동작 명시**: graceful degrade
+4. **분량 임계 정의**: 누적되는 산출물은 자동 분리 규칙
+5. **검증 시나리오 명시**: 빈/부분/풀 데이터 환경별 동작
+6. **다른 스킬과의 경계 명시**: 영역 침범 금지
 7. **신규 스킬 추가 후 `/skill-check {스킬명}` 호출**

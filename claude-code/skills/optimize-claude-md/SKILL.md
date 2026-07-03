@@ -20,29 +20,29 @@ CLAUDE.md로 해결할 수 없는 문제는 적합한 대안(Hook, Skill, 서브
 | 모듈 상세 | `.local.claude/modules/{name}.md` | 선택 | 코드 Grep 직접 fallback |
 | 대상 파일 | `CLAUDE.md` (프로젝트 또는 `~/.claude/`) | **필수** | "대상 파일 부재" 안내 후 종료 |
 | 서브에이전트 | `claude-md-analyzer` | **필수** | 에이전트 미설치 시 메인에서 직접 분석 fallback |
-| 메모리·훅·규칙 | `~/.claude/memory/`, `settings.json` hooks, `rules/` | 선택 | 재배치 후보 그룹 B/C 중 Hook/Memory 옵션 제외 |
+| 메모리, 훅, 규칙 | `~/.claude/memory/`, `settings.json` hooks, `rules/` | 선택 | 재배치 후보 그룹 B/C 중 Hook/Memory 옵션 제외 |
 
 ## 다른 스킬과의 경계
 
 | 질문 | 담당 | 이 스킬에서 |
 |------|------|-----------|
-| "CLAUDE.md가 200줄 넘는데 어떻게 줄여?" | **이 스킬** | ✓ 핵심 (수정·재배치·확장 수단 제안) |
+| "CLAUDE.md가 200줄 넘는데 어떻게 줄여?" | **이 스킬** | ✓ 핵심 (수정, 재배치, 확장 수단 제안) |
 | "신규 프로젝트 CLAUDE.md 처음 생성" | /on-boarding | 다루지 않음 (생성은 on-boarding, 이 스킬은 기존 파일 개선) |
-| ".local.claude/ 문서 정원·만료·아카이브" | /garden | 다루지 않음 (이 스킬은 CLAUDE.md·메모리 설정에 한정) |
+| ".local.claude/ 문서 정원, 만료, 아카이브" | /garden | 다루지 않음 (이 스킬은 CLAUDE.md와 메모리 설정에 한정) |
 | "디렉터리 구조 자체를 분석" | /analyze-dir | 다루지 않음 (구조 스캔은 analyze-dir) |
 
 ## 동작 모드
 
 $ARGUMENTS 유무에 따라 모드를 선택하세요:
 
-- $ARGUMENTS가 비어 있음 → 전체 분석 모드
-- $ARGUMENTS에 문제 설명이 있음 → 집중 분석 모드 (해당 문제 해결에 초점)
+- $ARGUMENTS가 비어 있으면 전체 분석 모드
+- $ARGUMENTS에 문제 설명이 있으면 집중 분석 모드 (해당 문제 해결에 초점)
 
 ## 1단계: 수집 및 진단 위임
 
 > **[1M 활용]** 서브에이전트가 부재하거나 메인에서 직접 분석 fallback 하는 경우 **다중 파일 동시 Read** 후 교차 분석:
 > - 로드: 프로젝트 `CLAUDE.md`, `~/.claude/CLAUDE.md`, `~/.claude/memory/**/*.md`, `~/.claude/settings.json`, `~/.claude/settings.local.json`, `.claude/rules/**/*.md`, `~/.claude/rules/**/*.md`, `.claude/settings.json`, `.claude/settings.local.json`, `.mcp.json`, auto memory
-> - 교차 분석: {CLAUDE.md 규칙} vs {hooks} vs {rules/ 정책} — 중복 지시, 모순, Hook 으로 옮겨야 할 규칙, rules/ 로 분리할 도메인 지식 식별
+> - 교차 분석: {CLAUDE.md 규칙} vs {hooks} vs {rules/ 정책}. 중복 지시, 모순, Hook 으로 옮겨야 할 규칙, rules/ 로 분리할 도메인 지식 식별
 > - 200줄 초과 시 어떤 부분이 (a) 자명한 지시 (b) 도메인 지식 (c) Hook 대상 (d) rules/ 대상 인지 한 번에 분류 가능
 > - 한계: 총 로드 추정 토큰 ~600K(1M 컨텍스트의 60%; 줄 수로 대략 가늠) 근접 시 CLAUDE.md + 최근 변경 memory/ 만 우선 로드.
 
@@ -80,10 +80,10 @@ claude-md-analyzer 서브에이전트에게 분석을 위임하세요.
 - 설정 예시 (코드 블록)
 
 확장 수단 선택 기준:
-- "매번 빠짐없이 실행되어야 하는 동작" → Hook
-- "판단이 필요한 반복 작업" → Skill
-- "컨텍스트를 분리해야 하는 탐색/분석" → 서브에이전트
-- "특정 파일 경로에만 적용되는 규칙" → .claude/rules/ (paths frontmatter)
+- "매번 빠짐없이 실행되어야 하는 동작"은 Hook
+- "판단이 필요한 반복 작업"은 Skill
+- "컨텍스트를 분리해야 하는 탐색/분석"은 서브에이전트
+- "특정 파일 경로에만 적용되는 규칙"은 .claude/rules/ (paths frontmatter)
 
 ## 3단계: 제시 및 승인
 
@@ -97,10 +97,10 @@ claude-md-analyzer 서브에이전트에게 분석을 위임하세요.
 [파일 목록과 각 줄 수]
 
 ### 그룹 A: 메모리 파일 수정 (N건)
-[각 항목의 대상 파일, 현재 → 수정안]
+[각 항목의 대상 파일, 현재 내용과 수정안]
 
 ### 그룹 B: 재배치 (N건)
-[각 항목의 현재 위치 → 이동 위치]
+[각 항목의 현재 위치와 이동 위치]
 
 ### 그룹 C: 다른 확장 수단 권장 (N건)
 [각 항목의 문제, 권장 수단, 예시]
@@ -126,14 +126,14 @@ claude-md-analyzer 서브에이전트에게 분석을 위임하세요.
 | `CLAUDE.md` (자동 로드) | 200줄 | @import / `.claude/rules/` 로 분리 |
 | `.claude/rules/{name}.md` | 200줄 | 영역별 추가 분리 권장 |
 
-CONTRACT §5 기준. 자동 로드(`@`)는 핵심 파일만 — detail/ref 는 `@` 대상에서 제외하고 수동 참조로 전환.
+CONTRACT 5절 기준. 자동 로드(`@`)는 핵심 파일만. detail/ref 는 `@` 대상에서 제외하고 수동 참조로 전환.
 
 ## 다음 스킬 연결
 
-- CLAUDE.md 200줄 초과 분리 필요 → 이 스킬 내에서 @import / `.claude/rules/` 제안
-- 분리 대상이 도메인 규칙 → `/biz-rules` (별도 파일로 이전)
-- `.local.claude/` 문서 전반 정리·만료 → `/garden`
-- 대상 CLAUDE.md 부재 (미생성 프로젝트) → `/on-boarding`
+- CLAUDE.md 200줄 초과로 분리 필요하면 이 스킬 내에서 @import / `.claude/rules/` 제안
+- 분리 대상이 도메인 규칙이면 `/biz-rules` (별도 파일로 이전)
+- `.local.claude/` 문서 전반 정리와 만료는 `/garden`
+- 대상 CLAUDE.md 부재 (미생성 프로젝트) 시 `/on-boarding`
 
 ## 제약조건
 
@@ -144,7 +144,7 @@ CONTRACT §5 기준. 자동 로드(`@`)는 핵심 파일만 — detail/ref 는 `
 
 ## 검증 시나리오
 
-공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT §6-1** 참조.
+공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT 6-1절** 참조.
 
 ### 이 스킬의 고유 실패 시나리오
 
@@ -152,6 +152,6 @@ CONTRACT §5 기준. 자동 로드(`@`)는 핵심 파일만 — detail/ref 는 `
 - 신호: `.claude/agents/claude-md-analyzer*` 미존재 또는 호출 실패
 - 대응: 메인 세션에서 직접 분석 fallback 수행 + 단일 패스 경고 표시
 
-**[사용자 개입 필요]** 200줄 초과 원인이 도메인 지식(biz-rules·용어·프로세스)일 때
+**[사용자 개입 필요]** 200줄 초과 원인이 도메인 지식(biz-rules, 용어, 프로세스)일 때
 - 신호: 분류 결과 "도메인 지식" 비중이 임계치 이상
 - 대응: 자동 삭제 금지, 사용자에게 `biz-rules.md` 등 별도 파일로 이동 여부 확인 후 진행

@@ -1,30 +1,30 @@
 # spec-demo 컴포넌트
 
-> Readable Light 스킨 + 표현 16종. 생성 HTML은 self-contained(아래 스킨 CSS를 `<style>`에 인라인, 폰트만 CDN). **구조가 복잡한 표현은 `assets/examples/`의 검증된 데모에서 스킨·구조·JS를 복사**해 도메인만 바꿔 쓴다. 정적 정보는 `.st`/`.tag`(버튼 아님), 동작은 `button`/`input`/세그먼트.
+> Readable Light 스킨 + 표현 16종. 생성 HTML은 self-contained(아래 스킨 CSS를 `<style>`에 인라인, 폰트만 CDN). **구조가 복잡한 표현은 `assets/examples/`의 검증된 데모에서 스킨, 구조, JS를 복사**해 도메인만 바꿔 쓴다. 정적 정보는 `.st`/`.tag`(버튼 아님), 동작은 `button`/`input`/세그먼트.
 
-## 케이스 → 표현 선택 (가장 먼저)
+## 케이스별 표현 선택 (가장 먼저)
 
-다이어그램·시각화는 한 종류가 아니다. **케이스 성격에 맞는 표현을 고른다 — 단일 패턴 강요 금지.**
+다이어그램과 시각화는 한 종류가 아니다. **케이스 성격에 맞는 표현을 고른다. 단일 패턴 강요 금지.**
 
 | 케이스 성격 | 표현 | 소스 |
 |---|---|---|
-| 부모-자식 집계 (규칙 후보 병기) | 집계 (슬라이더 + 롤업) | 스킨 §집계 |
-| 조건부 전파 (A→B 특정 상태) | 표 하이라이트 | 스킨 §조건부 |
-| 이벤트 연쇄 (발행→리스너→체인) | 이벤트 흐름 (fan-out) | 스킨 §이벤트 |
-| 사용자 행동 + 검증 | 유스케이스 (폼+토스트) | 스킨 §유스케이스 |
-| 변경 전/후 | 비교 (AS-IS/TO-BE) | 스킨 §비교 |
+| 부모-자식 집계 (규칙 후보 병기) | 집계 (슬라이더 + 롤업) | 스킨 '집계' |
+| 조건부 전파 (A에서 B로, 특정 상태일 때) | 표 하이라이트 | 스킨 '조건부' |
+| 이벤트 연쇄 (발행, 리스너, 체인 순) | 이벤트 흐름 (fan-out) | 스킨 '이벤트' |
+| 사용자 행동 + 검증 | 유스케이스 (폼+토스트) | 스킨 '유스케이스' |
+| 변경 전/후 | 비교 (AS-IS/TO-BE) | 스킨 '비교' |
 | 다단계 소요량 (계층 + 롤업) | 트리 + 소요량 | `examples/tree-rollup.html` |
 | 상태 전이 (정/역전이) | 상태도 | `examples/state-machine.html` |
 | 시간순 상호작용 (요청 흐름) | 시퀀스 (lifeline) | `examples/sequence.html` |
-| 흐름·분기 (워크플로우) | 플로우차트 (2D 분기) | `examples/flowchart.html` |
+| 흐름과 분기 (워크플로우) | 플로우차트 (2D 분기) | `examples/flowchart.html` |
 | 데이터 구조 + 트랜잭션 전파 | ER 전파 | `examples/er-transaction.html` |
-| 시스템·서비스 구성·연동 | 아키텍처 토폴로지 | `examples/architecture.html` |
-| 역할별 기능·권한·동작 | 유스케이스 다이어그램 | `examples/usecase-actors.html` |
-| 화면·CRUD 여러 페이지 | 화면 흐름 프로토타입 | `examples/screen-flow.html` |
-| 행×열 가능/결과 (권한·상태×액션) | 매트릭스 | 스킨 §매트릭스 |
-| 작업·일정의 시간축 | 타임라인 막대 | 스킨 §타임라인 |
+| 시스템과 서비스의 구성과 연동 | 아키텍처 토폴로지 | `examples/architecture.html` |
+| 역할별 기능, 권한, 동작 | 유스케이스 다이어그램 | `examples/usecase-actors.html` |
+| 화면과 CRUD 여러 페이지 | 화면 흐름 프로토타입 | `examples/screen-flow.html` |
+| 행×열 가능/결과 (권한이나 상태×액션) | 매트릭스 | 스킨 '매트릭스' |
+| 작업과 일정의 시간축 | 타임라인 막대 | 스킨 '타임라인' |
 
-소스가 `examples/`인 표현은 그 파일을 열어 스킨·구조·JS를 그대로 복사하고 도메인 데이터만 케이스에 맞게 바꾼다(검증된 구조 보존). 표현은 닫힌 목록이 아니라 케이스에 맞춰 고르고, 새 표현은 playbook에 누적한다.
+소스가 `examples/`인 표현은 그 파일을 열어 스킨, 구조, JS를 그대로 복사하고 도메인 데이터만 케이스에 맞게 바꾼다(검증된 구조 보존). 표현은 닫힌 목록이 아니라 케이스에 맞춰 고르고, 새 표현은 playbook에 누적한다.
 
 ## 스킨 CSS (생성 HTML `<style>`에 인라인)
 
@@ -190,25 +190,25 @@ footer{margin-top:30px;padding:16px 20px;background:var(--surface);border:1px so
 
 **스킨으로 직접 생성 (단순/공통):**
 
-- **집계**: 자식 슬라이더 + 부모 카드 2개(규칙 병기, 예 단순/가중) + `.diff`. 추상적이라 질문형 hero. JS: 슬라이더 `oninput` → 두 규칙 재계산.
-- **조건부 전파**: A `.seg/.segbtn` → B 표 `tr.changed`(노랑)/`tr.kept`(흐림). 필터 조건이 합의 포인트. JS: `setX(v,btn)` → 각 행 규칙 검사.
-- **이벤트 연쇄**: 트리거 → `.evt-node` → `.listener` 순차 `.show`(220ms). self loop 금지 → 별도 리스너 화살표. 상태는 큰 텍스트 + `.path`(누적 로그 금지). 
-- **유스케이스**: `.field` 폼 + `.cases` "잘못된 케이스" → 검증 → `#toast`(err/ok) + `.field.err`. 예외 흐름 강조.
+- **집계**: 자식 슬라이더 + 부모 카드 2개(규칙 병기, 예 단순/가중) + `.diff`. 추상적이라 질문형 hero. JS: 슬라이더 `oninput` 시 두 규칙 재계산.
+- **조건부 전파**: A `.seg/.segbtn` 조작 시 B 표가 `tr.changed`(노랑)/`tr.kept`(흐림)으로. 필터 조건이 합의 포인트. JS: `setX(v,btn)`에서 각 행 규칙 검사.
+- **이벤트 연쇄**: 트리거 다음 `.evt-node`, 이어서 `.listener` 순차 `.show`(220ms). self loop 금지, 별도 리스너 화살표로. 상태는 큰 텍스트 + `.path`(누적 로그 금지). 
+- **유스케이스**: `.field` 폼 + `.cases` "잘못된 케이스"에서 검증을 거쳐 `#toast`(err/ok) + `.field.err`로. 예외 흐름 강조.
 - **비교**: `.compare` 2컬럼 + `.chg`(add/del/mod) + "변경점만 보기" 토글.
-- **매트릭스**: `.matrix` 행×열(권한 역할×기능, 상태×액션). 셀 `.y`(허용)/`.n`(불가)/`.r`(결과·조건부). 행/열 클릭 시 `td.on` 강조.
-- **타임라인**: `.timebar-row`(라벨 + `.timebar>span` 위치·폭). 작업·배치 일정의 시간축. 막대 클릭 → 상세.
+- **매트릭스**: `.matrix` 행×열(권한 역할×기능, 상태×액션). 셀 `.y`(허용)/`.n`(불가)/`.r`(결과, 조건부). 행/열 클릭 시 `td.on` 강조.
+- **타임라인**: `.timebar-row`(라벨 + `.timebar>span` 위치와 폭). 작업과 배치 일정의 시간축. 막대 클릭 시 상세.
 
-**examples/ 복사 (구조 복잡 — 검증 데모에서 그대로):**
+**examples/ 복사 (구조 복잡, 검증 데모에서 그대로):**
 
-상태도 `state-machine.html` · 시퀀스 `sequence.html` · 플로우차트 `flowchart.html` · ER 전파 `er-transaction.html` · 아키텍처 토폴로지 `architecture.html` · 다단계 트리 `tree-rollup.html` · 유스케이스 다이어그램 `usecase-actors.html` · 화면 흐름 `screen-flow.html`. 각 파일의 `<style>`·구조·`<script>`를 복사하고 도메인 데이터만 케이스에 맞게 교체.
+상태도 `state-machine.html`, 시퀀스 `sequence.html`, 플로우차트 `flowchart.html`, ER 전파 `er-transaction.html`, 아키텍처 토폴로지 `architecture.html`, 다단계 트리 `tree-rollup.html`, 유스케이스 다이어그램 `usecase-actors.html`, 화면 흐름 `screen-flow.html`. 각 파일의 `<style>`, 구조, `<script>`를 복사하고 도메인 데이터만 케이스에 맞게 교체.
 
 ## 공통 장치
 
-- **기술/업무 모드 토글** — 같은 케이스를 기술 언어/업무 언어로 전환(라벨 스왑). "개발자/비개발자" 금지 → "기술/업무". 업무 모드 = 고객·기획 정렬.
-- **단계 재생(양방향)** — 첫 버튼 "시작 →", 이후 "다음 →"·"← 뒤로". step 인덱스 + 거쳐온 경로 동기화. 시퀀스·플로우차트·상태도 공통.
-- **표현 기법명 노출 금지** — eyebrow/라벨에 "상태도·시퀀스·2D 분기" 같은 기법명을 쓰지 않는다(만든 사람 메타). eyebrow는 케이스 상황·맥락으로 쓰거나 생략.
-- **affordance 정직** — 동작은 button/input/세그먼트. 정적 표시(상태·거쳐온 경로)는 버튼처럼 보이는 알약 칩 금지 → 큰 텍스트·경로(모노+화살표).
+- **기술/업무 모드 토글**: 같은 케이스를 기술 언어/업무 언어로 전환(라벨 스왑). "개발자/비개발자" 금지, "기술/업무"로. 업무 모드는 고객과 기획 정렬용.
+- **단계 재생(양방향)**: 첫 버튼 `시작 →`, 이후 `다음 →`과 `← 뒤로`. step 인덱스 + 거쳐온 경로 동기화. 시퀀스, 플로우차트, 상태도 공통.
+- **표현 기법명 노출 금지**: eyebrow/라벨에 "상태도, 시퀀스, 2D 분기" 같은 기법명을 쓰지 않는다(만든 사람 메타). eyebrow는 케이스 상황과 맥락으로 쓰거나 생략.
+- **affordance 정직**: 동작은 button/input/세그먼트. 정적 표시(상태, 거쳐온 경로)는 버튼처럼 보이는 알약 칩 금지, 큰 텍스트와 경로(모노+화살표)로.
 
 ## 핵심 JS 패턴
 
-슬라이더 `oninput` 재계산 / 세그먼트 `setX(v,btn)` / 순차 `setTimeout` 점등 / `toast(type,msg)` / 노드 클릭 `jumpTo` / 단계 `next`·`prev`(양방향) / 모드 `setMode`(라벨 재빌드).
+슬라이더 `oninput` 재계산 / 세그먼트 `setX(v,btn)` / 순차 `setTimeout` 점등 / `toast(type,msg)` / 노드 클릭 `jumpTo` / 단계 `next`와 `prev`(양방향) / 모드 `setMode`(라벨 재빌드).

@@ -23,8 +23,8 @@ allowed-tools: Read, Grep, Glob, Write, Agent(structure-scanner), Agent(content-
 
 $ARGUMENTS를 확인하세요:
 
-- `--save`가 있으면 -> 분석 결과를 현재 디렉터리에 ANALYSIS.md로 저장
-- 인자가 없으면 -> 대화로만 보고
+- `--save`가 있으면 분석 결과를 현재 디렉터리에 ANALYSIS.md로 저장
+- 인자가 없으면 대화로만 보고
 
 ## 분석 프로세스
 
@@ -86,19 +86,19 @@ relation-mapper에게:
 
 | 질문 | 담당 | 이 스킬 |
 |---|---|---|
-| 받은 업무 요청 메시지(슬랙·메일) 분석·판정 | `/analyze-request` | [다루지 않음] |
-| CLAUDE.md·메모리 설정 진단·최적화 | `/optimize-claude-md` | [다루지 않음] |
-| 임의 디렉터리의 목적·구조·파일 관계 분석 | 이 스킬 | [핵심] |
+| 받은 업무 요청 메시지(슬랙, 메일) 분석과 판정 | `/analyze-request` | [다루지 않음] |
+| CLAUDE.md와 메모리 설정의 진단과 최적화 | `/optimize-claude-md` | [다루지 않음] |
+| 임의 디렉터리의 목적, 구조, 파일 관계 분석 | 이 스킬 | [핵심] |
 
 ## 검증 시나리오
 
-공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT §6-1** 참조.
+공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT 6-1절** 참조.
 
 ### 이 스킬의 고유 실패 시나리오
 
-**[환경·규모]** 분석 대상 파일 10만 개 이상
+**[환경/규모]** 분석 대상 파일 10만 개 이상
 - 신호: `find . -type f | wc -l` ≥ 100k
-- 대응: structure-scanner 만 먼저 수행해 규모·분포 파악 후, 규모별 분석 전략(샘플링·구역화) 결정
+- 대응: structure-scanner 만 먼저 수행해 규모와 분포 파악 후, 규모별 분석 전략(샘플링, 구역화) 결정
 
 **[의존성 부재]** 서브에이전트 3종(structure-scanner / content-analyzer / relation-mapper) 미설치
 - 신호: `.claude/agents/` 내 해당 에이전트 파일 부재

@@ -1,6 +1,6 @@
 # html-explain 컴포넌트 라이브러리
 
-> `template.html` 스킨이 정의한 클래스로 `{{MAIN}}`·`{{TOC_ITEMS}}`를 채울 때 쓰는 스니펫. 필요한 것만 골라 적응형 배치. 정적 정보는 `.tag`(버튼 아님), 동작은 `button`/`a`로.
+> `template.html` 스킨이 정의한 클래스로 `{{MAIN}}`과 `{{TOC_ITEMS}}`를 채울 때 쓰는 스니펫. 필요한 것만 골라 적응형 배치. 정적 정보는 `.tag`(버튼 아님), 동작은 `button`/`a`로.
 
 ## TOC 항목 (`{{TOC_ITEMS}}`)
 
@@ -19,7 +19,7 @@
 </section>
 ```
 
-## 한눈에 / BLUF (역피라미드 — 맨 위)
+## 한눈에 / BLUF (역피라미드, 맨 위)
 
 ```html
 <section id="s-tldr"><div class="hero">
@@ -35,9 +35,9 @@
 ```html
 <div class="note crit"><span class="lbl">주의</span><div>본문 <b>강조</b>.</div></div>
 ```
-의미별: ok=성공/낮은리스크, info=특이점/참고, warn=중간주의, crit=치명/높음.
+의미별: ok는 성공/낮은리스크, info는 특이점/참고, warn은 중간주의, crit는 치명/높음.
 
-## 표 + 점수·진행 막대
+## 표 + 점수와 진행 막대
 
 ```html
 <div class="card pad scrollx"><table>
@@ -48,9 +48,9 @@
   </tbody>
 </table></div>
 ```
-약한 값은 `<div class="bar dim">`, 추천/우위 열·셀은 `class="win"`.
+약한 값은 `<div class="bar dim">`, 추천/우위 열과 셀은 `class="win"`.
 
-## 카드 (점수·통계, 추천 핀)
+## 카드 (점수와 통계, 추천 핀)
 
 ```html
 <div class="cards">
@@ -78,9 +78,9 @@
 ```
 JSON 강조: `<span class="tok-key">"키"</span><span class="tok-punc">:</span> <span class="tok-str">"값"</span>`.
 
-## 흐름 다이어그램 (과정·시퀀스 — 산문보다 우선)
+## 흐름 다이어그램 (과정과 시퀀스, 산문보다 우선)
 
-> 번호 동그라미 배지(`.fn`) 안 씀 — 화살표가 순서를 말함(겹침 배지는 산만·밀도↑). 카드 + 화살표만.
+> 번호 동그라미 배지(`.fn`) 안 씀. 화살표가 순서를 말함(겹침 배지는 산만, 밀도↑). 카드 + 화살표만.
 
 ```html
 <div class="flow">
@@ -99,9 +99,9 @@ JSON 강조: `<span class="tok-key">"키"</span><span class="tok-punc">:</span> 
 
 ## 원문 토글 (소스 문서가 있을 때만)
 
-`template.html`의 단일 토글 버튼(`#modetoggle`, 클릭마다 스왑·라벨이 다음 상태 안내) 유지 + 각 블록에 `class="only-easy"`(쉬운 설명) / `class="only-raw"`(원문 verbatim) 부여. 세션 요약 모드면 버튼 제거.
+`template.html`의 단일 토글 버튼(`#modetoggle`, 클릭마다 스왑, 라벨이 다음 상태 안내) 유지 + 각 블록에 `class="only-easy"`(쉬운 설명) / `class="only-raw"`(원문 verbatim) 부여. 세션 요약 모드면 버튼 제거.
 
-## footer (출처·주의)
+## footer (출처와 주의)
 
 ```html
 <footer>생성 · 원본 §출처 · <b>원본 불변</b> · 폰트만 CDN<br>외부 공유 전 정확성 검토.</footer>
@@ -109,18 +109,18 @@ JSON 강조: `<span class="tok-key">"키"</span><span class="tok-punc">:</span> 
 
 ---
 
-## kind별 프리셋 (가이드 — 강제 아님)
+## kind별 프리셋 (가이드, 강제 아님)
 
 | kind | 주로 쓰는 컴포넌트 |
 |------|-------------------|
-| meeting(회의록) | hero(결정 요약) · 표(액션아이템 담당/기한) · 콜아웃(미결) |
-| status(진행현황) | hero · 카드(트랙 진행률) · 막대 · 타임라인 · 콜아웃(블로커) |
-| summary(요약) | hero(핵심 합의) · 불릿 · 콜아웃(결정/미해결) · 흐름(필요 시) |
-| rfp/decision | hero(BLUF 추천) · 카드(점수) · 표+막대(비교 매트릭스) · 콜아웃(리스크) |
-| api | hero · 흐름 다이어그램 · 표(요청/응답) · 코드 · 콜아웃(에러/함정) · 원문 토글 |
+| meeting(회의록) | hero(결정 요약), 표(액션아이템 담당/기한), 콜아웃(미결) |
+| status(진행현황) | hero, 카드(트랙 진행률), 막대, 타임라인, 콜아웃(블로커) |
+| summary(요약) | hero(핵심 합의), 불릿, 콜아웃(결정/미해결), 흐름(필요 시) |
+| rfp/decision | hero(BLUF 추천), 카드(점수), 표+막대(비교 매트릭스), 콜아웃(리스크) |
+| api | hero, 흐름 다이어그램, 표(요청/응답), 코드, 콜아웃(에러/함정), 원문 토글 |
 | external | 위 중 적합 + redact 강화 + footer 정확성 검토 |
 
-## 헤더 아이콘 (kind별 — `{{ICON}}`에 1개)
+## 헤더 아이콘 (kind별, `{{ICON}}`에 1개)
 
 헤더 dot을 빈 장식이 아니라 문서 종류 표시로 쓴다. kind에 맞는 한 개를 `{{ICON}}`에 넣는다(흰색 선 아이콘으로 자동 스타일). 매칭 없으면 default.
 
