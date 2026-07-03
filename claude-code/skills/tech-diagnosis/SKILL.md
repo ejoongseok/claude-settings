@@ -1,6 +1,6 @@
 ---
 name: tech-diagnosis
-description: 기술 관점 종합 진단 — 아키텍처 건강도, 엔지니어링 조직 운영, 기술 전략/로드맵을 종합하여 기술 리더십 보고서를 작성합니다.
+description: 기술 관점 종합 진단. 아키텍처 건강도, 엔지니어링 조직 운영, 기술 전략/로드맵을 종합하여 기술 리더십 보고서를 작성합니다.
 disable-model-invocation: true
 allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__github__list_issues, mcp__github__list_pull_requests, mcp__github__search_issues
 ---
@@ -23,33 +23,33 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 
 | 질문 | 담당 | 이 스킬에서 |
 |------|------|-----------|
-| "코드/아키텍처가 건강한가?" | **/tech-diagnosis** | [OK] 핵심 — 아키텍처·기술부채·버스팩터 |
-| "데이터 파이프라인이 안정적인가, 지표가 정확한가?" | /data-diagnosis | [FAIL] 다루지 않음 — 측정 인프라 축 |
-| "전체 코드베이스 보안 자세는?" | /security-diagnosis | [FAIL] 다루지 않음 — 보안 1.5절은 신호만, 심층은 위임 |
-| "일이 예측 가능하게 흘러가는가?" | /delivery-diagnosis | [FAIL] 다루지 않음 — WIP·리드타임 축 |
-| "고객/사업/성장 관점은?" | /product·business·growth-diagnosis | [FAIL] 다루지 않음 — 기술 임팩트만 1줄 참조 |
-| "컨벤션 이탈 패턴은?" | /convention-audit | [FAIL] 다루지 않음 — 커밋 단위 스타일 감사 축 |
+| "코드/아키텍처가 건강한가?" | **/tech-diagnosis** | [OK] 핵심: 아키텍처, 기술부채, 버스팩터 |
+| "데이터 파이프라인이 안정적인가, 지표가 정확한가?" | /data-diagnosis | [FAIL] 다루지 않음: 측정 인프라 축 |
+| "전체 코드베이스 보안 자세는?" | /security-diagnosis | [FAIL] 다루지 않음: 보안 1.5절은 신호만, 심층은 위임 |
+| "일이 예측 가능하게 흘러가는가?" | /delivery-diagnosis | [FAIL] 다루지 않음: WIP와 리드타임 축 |
+| "고객/사업/성장 관점은?" | /product-diagnosis, /business-diagnosis, /growth-diagnosis | [FAIL] 다루지 않음: 기술 임팩트만 1줄 참조 |
+| "컨벤션 이탈 패턴은?" | /convention-audit | [FAIL] 다루지 않음: 커밋 단위 스타일 감사 축 |
 
-기술 관점은 "기술적으로 건강한가". 측정 인프라(data)·공격면(security)·흐름(delivery)·스타일(convention)은 각 축으로 위임.
+기술 관점은 "기술적으로 건강한가". 측정 인프라(data), 공격면(security), 흐름(delivery), 스타일(convention)은 각 축으로 위임.
 
 ### 검증과 정확성
 
 1. **정량 데이터는 코드/git에서 직접 측정.** 문서 기술을 사실로 단정하지 않는다. 코드로 검증 가능한 주장은 직접 검증한다.
 2. **공수 추정은 범위(min~max)로.** "1인월"이 아니라 "1~2인월(선행 조건에 따라)". 전제조건을 함께 명시.
 3. **숨은 전제조건 점검.** 권고(예: Blue-Green) 시 기술적 전제를 코드에서 확인 (세션 의존성, 인메모리 상태 등).
-4. **git log 기반 지표의 한계 인식.** 커밋 수 = 생산성이 아님. 개인 평가에 사용 금지. 맥락(Git 도입 시기, PR 문화 성숙도 등) 함께 기술.
+4. **git log 기반 지표의 한계 인식.** 커밋 수가 곧 생산성인 것은 아님. 개인 평가에 사용 금지. 맥락(Git 도입 시기, PR 문화 성숙도 등) 함께 기술.
 5. **사람에 대한 판단은 복수 출처 교차.** git log + daily/meetings + auto memory 교차 확인. 단일 출처면 `[단일 출처]` 태그 또는 기술하지 않음.
 
 ### 데이터 소스 신뢰도
 
 | 소스 | 신뢰도 | 비고 |
 |------|:------:|------|
-| 코드/git 정량 측정 | ★★★★★ | 객관적 사실 |
-| bot/*.md, ONBOARDING.md, modules/ | ★★★★ | 코드 기반 작성 |
-| auto memory | ★★★★ | 사용자 교정 사실 |
-| daily/meetings | ★★★ | 1인 관점 |
-| PRD/SRS | ★★~★★★ | 작성자 해석 포함, **작성일 확인 필수** |
-| WebSearch | ★★ | 검증 안 됨 |
+| 코드/git 정량 측정 | 5/5 | 객관적 사실 |
+| bot/*.md, ONBOARDING.md, modules/ | 4/5 | 코드 기반 작성 |
+| auto memory | 4/5 | 사용자 교정 사실 |
+| daily/meetings | 3/5 | 1인 관점 |
+| PRD/SRS | 2/5~3/5 | 작성자 해석 포함, **작성일 확인 필수** |
+| WebSearch | 2/5 | 검증 안 됨 |
 
 30일+ 경과 문서의 "현재 상태" 기술: `[N일 전 문서, 현재 미확인]` 태그.
 데이터 소스 간 모순: 양쪽 모두 기술 + `[데이터 충돌]`, 임의 선택 금지.
@@ -60,40 +60,40 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 |--------|------|:------:|------------|
 | 프로젝트 컨텍스트 | `CLAUDE.md` | 선택 | 일반 SW 가정으로 진행. 도메인 규칙 검증 생략, `[프로젝트 규칙 미확인]` 태그 |
 | 봇 인덱스 | `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md` | 선택 | 디렉터리 Glob + Grep 으로 구조 추론 fallback |
-| 인프라 정보 | `.local.claude/INFRASTRUCTURE.md` | 선택 | 배포·CI/CD 관련 분석 영역 생략 + `[인프라 데이터 부재]` 안내 |
-| 비즈니스 규칙 | `.local.claude/biz-rules.md` (§4 도메인 점검 카테고리) | 선택 | Tier 1(도메인 무관 일반 점검)만 수행 |
+| 인프라 정보 | `.local.claude/INFRASTRUCTURE.md` | 선택 | 배포와 CI/CD 관련 분석 영역 생략 + `[인프라 데이터 부재]` 안내 |
+| 비즈니스 규칙 | `.local.claude/biz-rules.md` (4절 도메인 점검 카테고리) | 선택 | Tier 1(도메인 무관 일반 점검)만 수행 |
 | 팀 정보 | `.local.claude/team.md` | 선택 | git author 그대로 표기, `[담당자 미지정]` 태그 |
 | 모듈 상세 | `.local.claude/modules/{name}.md` | 선택 | 코드 Grep 직접 fallback, `[코드 직접 확인]` 태그 |
 | 이전 진단 보고서 | `.local.claude/reports/YYYY-MM-DD-*-diagnosis.md` | 선택 | 초회 진단 모드로 진행 (변화/델타 분석 생략) |
-| 빌드 파일 | `pom.xml`, `build.gradle`, `package.json`, `requirements.txt` 등 | 선택 | 자동 감지 — 감지 실패 시 "기술 스택 미확인" 안내 후 수동 입력 요청 |
-| auto memory | `MEMORY.md` + 하위 파일 | 선택 | 이전 대화 교정 사실 없이 진행, 추정 정확도 ★★★ 로 하향 |
+| 빌드 파일 | `pom.xml`, `build.gradle`, `package.json`, `requirements.txt` 등 | 선택 | 자동 감지. 감지 실패 시 "기술 스택 미확인" 안내 후 수동 입력 요청 |
+| auto memory | `MEMORY.md` + 하위 파일 | 선택 | 이전 대화 교정 사실 없이 진행, 추정 정확도 3/5로 하향 |
 
-## 프로젝트 컨텍스트 (필수 — 호출 전 read)
+## 프로젝트 컨텍스트 (필수, 호출 전 read)
 
 > [WARN] 하드코딩 없이 데이터에서 최신 현황 확인.
 
-다음 파일이 존재하면 우선 read 하여 회사·제품·기술 스택·조직 파악:
-- `CLAUDE.md` (자동 로드, 회사·제품·기술 스택·컨벤션)
+다음 파일이 존재하면 우선 read 하여 회사, 제품, 기술 스택, 조직 파악:
+- `CLAUDE.md` (자동 로드, 회사, 제품, 기술 스택, 컨벤션)
 - `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md`
-- `.local.claude/INFRASTRUCTURE.md` (인프라·CI/CD)
+- `.local.claude/INFRASTRUCTURE.md` (인프라, CI/CD)
 - `.local.claude/team.md` 또는 멤버 매핑 파일
 - `.local.claude/biz-rules.md` (비즈니스 규칙)
-- `.local.claude/modules/*.md` (모듈 상세 — 변경 감지된 모듈만)
+- `.local.claude/modules/*.md` (모듈 상세, 변경 감지된 모듈만)
 
-도메인 약어·모듈 명칭은 CLAUDE.md 의 "도메인 약어" 섹션 따름.
+도메인 약어와 모듈 명칭은 CLAUDE.md 의 "도메인 약어" 섹션 따름.
 
 ## 모드 판단
 
 | 입력 | 모드 | 예상 소요 |
 |------|------|----------|
-| `/tech-diagnosis` (기본) | **종합 진단** — 3영역 전체, 검증 루프 포함 | ~30분+ |
-| `arch` 또는 `아키텍처` | **아키텍처 심층** — 영역 1만 | ~15분 |
-| `org` 또는 `조직` | **조직 운영** — 영역 2만 | ~15분 |
-| `roadmap` 또는 `전략` | **기술 전략** — 영역 3만 | ~15분 |
-| `delta` 또는 `변화` | **델타** — 이전 보고서 대비 변화만 | ~10분 |
-| `metrics` 또는 `지표` | **대시보드** — 핵심 지표만 1페이지 | ~5분 |
+| `/tech-diagnosis` (기본) | **종합 진단**: 3영역 전체, 검증 루프 포함 | ~30분+ |
+| `arch` 또는 `아키텍처` | **아키텍처 심층**: 영역 1만 | ~15분 |
+| `org` 또는 `조직` | **조직 운영**: 영역 2만 | ~15분 |
+| `roadmap` 또는 `전략` | **기술 전략**: 영역 3만 | ~15분 |
+| `delta` 또는 `변화` | **델타**: 이전 보고서 대비 변화만 | ~10분 |
+| `metrics` 또는 `지표` | **대시보드**: 핵심 지표만 1페이지 | ~5분 |
 
-## 프로세스 — 3단계 검증 루프
+## 프로세스: 3단계 검증 루프
 
 ### Phase 1: 정량 데이터 수집
 
@@ -107,9 +107,9 @@ ls .local.claude/reports/ 2>/dev/null | grep -iE 'tech-diagnosis' | sort | tail 
 ls .local.claude/reports/ 2>/dev/null | grep -iE '(심층진단|회사진단)' | sort | tail -1
 ```
 
-- 이전 /tech-diagnosis 보고서 → Read → 핵심 지표 추출 (비교 기준)
-- 이전 보고서의 `[미검증]` 태그 항목 추출 → 이번에 검증 시도
-- 회사 진단 보고서 → 조직/고객사 데이터 재활용 (측정 불필요)
+- 이전 /tech-diagnosis 보고서는 Read 하여 핵심 지표 추출 (비교 기준)
+- 이전 보고서의 `[미검증]` 태그 항목을 추출해 이번에 검증 시도
+- 회사 진단 보고서는 조직/고객사 데이터 재활용 (측정 불필요)
 
 **1-2. 코드베이스 정량 측정**
 
@@ -181,30 +181,30 @@ done
 ```
 
 GitHub 데이터 (가능한 경우):
-- `mcp__github__list_pull_requests` — PR 현황, 머지 빈도, 리뷰어
-- `mcp__github__list_issues` — 이슈 백로그, 라벨 분포
+- `mcp__github__list_pull_requests`: PR 현황, 머지 빈도, 리뷰어
+- `mcp__github__list_issues`: 이슈 백로그, 라벨 분포
 
 **1-3. 내부 문서 수집**
 
 **[필수]**
-- `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md` — 아키텍처 현황
-- `.local.claude/INFRASTRUCTURE.md` — 인프라, CI/CD, 배포
-- `.local.claude/biz-rules.md` — 비즈니스 규칙 (기술 정합성)
-- `.local.claude/team.md` — 조직 구조 + 멤버 매핑
-- auto memory (MEMORY.md + 하위 파일) — 이전 대화에서 교정된 사실
+- `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md`: 아키텍처 현황
+- `.local.claude/INFRASTRUCTURE.md`: 인프라, CI/CD, 배포
+- `.local.claude/biz-rules.md`: 비즈니스 규칙 (기술 정합성)
+- `.local.claude/team.md`: 조직 구조 + 멤버 매핑
+- auto memory (MEMORY.md + 하위 파일): 이전 대화에서 교정된 사실
 
 **[기간 데이터]** (이전 보고서 이후 또는 30일)
-- `.local.claude/daily/` — 개발자 고민, 기술 이슈
-- `.local.claude/briefing/` — 최근 5개 (코드 변경 흐름)
-- `.local.claude/meetings/` — 기술 의사결정
-- `.local.claude/reports/*심층진단*` — 회사 진단 보고서 (조직/고객사 재활용)
+- `.local.claude/daily/`: 개발자 고민, 기술 이슈
+- `.local.claude/briefing/`: 최근 5개 (코드 변경 흐름)
+- `.local.claude/meetings/`: 기술 의사결정
+- `.local.claude/reports/*심층진단*`: 회사 진단 보고서 (조직/고객사 재활용)
 
 **[선택]**
-- `.local.claude/modules/*.md` — 변경 감지된 모듈만
+- `.local.claude/modules/*.md`: 변경 감지된 모듈만
 
 **1-4. 외부 기술 트렌드 (WebSearch)**
 
-WebSearch 쿼리는 1-2단계에서 측정한 프로젝트 기술 스택·버전을 동적 대입:
+WebSearch 쿼리는 1-2단계에서 측정한 프로젝트 기술 스택과 버전을 동적 대입:
 
 ```
 1. "{프레임워크 이름} {현재 버전} EOL migration"
@@ -221,7 +221,7 @@ WebSearch 쿼리는 1-2단계에서 측정한 프로젝트 기술 스택·버전
 Phase 1의 정량 데이터와 핵심 가정을 사용자에게 제시하고 교정받는다.
 
 ```markdown
-## 팩트 시트 — 검증 요청
+## 팩트 시트: 검증 요청
 
 ### 코드베이스 규모
 | 항목 | 측정값 |
@@ -245,7 +245,7 @@ Phase 1의 정량 데이터와 핵심 가정을 사용자에게 제시하고 교
 - 최근 변동: [변동 사항]
 
 ### 핵심 가정 (검증 필요)
-- [ ] 프로젝트 모듈·도메인 약어 매핑 (CLAUDE.md 기준)
+- [ ] 프로젝트 모듈과 도메인 약어 매핑 (CLAUDE.md 기준)
 - [ ] Git/PR 도입 시기와 현재 성숙도
 - [ ] 코드 리뷰 범위와 방식
 - [ ] 배포 빈도와 다운타임
@@ -272,15 +272,15 @@ Phase 2에서 교정된 팩트를 기반으로 3영역 분석 수행.
 각 기술에 대해:
 - EOL 이후 경과 기간 (WebSearch에서 확인한 정확한 날짜)
 - 알려진 보안 취약점 (CVE 수 또는 주요 건)
-- 마이그레이션 시 영향 범위 (파일 수 — Phase 1 bash에서 측정한 javax.* 파일 수 등)
-- 자동화 도구 존재 여부 (OpenRewrite 등 — WebSearch에서 확인)
+- 마이그레이션 시 영향 범위 (파일 수. Phase 1 bash에서 측정한 javax.* 파일 수 등)
+- 자동화 도구 존재 여부 (OpenRewrite 등, WebSearch에서 확인)
 
 ### 1-2. 아키텍처 성숙도 매트릭스
 
 | 영역 | 현재 수준 | 목표 수준(1년) | 갭 | 우선순위 |
 |------|:--------:|:------------:|:--:|:--------:|
 
-5단계 척도: ① 수동/없음 → ② 일부 자동화 → ③ 표준화 → ④ 측정 가능 → ⑤ 최적화
+5단계 척도: 1) 수동/없음, 2) 일부 자동화, 3) 표준화, 4) 측정 가능, 5) 최적화
 
 각 영역의 판정 근거를 인라인으로 명시 (코드에서 확인한 사실 기반).
 
@@ -297,16 +297,16 @@ Phase 2에서 교정된 팩트를 기반으로 3영역 분석 수행.
 - 이전 보고서 대비: `[NEW]` / `[CHANGED]` / `[RESOLVED]` / `[WORSENED]` / `[UNCHANGED]`
 
 **숨은 전제조건 점검**: 해결 방안 권고 시 기술적 전제를 코드에서 확인.
-예: Blue-Green → `SessionCreationPolicy.STATELESS` 확인, HttpSession/SseEmitter 인메모리 상태 확인
+예: Blue-Green 권고라면 `SessionCreationPolicy.STATELESS` 확인, HttpSession/SseEmitter 인메모리 상태 확인
 
 부채 간 의존 관계 그래프 (텍스트):
 ```
 [부채 A]
-  └→ [부채 B] — A 해결이 선행
-       └→ [부채 C]
+  └─ [부채 B] (A 해결이 선행)
+       └─ [부채 C]
 ```
 
-**→ 의사결정 포인트:** 이번 주 / 이번 달 / 이번 분기에 해야 할 기술 액션 각 1줄
+**의사결정 포인트:** 이번 주 / 이번 달 / 이번 분기에 해야 할 기술 액션 각 1줄
 
 ### 1-4. 단일 장애 지점 (SPOF) 맵
 
@@ -318,14 +318,14 @@ Phase 2에서 교정된 팩트를 기반으로 3영역 분석 수행.
 | 항목 | 상태 | 심각도 | 권고 |
 |------|------|:------:|------|
 
-Phase 1 bash에서 측정한 보안 데이터(평문 비밀, 취약 라이브러리, 인증·인가 결함 등) 기반.
+Phase 1 bash에서 측정한 보안 데이터(평문 비밀, 취약 라이브러리, 인증과 인가 결함 등) 기반.
 
 ### 1-6. 빌드/배포 파이프라인 평가
 
 | 항목 | 현재 | 업계 표준 | 갭 |
 |------|------|---------|-----|
 
-**→ 의사결정 포인트:** 배포 파이프라인에서 가장 급한 개선 1줄
+**의사결정 포인트:** 배포 파이프라인에서 가장 급한 개선 1줄
 
 ---
 
@@ -337,7 +337,7 @@ Phase 1 bash에서 측정한 보안 데이터(평문 비밀, 취약 라이브러
 |----|:----:|---------|---------|-----|
 
 team.md + 회사 진단 보고서에서 최신 데이터 활용.
-**숨은 이중 역할** (기획자 QA 겸임 등) 탐지 — daily/meetings에서 확인.
+**숨은 이중 역할** (기획자 QA 겸임 등) 탐지. daily/meetings에서 확인.
 
 ### 2-2. 버스 팩터 분석
 
@@ -360,7 +360,7 @@ team.md + 회사 진단 보고서에서 최신 데이터 활용.
 | 지표 | 값 | 추세 | 맥락 |
 |------|:--:|:----:|------|
 
-> "맥락" 컬럼이 핵심. 예: PR 머지 7건/239커밋 → 수치만 보면 3%지만, 맥락은 "SVN→Git 전환 {N}주차, 이슈→PR→머지 정착 중"
+> "맥락" 컬럼이 핵심. 예: PR 머지 7건/239커밋은 수치만 보면 3%지만, 맥락은 "SVN에서 Git 전환 {N}주차, 이슈에서 PR, 머지로 이어지는 흐름 정착 중"
 
 ### 2-4. 코드 리뷰 & 품질 게이트
 
@@ -381,7 +381,7 @@ daily/meetings + auto memory에서 리뷰 문화의 **실제 현황** 확인. gi
 
 확인된 결정은 일반체, 추정은 *이탤릭* + `[간접 추론]`.
 
-**→ 의사결정 포인트:** 조직 측면에서 가장 급한 액션 1줄
+**의사결정 포인트:** 조직 측면에서 가장 급한 액션 1줄
 
 ---
 
@@ -397,7 +397,7 @@ daily/meetings + auto memory에서 리뷰 문화의 **실제 현황** 확인. gi
 > 하드코딩하지 않는다. Phase 1에서 측정한 현재 상태 + WebSearch에서 확인한 EOL/마이그레이션 경로를 기반으로 **데이터 기반 로드맵을 도출**한다.
 
 각 마이그레이션에 대해:
-- 현재 → 중간 단계 → 목표 (구체적 버전)
+- 현재에서 중간 단계를 거쳐 목표까지 (구체적 버전)
 - 선행 조건 (어떤 마이그레이션이 먼저여야 하는가)
 - 비즈니스 트리거 (왜 지금 해야 하는가)
 - 공수 **범위** (min~max 인월, 전제조건 명시)
@@ -416,7 +416,7 @@ daily/meetings + auto memory에서 리뷰 문화의 **실제 현황** 확인. gi
 
 ### 3-5. 아키텍처 목표 상태 (To-Be)
 
-현재 vs 12~18개월 목표 — Phase 1 측정값 + Phase 2 교정값 기반으로 도출.
+현재 vs 12~18개월 목표. Phase 1 측정값 + Phase 2 교정값 기반으로 도출.
 
 ### 3-6. 기술 KPI 대시보드
 
@@ -425,16 +425,16 @@ daily/meetings + auto memory에서 리뷰 문화의 **실제 현황** 확인. gi
 
 > 목표치를 하드코딩하지 않는다. 현재 측정값과 영역 1~3 분석을 기반으로 **현실적 목표**를 도출. 예: 현재 PR 비율이 도입 초기라면 3개월 목표를 50%로, 100%로 하지 않는다.
 
-**→ 의사결정 포인트:** 3개월 내 달성해야 할 가장 중요한 KPI 1개와 이유
+**의사결정 포인트:** 3개월 내 달성해야 할 가장 중요한 KPI 1개와 이유
 
 ---
 
 ### Phase 3-B: 자기 검증 (Adversarial Review)
 
-**Adversarial Review** — 핵심 권고/판단 Top 3~5 각각에 대해:
+**Adversarial Review**: 핵심 권고/판단 Top 3~5 각각에 대해:
 1. **근거 재점검**: 코드/측정 기반인가, 문서 기술인가? 단일 출처인가 교차 확인인가? `[코드 검증]` vs `[문서 기술, 코드 미검증]` 구분 명확한가?
-2. **전제 검증**: 권고가 유효하려면 어떤 전제가 필요한가? 그 전제가 코드에서 확인되는가? (예: Blue-Green → SessionCreationPolicy.STATELESS + 인메모리 상태 부재)
-3. **반대 증거 탐색**: "왜 이미 하지 않았나?" / "현재가 충분하다면?" — 반박 1개 이상 탐색. auto memory 교정 사실이 이번 보고서에서 다시 잘못 기술되지 않았는지 재점검
+2. **전제 검증**: 권고가 유효하려면 어떤 전제가 필요한가? 그 전제가 코드에서 확인되는가? (예: Blue-Green 이면 SessionCreationPolicy.STATELESS + 인메모리 상태 부재)
+3. **반대 증거 탐색**: "왜 이미 하지 않았나?" / "현재가 충분하다면?" 같은 반박 1개 이상 탐색. auto memory 교정 사실이 이번 보고서에서 다시 잘못 기술되지 않았는지 재점검
 
 반박 유효 시 본문 수정, 부분 반박 시 "단, ~의 가능성도 있음" 인라인 추가.
 
@@ -475,15 +475,15 @@ data-sources:
 > **데이터 한계**: git/코드 측정은 객관적. 조직/문화 판단은 {사용자닉네임} 1인 관점 기반.
 
 ## 핵심 판단 (3줄)
-1. [가장 급한 기술 리스크 — 한 줄]
-2. [가장 큰 조직 병목 — 한 줄]
-3. [지금 해야 할 기술 투자 — 한 줄]
+1. [가장 급한 기술 리스크, 한 줄]
+2. [가장 큰 조직 병목, 한 줄]
+3. [지금 해야 할 기술 투자, 한 줄]
 
-[변화 요약 — 이전 보고서가 있을 때]
+[변화 요약 (이전 보고서가 있을 때)]
 
 ---
 ## 영역 1~3
-[각 영역의 마지막 섹션에 **→ 의사결정 포인트:** 필수]
+[각 영역의 마지막 섹션에 **의사결정 포인트:** 필수]
 ---
 
 ## 핵심 권고 Top 5
@@ -507,7 +507,7 @@ data-sources:
 
 **metrics 모드** (1페이지, bash 측정 위주):
 ```markdown
-# 기술 대시보드 — YYYY-MM-DD
+# 기술 대시보드 (YYYY-MM-DD)
 
 ## 코드베이스
 Java: ~Nk줄 (N개) | XML: ~Nk줄 | JS: ~Nk줄 | 테스트: N개
@@ -533,7 +533,7 @@ Java: ~Nk줄 (N개) | XML: ~Nk줄 | JS: ~Nk줄 | 테스트: N개
 
 ## 파일 저장
 
-Frontmatter (CONTRACT §7-2 표준): `category: reports, retention: 30d, harvest_targets: [biz-rules.md]`
+Frontmatter (CONTRACT 7-2절 표준): `category: reports, retention: 30d, harvest_targets: [biz-rules.md]`
 
 ```bash
 mkdir -p .local.claude/reports
@@ -556,12 +556,12 @@ mkdir -p .local.claude/reports
 
 ## 다음 스킬 연결
 
-- 기술부채 액션 → `/todo`
-- 마이그레이션 방향 발산 → `/brainstorm`
-- 기술 결정 명세화 → `/prd`
-- 팀 프로세스 변경 공유 → `/draft`
-- 조직/채용/자원배분 → `/business-diagnosis`
-- 비즈니스 관점 보완 → `/business-diagnosis`
+- 기술부채 액션은 `/todo`
+- 마이그레이션 방향 발산은 `/brainstorm`
+- 기술 결정 명세화는 `/prd`
+- 팀 프로세스 변경 공유는 `/draft`
+- 조직/채용/자원배분은 `/business-diagnosis`
+- 비즈니스 관점 보완은 `/business-diagnosis`
 
 ## 제약조건
 
@@ -574,18 +574,18 @@ mkdir -p .local.claude/reports
 - **정보 신선도.** 30일+ 문서는 `[N일 전 문서]` 태그
 - **하드코딩 금지.** 버전, 연도, 조직 구성, KPI 목표치, 로드맵 타임라인 모두 데이터에서 도출
 - **자기 검증 필수.** Phase 3-B Adversarial Review 실행
-- **다른 보고서와의 관계**: 기술 관점은 "기술", /business-diagnosis는 "돈·시간·사람", /product-diagnosis는 "고객·제품". 상호 참조 권장
+- **다른 보고서와의 관계**: 기술 관점은 "기술", /business-diagnosis는 "돈, 시간, 사람", /product-diagnosis는 "고객과 제품". 상호 참조 권장
 
 ## 검증 시나리오
 
-공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT §6-1** 참조.
+공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT 6-1절** 참조.
 
 ### 이 스킬의 고유 실패 시나리오
 
-**[환경·규모]** git 저장소 2GB+ (또는 커밋 5만+)인 경우
+**[환경/규모]** git 저장소 2GB+ (또는 커밋 5만+)인 경우
 - 신호: `du -sh .git` 기준 2GB 이상 또는 타임아웃 위험 감지
 - 대응: git log/blame 에 `--since-days 7` 자동 적용 + 범위 축소 경고 표시
 
 **[도메인 특수성]** 이종 기술 스택 다수 감지
-- 신호: 언어 3종+ / 서비스 5개+ 혼재 (모노레포·마이크로서비스)
+- 신호: 언어 3종+ / 서비스 5개+ 혼재 (모노레포, 마이크로서비스)
 - 대응: 주 스택만 우선 심층 분석, 나머지는 `[부분 분석]` 태그로 개요 수준만 제공

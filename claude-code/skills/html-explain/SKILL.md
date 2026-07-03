@@ -11,22 +11,22 @@ recommended-effort: high
 
 ## 입력
 
-- 인자에 파일 경로 → 그 문서 read.
-- 인자 없음(또는 topic 단어만) → 현재 세션 대화 전체 흡수: 한 일 / 정한 일 / 다음.
-- `--kind` 없으면 내용으로 판별. `--external` = 외부 공유 모드.
+- 인자에 파일 경로가 오면 그 문서를 read.
+- 인자가 없으면(또는 topic 단어만이면) 현재 세션 대화 전체 흡수: 한 일 / 정한 일 / 다음.
+- `--kind` 없으면 내용으로 판별. `--external`은 외부 공유 모드.
 
 ## 절차
 
-1. read: `assets/template.html`(스킨), `assets/design-principles.md`(§0 체크리스트), `assets/components.md`(컴포넌트 + kind 프리셋), `assets/content-rules.md`(내용 추출 10원칙), `assets/playbook.md`(해당 kind 누적 학습).
+1. read: `assets/template.html`(스킨), `assets/design-principles.md`(0절 체크리스트), `assets/components.md`(컴포넌트 + kind 프리셋), `assets/content-rules.md`(내용 추출 10원칙), `assets/playbook.md`(해당 kind 누적 학습).
 2. 입력 흡수(파일/세션).
-3. **핵심 추출** — `assets/content-rules.md` 적용: 결론 먼저(역피라미드), What>How, 내부 경로·상수·플래그·담당자 주관 redact, 정량 표기, 추정은 `추정`/`TBD`.
-4. kind 판별 → playbook 학습 반영.
+3. **핵심 추출**: `assets/content-rules.md` 적용. 결론 먼저(역피라미드), What>How, 내부 경로와 상수와 플래그와 담당자 주관 redact, 정량과 절대 표기, 추정은 `추정`/`TBD`.
+4. kind 판별 후 playbook 학습 반영.
 5. `template.html`의 `{{TITLE}}{{SUBTITLE}}{{TOC_ITEMS}}{{MAIN}}` 를 components.md 컴포넌트로만 채움. 내용 구조가 배치를 정하되 담백 규칙(hero 금지, 색 배경 금지, 화려 컴포넌트 금지, 풀폭)은 절대 어기지 않음. TOC 항목은 `<a href="#s-id">제목</a>`, 섹션은 `<section class="s" id="s-id"><h2>제목</h2>`. 헤더 아이콘 없음.
-6. `design-principles.md` §0 체크리스트 통과 확인.
+6. `design-principles.md` 0절 체크리스트 통과 확인.
 7. 저장: 작업 폴더의 `rendered/{YYYY-MM-DD}-{slug}.html`(폴더 없으면 생성). 입력이 파일이면 그 파일과 같은 폴더의 `rendered/`도 무방. 저장 후 원본 파일 미변경 확인.
-8. 콘솔: 저장 경로 안내. 열기는 OS에 맞게 — macOS `open <경로>`, Linux `xdg-open <경로>`, Windows `start "" <경로>`.
-9. external 모드: 콘솔에 정확성 검토 체크리스트 출력 — 내부 경로·상수·담당자 주관 제거 / 요약이 원문과 일치 / 추정 표시 / 저맥락화.
-10. 사용자 피드백 시 `assets/playbook.md` 해당 kind에 1줄 append(날짜·간결).
+8. 콘솔: 저장 경로 안내. 열기는 OS에 맞게 안내한다: macOS는 `open <경로>`, Linux는 `xdg-open <경로>`, Windows는 `start "" <경로>`.
+9. external 모드: 콘솔에 정확성 검토 체크리스트를 출력한다. 내부 경로와 상수와 담당자 주관 제거 / 요약이 원문과 일치 / 추정 표시 / 저맥락화.
+10. 사용자 피드백 시 `assets/playbook.md` 해당 kind에 1줄 append(날짜 포함, 간결하게).
 
 ## 비협상 제약
 

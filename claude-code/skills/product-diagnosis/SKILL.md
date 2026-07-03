@@ -1,6 +1,6 @@
 ---
 name: product-diagnosis
-description: 제품 관점 종합 진단 — 축적된 고객 접점 데이터(CS, 요청, 회의록, 고객 프로필)를 횡단 분석하여 제품 방향 신호를 포착하고 로드맵 우선순위를 도출합니다.
+description: 제품 관점 종합 진단. 축적된 고객 접점 데이터(CS, 요청, 회의록, 고객 프로필)를 횡단 분석하여 제품 방향 신호를 포착하고 로드맵 우선순위를 도출합니다.
 disable-model-invocation: true
 allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__github__list_issues, mcp__github__list_pull_requests, mcp__github__search_issues
 ---
@@ -24,13 +24,13 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 
 | 질문 | 담당 | 이 스킬에서 |
 |------|------|-----------|
-| "고객 문제를 잘 풀고 있나, 무엇을 만들까?" | **/product-diagnosis** | [OK] 핵심 — 고객 신호·제품화·로드맵 |
-| "기술적으로 어떻게 만드나, 코드가 건강한가?" | /tech-diagnosis | [FAIL] 다루지 않음 — 기술 실현 가능성만 참조 |
-| "사업적으로 어디에 배팅하나?" | /business-diagnosis | [FAIL] 다루지 않음 — 사업 임팩트만 참조 |
-| "전환율·리텐션을 어떻게 올릴까?" | /growth-diagnosis | [FAIL] 다루지 않음 — 깔때기·채널 축 |
-| "지표를 정확히 측정하고 있나?" | /data-diagnosis | [FAIL] 다루지 않음 — 측정 인프라 축 |
+| "고객 문제를 잘 풀고 있나, 무엇을 만들까?" | **/product-diagnosis** | [OK] 핵심: 고객 신호, 제품화, 로드맵 |
+| "기술적으로 어떻게 만드나, 코드가 건강한가?" | /tech-diagnosis | [FAIL] 다루지 않음. 기술 실현 가능성만 참조 |
+| "사업적으로 어디에 배팅하나?" | /business-diagnosis | [FAIL] 다루지 않음. 사업 임팩트만 참조 |
+| "전환율과 리텐션을 어떻게 올릴까?" | /growth-diagnosis | [FAIL] 다루지 않음. 깔때기와 채널 축 |
+| "지표를 정확히 측정하고 있나?" | /data-diagnosis | [FAIL] 다루지 않음. 측정 인프라 축 |
 
-제품 관점은 "고객에게 무엇을". 기술(어떻게)·사업(돈·시간·사람)·성장(유입·전환)·데이터(측정)는 각 축으로 위임.
+제품 관점은 "고객에게 무엇을". 기술(어떻게), 사업(돈, 시간, 사람), 성장(유입, 전환), 데이터(측정)는 각 축으로 위임.
 
 ### 기술 스킬과의 차이
 
@@ -38,7 +38,7 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 |--|-----|-----|
 | 메인 데이터 | 코드, git, 인프라 | 고객 프로필, CS, 요청, 회의록, PRD |
 | 핵심 질문 | "기술적으로 건강한가?" | "고객 문제를 잘 풀고 있는가?" |
-| 메인 루프 | bash 측정 → 정량 분석 | **문서 횡단 읽기 → 패턴 감지** |
+| 메인 루프 | bash 측정 후 정량 분석 | **문서 횡단 읽기 후 패턴 감지** |
 | 의사결정 | 기술 투자 우선순위 | 기능/제품 투자 우선순위 |
 
 **bash로 Controller 수를 세는 건 /tech-diagnosis 가 이미 한다. 제품 관점은 세지 않고 읽는다.**
@@ -55,16 +55,16 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 
 | 소스 | 신뢰도 | 제품 관점에서의 가치 |
 |------|:------:|-----------------|
-| customers/*.md | ★★★★ | **핵심** — 고객별 Pain Point, CS 이력, 커스터마이징 |
-| CS 이력 (.local.claude/cs/) | ★★★★ | **핵심** — 실제 고객 문제 |
-| auto memory | ★★★★ | 사용자가 교정한 고객/제품 사실 |
-| 이슈 이력 (.local.claude/issues/) | ★★★ | 기능 요청/버그 패턴 |
-| meetings/ | ★★★ | 고객 미팅 맥락 |
-| PRD/SRS | ★★★ | 기획 의도 (작성일 확인 필수) |
-| biz-rules.md | ★★★★ | 제품 흐름 = 상태 전이 |
-| bot/INDEX.md / ONBOARDING.md | ★★★★ | 핵심 사용자 여정 = 제품 프레임워크 |
-| 코드/git | ★★★★★ | 기능 존재 확인용 (보조) |
-| WebSearch | ★★ | 경쟁사 정보 (검증 안 됨) |
+| customers/*.md | 4/5 | **핵심**: 고객별 Pain Point, CS 이력, 커스터마이징 |
+| CS 이력 (.local.claude/cs/) | 4/5 | **핵심**: 실제 고객 문제 |
+| auto memory | 4/5 | 사용자가 교정한 고객/제품 사실 |
+| 이슈 이력 (.local.claude/issues/) | 3/5 | 기능 요청/버그 패턴 |
+| meetings/ | 3/5 | 고객 미팅 맥락 |
+| PRD/SRS | 3/5 | 기획 의도 (작성일 확인 필수) |
+| biz-rules.md | 4/5 | 제품 흐름은 곧 상태 전이 |
+| bot/INDEX.md / ONBOARDING.md | 4/5 | 핵심 사용자 여정은 곧 제품 프레임워크 |
+| 코드/git | 5/5 | 기능 존재 확인용 (보조) |
+| WebSearch | 2/5 | 경쟁사 정보 (검증 안 됨) |
 
 ## 외부 데이터 의존
 
@@ -72,44 +72,44 @@ allowed-tools: Read, Write, Glob, Grep, Bash, WebSearch, AskUserQuestion, mcp__g
 |--------|------|:------:|------------|
 | 프로젝트 컨텍스트 | `CLAUDE.md` | 선택 | 일반 SW 가정으로 진행. 도메인 규칙 검증 생략, `[프로젝트 규칙 미확인]` 태그 |
 | 봇 인덱스 | `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md` | 선택 | 디렉터리 Glob + Grep 으로 구조 추론 fallback |
-| 인프라 정보 | `.local.claude/INFRASTRUCTURE.md` | 선택 | 배포·CI/CD 관련 분석 영역 생략 + `[인프라 데이터 부재]` 안내 |
-| 비즈니스 규칙 | `.local.claude/biz-rules.md` (§4 도메인 점검 카테고리) | 선택 | Tier 1(도메인 무관 일반 점검)만 수행 |
+| 인프라 정보 | `.local.claude/INFRASTRUCTURE.md` | 선택 | 배포와 CI/CD 관련 분석 영역 생략 + `[인프라 데이터 부재]` 안내 |
+| 비즈니스 규칙 | `.local.claude/biz-rules.md` (4절 도메인 점검 카테고리) | 선택 | Tier 1(도메인 무관 일반 점검)만 수행 |
 | 팀 정보 | `.local.claude/team.md` | 선택 | git author 그대로 표기, `[담당자 미지정]` 태그 |
 | 모듈 상세 | `.local.claude/modules/{name}.md` | 선택 | 코드 Grep 직접 fallback, `[코드 직접 확인]` 태그 |
 | 이전 진단 보고서 | `.local.claude/reports/YYYY-MM-DD-*-diagnosis.md` | 선택 | 초회 진단 모드로 진행 (변화/델타 분석 생략) |
-| 고객 프로필 | `.local.claude/customers/*.md` | 선택 | 축적 데이터 부재 — 고객 횡단 분석 생략, `[고객 데이터 부재]` 태그 |
+| 고객 프로필 | `.local.claude/customers/*.md` | 선택 | 축적 데이터 부재. 고객 횡단 분석 생략, `[고객 데이터 부재]` 태그 |
 | CS 이력 | `.local.claude/cs/*.md` | 선택 | 고객 문제 패턴 분석 제한, 일반적 제품 지표만 사용 |
 
-## 프로젝트 컨텍스트 (필수 — 호출 전 read)
+## 프로젝트 컨텍스트 (필수, 호출 전 read)
 
 > [WARN] 하드코딩 없이 데이터에서 최신 현황 확인.
 
-다음 파일이 존재하면 우선 read 하여 회사·제품·고객·도메인 흐름 파악:
-- `CLAUDE.md` (자동 로드, 회사·제품·도메인 약어)
+다음 파일이 존재하면 우선 read 하여 회사, 제품, 고객, 도메인 흐름 파악:
+- `CLAUDE.md` (자동 로드, 회사와 제품과 도메인 약어)
 - `bot/INDEX.md` 또는 `.local.claude/INDEX.md`
 - `.local.claude/customers/*.md` (고객사 프로필)
-- `.local.claude/biz-rules.md` (도메인 규칙·상태 전이 = 제품 흐름)
+- `.local.claude/biz-rules.md` (도메인 규칙과 상태 전이, 곧 제품 흐름)
 - `bot/INDEX.md` 또는 `.local.claude/ONBOARDING.md` (제품 프레임워크)
 
-도메인 약어·모듈 매핑·고객 여정은 위 파일에서 추출.
+도메인 약어, 모듈 매핑, 고객 여정은 이 파일들에서 추출.
 
 ## 모드 판단
 
 | 입력 | 모드 | 예상 소요 |
 |------|------|----------|
-| `/product-diagnosis` (기본) | **종합 진단** — 3영역 전체 | ~20분+ |
-| `signal` 또는 `고객신호` | **고객 신호** — 영역 1만 | ~15분 |
-| `fit` 또는 `적합성` | **제품 적합성** — 영역 2만 | ~10분 |
-| `roadmap` 또는 `로드맵` | **제품 로드맵** — 영역 3만 | ~10분 |
-| `delta` 또는 `변화` | **델타** — 이전 보고서 대비 변화만 | ~10분 |
+| `/product-diagnosis` (기본) | **종합 진단**: 3영역 전체 | ~20분+ |
+| `signal` 또는 `고객신호` | **고객 신호**: 영역 1만 | ~15분 |
+| `fit` 또는 `적합성` | **제품 적합성**: 영역 2만 | ~10분 |
+| `roadmap` 또는 `로드맵` | **제품 로드맵**: 영역 3만 | ~10분 |
+| `delta` 또는 `변화` | **델타**: 이전 보고서 대비 변화만 | ~10분 |
 
-## 프로세스 — 읽고 가로지르기
+## 프로세스: 읽고 가로지르기
 
 ### Phase 1: 고객 접점 수집
 
 > **[1M 활용]** **다중 파일 동시 Read** 후 교차 분석:
 > - 로드: `customers/*.md` 전체, `.local.claude/cs/` 전체, `.local.claude/issues/` 전체, `.local.claude/projects/*/PRD-*.md`, `.local.claude/meetings/` 고객 관련, `biz-rules.md`, `bot/INDEX.md` 또는 `ONBOARDING.md`
-> - 교차 분석: {고객사 A Pain Point vs 고객사 B 유사 요청 → 제품화 후보}, {CS 불만 vs 이슈 백로그 일관성}, {PRD 의도 vs CS 실제 이탈 모순 탐지}, {biz-rules 상태전이 vs 고객 여정 병목 매핑}
+> - 교차 분석: {고객사 A Pain Point vs 고객사 B 유사 요청, 여기서 제품화 후보 도출}, {CS 불만 vs 이슈 백로그 일관성}, {PRD 의도 vs CS 실제 이탈 모순 탐지}, {biz-rules 상태전이 vs 고객 여정 병목 매핑}
 > - 한계: 총 로드량이 컨텍스트 윈도우 용량에 근접하면 AskUserQuestion 으로 범위 축소 권장 (우선순위: customers > CS > 이슈 > PRD > 회의록).
 
 **1-1. 데이터 충분성 체크**
@@ -128,7 +128,7 @@ echo "=== 이전 /product-diagnosis 보고서 ===" && ls .local.claude/reports/ 
 
 | 데이터 | 충분 | 부족 시 |
 |--------|:----:|--------|
-| 고객사 프로필 | 3개+ | [WARN] "고객 데이터 부족 — `/customer-profile`로 축적 필요" 안내. 있는 것만으로 진행 |
+| 고객사 프로필 | 3개+ | [WARN] "고객 데이터 부족, `/customer-profile`로 축적 필요" 안내. 있는 것만으로 진행 |
 | CS 이력 | 5건+ | 패턴 분석 대신 개별 나열 |
 | 이슈/PRD | 3건+ | 요청 패턴 대신 개별 나열 |
 | 회의록 | 2건+ | 사용자 입력에 더 의존 |
@@ -138,15 +138,15 @@ echo "=== 이전 /product-diagnosis 보고서 ===" && ls .local.claude/reports/ 
 **1-2. 고객 접점 문서 읽기** (이것이 메인 활동)
 
 우선순위순으로 Read:
-1. **customers/*.md** — 전체 고객사 프로필 (Pain Point, CS 이력, 커스터마이징)
-2. **CS 이력** — `.local.claude/cs/`, `projects/*/cs/` 전체
-3. **이슈 이력** — `.local.claude/issues/` 전체
-4. **PRD/SRS** — `.local.claude/projects/*/PRD-*.md`, `.local.claude/prd/`
-5. **회의록** — `.local.claude/meetings/` 중 고객 관련
-6. **auto memory** — 고객/제품 관련 메모리
-7. **biz-rules.md** — 상태 전이 = 고객 여정의 제품 흐름
-8. **bot/INDEX.md** 또는 **`.local.claude/ONBOARDING.md`** — 핵심 사용자 여정 = 제품 프레임워크
-9. **메모** — `.local.claude/memo/` 최근 파일 (고객/제품/경쟁 태그 메모)
+1. **customers/*.md**: 전체 고객사 프로필 (Pain Point, CS 이력, 커스터마이징)
+2. **CS 이력**: `.local.claude/cs/`, `projects/*/cs/` 전체
+3. **이슈 이력**: `.local.claude/issues/` 전체
+4. **PRD/SRS**: `.local.claude/projects/*/PRD-*.md`, `.local.claude/prd/`
+5. **회의록**: `.local.claude/meetings/` 중 고객 관련
+6. **auto memory**: 고객/제품 관련 메모리
+7. **biz-rules.md**: 상태 전이는 곧 고객 여정의 제품 흐름
+8. **bot/INDEX.md** 또는 **`.local.claude/ONBOARDING.md`**: 핵심 사용자 여정은 곧 제품 프레임워크
+9. **메모**: `.local.claude/memo/` 최근 파일 (고객/제품/경쟁 태그 메모)
 
 **읽으면서 추출할 것:**
 - 고객사별 Pain Point 키워드
@@ -157,7 +157,7 @@ echo "=== 이전 /product-diagnosis 보고서 ===" && ls .local.claude/reports/ 
 
 **1-3. 경쟁사 조사 (WebSearch)**
 
-쿼리는 CLAUDE.md 의 산업 도메인·제품 카테고리에서 동적 생성:
+쿼리는 CLAUDE.md 의 산업 도메인과 제품 카테고리에서 동적 생성:
 
 ```
 1. "{산업 도메인}" SaaS {국가} {현재연도}
@@ -170,7 +170,7 @@ echo "=== 이전 /product-diagnosis 보고서 ===" && ls .local.claude/reports/ 
 축적 데이터에서 빠진 고객 맥락을 `AskUserQuestion`으로 보완.
 **데이터 충분성에 따라 질문이 달라진다:**
 
-**데이터 충분할 때** — 확인/교정 위주:
+**데이터 충분할 때**는 확인/교정 위주:
 ```
 Phase 1에서 파악한 내용을 검증합니다:
 
@@ -179,7 +179,7 @@ Phase 1에서 파악한 내용을 검증합니다:
 3. 최근 경쟁 입찰에서 진/패한 경험이 있나요?
 ```
 
-**데이터 부족할 때** — 직접 수집:
+**데이터 부족할 때**는 직접 수집:
 ```
 고객 접점 데이터가 부족해서 직접 여쭤봅니다:
 
@@ -205,8 +205,8 @@ customers/*.md + CS 이력 + auto memory를 횡단하여:
 |--------|---------------|---------|---------|-----------|---------|---------|
 
 각 고객사에 대해:
-- **반복 요청**: 같은 고객이 2회+ 요청한 것 = 진짜 아픈 곳
-- **미사용 모듈**: 제품에 있는데 이 고객이 안 쓰는 것 = 적합성 갭 or 온보딩 부족
+- **반복 요청**: 같은 고객이 2회+ 요청한 것, 곧 진짜 아픈 곳
+- **미사용 모듈**: 제품에 있는데 이 고객이 안 쓰는 것, 곧 적합성 갭 or 온보딩 부족
 - **이탈 신호**: CS 빈도 증가, 불만 톤 변화, 경쟁사 언급
 - **확장 기회**: "이런 것도 되나요?" 류의 질문
 
@@ -218,9 +218,9 @@ CS + 이슈 + PRD + 회의록을 **가로질러** 반복 패턴을 추출:
 |------|:-------:|----------|---------|--------------|:---------:|
 
 **핵심 판단 기준:**
-- 같은 요청 × 2개+ 고객사 → **제품화 강력 후보**
-- 같은 요청 × 1개 고객사 반복 → **커스터마이징 유지, 단 근본 문제 확인**
-- 요청의 How vs What 분리: "엑셀 다운로드 버튼 추가해주세요" → What은 "데이터를 빠르게 공유하고 싶다"
+- 같은 요청 × 2개+ 고객사면 **제품화 강력 후보**
+- 같은 요청 × 1개 고객사 반복이면 **커스터마이징 유지, 단 근본 문제 확인**
+- 요청의 How vs What 분리: "엑셀 다운로드 버튼 추가해주세요"의 What은 "데이터를 빠르게 공유하고 싶다"
 
 ### 1-3. 고객 여정 병목
 
@@ -229,8 +229,8 @@ biz-rules.md의 상태 전이를 고객 여정으로 읽어서, 어디서 막히
 | 여정 단계 | 상태 전이 | 병목 증상 | 근거 (CS/요청) | 제품 개선 방향 |
 |----------|---------|---------|-------------|-------------|
 
-예: "{단계A} → {단계B} 사이에 {승인 단계}가 오래 걸린다" → 승인 흐름 간소화
-예: "{대기 상태} → {진행 상태} 전환이 수동" → 자동 전환 트리거
+예: "{단계A}에서 {단계B}로 넘어가는 사이에 {승인 단계}가 오래 걸린다"면 승인 흐름 간소화
+예: "{대기 상태}에서 {진행 상태}로의 전환이 수동"이면 자동 전환 트리거
 
 ### 1-4. 커스터마이징 vs 제품화
 
@@ -241,7 +241,7 @@ biz-rules.md의 상태 전이를 고객 여정으로 읽어서, 어디서 막히
 - **커스터마이징 유지**: 1개 고객사 전용 + 다른 고객에 불필요
 - **검토 필요**: 1개 고객사지만 시장 니즈가 있을 가능성
 
-**→ 의사결정 포인트:** 가장 제품화 가치 높은 항목 1줄
+**의사결정 포인트:** 가장 제품화 가치 높은 항목 1줄
 
 ---
 
@@ -282,7 +282,7 @@ biz-rules.md의 상태 전이를 고객 여정으로 읽어서, 어디서 막히
 
 `[WebSearch]` 기반. 실제 기능 ≠ 마케팅 주장.
 
-**→ 의사결정 포인트:** 경쟁에서 가장 취약한 영역 1줄
+**의사결정 포인트:** 경쟁에서 가장 취약한 영역 1줄
 
 ---
 
@@ -305,9 +305,9 @@ biz-rules.md의 상태 전이를 고객 여정으로 읽어서, 어디서 막히
 ### 3-2. 분기별 로드맵
 
 ```
-[현재]                       [Q+1]                         [Q+2]
-[제품화 후보 #1]         →   [기능 공백 #1]             →   [차별화 강화]
-[고객 병목 해소]         →   [커스터마이징 제품화 #2]    →   [경쟁 취약점 보완]
+[현재] [제품화 후보 #1], [고객 병목 해소]
+[Q+1]  [기능 공백 #1], [커스터마이징 제품화 #2]
+[Q+2]  [차별화 강화], [경쟁 취약점 보완]
 ```
 
 이전 보고서가 있으면 로드맵 진행 상황 추적.
@@ -317,16 +317,16 @@ biz-rules.md의 상태 전이를 고객 여정으로 읽어서, 어디서 막히
 | 기능 | Build | Buy/통합 | Partner | 권고 | 근거 |
 |------|-------|---------|---------|------|------|
 
-**→ 의사결정 포인트:** 다음 분기에 가장 우선해야 할 제품 투자 1줄
+**의사결정 포인트:** 다음 분기에 가장 우선해야 할 제품 투자 1줄
 
 ---
 
 ### Phase 3-B: 자기 검증 (Adversarial Review)
 
-**Adversarial Review** — 핵심 권고/판단 Top 3 각각에 대해:
+**Adversarial Review**. 핵심 권고/판단 Top 3 각각에 대해:
 1. **근거 재점검**: 코드/측정 기반인가, 문서 기술인가? 단일 출처인가 교차 확인인가?
 2. **전제 검증**: 권고가 유효하려면 어떤 전제가 필요한가? 그 전제가 코드/문서에서 확인되는가?
-3. **반대 증거 탐색**: "왜 이미 하지 않았나?" / "현재가 충분하다면?" — 반박 1개 이상 탐색
+3. **반대 증거 탐색**: "왜 이미 하지 않았나?" / "현재가 충분하다면?" 등 반박 1개 이상 탐색
 
 반박 유효 시 본문 수정, 부분 반박 시 "단, {가능성}" 인라인 추가.
 
@@ -334,7 +334,7 @@ biz-rules.md의 상태 전이를 고객 여정으로 읽어서, 어디서 막히
 2. **How vs What 점검**: 요청을 그대로 로드맵에 넣지 않았는지. 근본 문제로 변환했는지
 3. **경쟁사 정보 한계**: WebSearch 기반 분석의 불확실성 명시
 4. **데이터 부족 영역**: 판단 근거가 약한 곳에 `[데이터 부족]` 태그 누락 없는지
-5. **/tech·/business-diagnosis 와의 정합성**: 기술 실현 가능성(/tech-diagnosis), 사업 우선순위(/business-diagnosis)와 모순 없는지
+5. **/tech-diagnosis, /business-diagnosis 와의 정합성**: 기술 실현 가능성(/tech-diagnosis), 사업 우선순위(/business-diagnosis)와 모순 없는지
 
 ---
 
@@ -370,13 +370,13 @@ data-sufficiency: sufficient | partial | insufficient
 > **한계**: 고객 사용 패턴은 축적 문서 + 1인 관점 기반. 접속 로그/사용률 데이터 없음. 경쟁사 정보는 WebSearch 기반.
 
 ## 핵심 판단 (3줄)
-1. [가장 강한 고객 신호 — 한 줄]
-2. [가장 제품화 가치 높은 항목 — 한 줄]
-3. [다음 분기 제품 투자 우선순위 — 한 줄]
+1. [가장 강한 고객 신호, 한 줄]
+2. [가장 제품화 가치 높은 항목, 한 줄]
+3. [다음 분기 제품 투자 우선순위, 한 줄]
 
 ---
 ## 영역 1~3
-[각 영역 마지막에 **→ 의사결정 포인트:** 필수]
+[각 영역 마지막에 **의사결정 포인트:** 필수]
 ---
 
 ## 핵심 권고 Top 5
@@ -395,7 +395,7 @@ data-sufficiency: sufficient | partial | insufficient
 
 ## 파일 저장
 
-Frontmatter (CONTRACT §7-2 표준): `category: reports, retention: 30d, harvest_targets: [customers/*.md]`
+Frontmatter (CONTRACT 7-2절 표준): `category: reports, retention: 30d, harvest_targets: [customers/*.md]`
 
 ```bash
 mkdir -p .local.claude/reports
@@ -417,11 +417,11 @@ mkdir -p .local.claude/reports
 
 ## 다음 스킬 연결
 
-- 제품화 후보 구체화 → `/prd`
-- 기능 우선순위 발산 → `/brainstorm`
-- 기술 실현 가능성 확인 → `/tech-diagnosis`
-- 사업 임팩트 확인 → `/business-diagnosis`
-- 고객사 심층 분석 → `/customer-profile`
+- 제품화 후보 구체화는 `/prd`
+- 기능 우선순위 발산은 `/brainstorm`
+- 기술 실현 가능성 확인은 `/tech-diagnosis`
+- 사업 임팩트 확인은 `/business-diagnosis`
+- 고객사 심층 분석은 `/customer-profile`
 
 ## 제약조건
 
@@ -436,13 +436,13 @@ mkdir -p .local.claude/reports
 
 ## 검증 시나리오
 
-공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT §6-1** 참조.
+공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT 6-1절** 참조.
 
 ### 이 스킬의 고유 실패 시나리오
 
 **[의존성 부재]** customers/*.md 가 0개인 경우
 - 신호: `ls customers/` 결과 비어 있음
-- 대응: 사용자에게 대표 고객 3~5명 간이 입력 요청 → 간이 진단(`[간이 모드]` 표시)으로 진행
+- 대응: 사용자에게 대표 고객 3~5명 간이 입력 요청 후 간이 진단(`[간이 모드]` 표시)으로 진행
 
 **[데이터 결함]** 고객 프로필 작성일이 90일+ 경과
 - 신호: frontmatter `updated` 또는 mtime 기준 90일 초과

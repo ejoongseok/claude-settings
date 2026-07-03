@@ -68,11 +68,11 @@ maxTurns: 30
 
 ### 2-4. 배치 적정성 점검
 각 지시가 올바른 위치에 있는지 확인하세요:
-- 개인 취향 → ~/.claude/CLAUDE.md 또는 ~/.claude/rules/
-- 프로젝트 공통 규칙 → ./CLAUDE.md
-- 특정 경로에만 적용 → .claude/rules/ (paths frontmatter 활용)
-- 예외 없는 실행 → CLAUDE.md가 아닌 Hook이 적합
-- 특정 워크플로우 → CLAUDE.md가 아닌 Skill이 적합
+- 개인 취향은 ~/.claude/CLAUDE.md 또는 ~/.claude/rules/ 에 두어야 합니다
+- 프로젝트 공통 규칙은 ./CLAUDE.md 에 두어야 합니다
+- 특정 경로에만 적용되는 지시는 .claude/rules/ 에 두어야 합니다 (paths frontmatter 활용)
+- 예외 없는 실행은 CLAUDE.md가 아닌 Hook이 적합합니다
+- 특정 워크플로우는 CLAUDE.md가 아닌 Skill이 적합합니다
 
 ### 2-5. 누락 점검 (전체 분석 모드만)
 일반적으로 유용하지만 빠져 있는 항목이 있는지 확인하세요:

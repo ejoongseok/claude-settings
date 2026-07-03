@@ -15,7 +15,7 @@
 
 ---
 
-## 1. CLAUDE.md (자동 로드 — 최우선)
+## 1. CLAUDE.md (자동 로드, 최우선)
 
 **대상**: Claude Code (자동 로드되는 프로젝트 지침)
 **분량**: **200줄 이내 엄수**
@@ -36,7 +36,7 @@
 
 ### 제외 항목
 - Claude 가 코드를 읽으면 알 수 있는 내용
-- 상세 설명·튜토리얼·아키텍처 장황한 설명
+- 상세 설명, 튜토리얼, 아키텍처 장황한 설명
 - 자명한 규칙 ("클린 코드 작성")
 - 자주 변하는 정보
 
@@ -53,7 +53,7 @@
 - 로컬 실행: `[명령]`
 
 ## 프로젝트 구조 (요약)
-- [디렉터리]/ → [역할]
+- [디렉터리]/: [역할]
 
 ## 코딩 컨벤션
 - [구체 규칙]
@@ -62,7 +62,7 @@
 - [표준 패턴]
 
 ## 자주 쓰는 유틸
-- `[유틸명]` ([경로]) — [용도]
+- `[유틸명]` ([경로]): [용도]
 
 ## 금지 사항
 - [구체 금지]
@@ -78,23 +78,23 @@
 
 **대상**: Claude Code 가 grep + 부분 read 로 빠르게 인덱싱
 **위치**: 프로젝트 루트의 `bot/` 디렉터리
-**호환**: `/dualize-docs` 스킬의 bot/ 출력 형식과 동일 — 누적되면 dualize-docs 가 같은 디렉터리에 보강 가능
+**호환**: `/dualize-docs` 스킬의 bot/ 출력 형식과 동일. 누적되면 dualize-docs 가 같은 디렉터리에 보강 가능
 
 ### bot/INDEX.md (라우팅 진입점)
 
 ```markdown
-# bot/ — AI 에이전트 진입점
+# bot/: AI 에이전트 진입점
 
 > 이 디렉터리는 /on-boarding 스킬로 YYYY-MM-DD 생성.
-> 사람용 배경·다이어그램은 ../human/README.md, 자동 로드 빠른 참조는 ../CLAUDE.md 참조.
+> 사람용 배경과 다이어그램은 ../human/README.md, 자동 로드 빠른 참조는 ../CLAUDE.md 참조.
 > 누적된 문서가 쌓이면 /dualize-docs 로 이 디렉터리 보강 가능.
 
 ## 라우팅
 
 | 파일 | 내용 | 갱신 |
 |------|------|------|
-| [architecture.md](./architecture.md) | 모듈 구조·요청 흐름·진입점 | YYYY-MM-DD |
-| [domain-model.md](./domain-model.md) | 핵심 엔티티·관계·DB 스키마 | YYYY-MM-DD |
+| [architecture.md](./architecture.md) | 모듈 구조, 요청 흐름, 진입점 | YYYY-MM-DD |
+| [domain-model.md](./domain-model.md) | 핵심 엔티티, 관계, DB 스키마 | YYYY-MM-DD |
 | ... (1~5개 분할) | ... | ... |
 ```
 
@@ -106,12 +106,12 @@
 - 강제 개수 없음. 같은 주제 두 파일 분할(과분할) / 다른 주제 한 파일(혼합) 둘 다 금지
 
 **분할 후보 카테고리** (해당 시):
-- `architecture.md` — 모듈 구조, 요청 흐름, 진입점
-- `domain-model.md` — 핵심 엔티티, 관계, DB 스키마
-- `api-contract.md` — 주요 API, 인증/인가
-- `infrastructure.md` — 외부 연동, 배포, 환경 설정
-- `rules.md` — 컨벤션, 금지 사항, 코딩 규칙
-- `known-issues.md` — 알려진 이슈, 트러블슈팅 (분석에서 발견된 것만)
+- `architecture.md`: 모듈 구조, 요청 흐름, 진입점
+- `domain-model.md`: 핵심 엔티티, 관계, DB 스키마
+- `api-contract.md`: 주요 API, 인증/인가
+- `infrastructure.md`: 외부 연동, 배포, 환경 설정
+- `rules.md`: 컨벤션, 금지 사항, 코딩 규칙
+- `known-issues.md`: 알려진 이슈, 트러블슈팅 (분석에서 발견된 것만)
 
 **파일 형식 (각 파일 공통)**:
 - **150줄 이내 권장**, 200줄 경고
@@ -187,19 +187,19 @@ graph LR
   Service --> DB[(Database)]
 ```
 
-## 3. 남은 질문 · 의사결정
+## 3. 남은 질문과 의사결정
 - 분석 중 발견된 미해결 항목
 - 도메인 전문가 확인 필요 사항
 - 향후 결정해야 할 것
 
 ## 더 읽을 거리
-- [../bot/INDEX.md](../bot/INDEX.md) — AI 사실 카탈로그
-- [../CLAUDE.md](../CLAUDE.md) — AI 자동 로드 빠른 참조
+- [../bot/INDEX.md](../bot/INDEX.md): AI 사실 카탈로그
+- [../CLAUDE.md](../CLAUDE.md): AI 자동 로드 빠른 참조
 ```
 
 **보조 파일 (선택, 정보량 충분할 때만)**:
-- `human/architecture.md` — AS-IS vs TO-BE 다이어그램 중심
-- `human/decisions.md` — 의사결정 타임라인 스토리라인
+- `human/architecture.md`: AS-IS vs TO-BE 다이어그램 중심
+- `human/decisions.md`: 의사결정 타임라인 스토리라인
 
 분석 단계에서 충분한 자료가 모이지 않으면 README.md 만 생성. 빈 보조 파일 만들지 말 것.
 
@@ -207,8 +207,8 @@ graph LR
 
 ## 작성 원칙 (3개 산출물 공통)
 
-1. **인덱싱 가능한 구조 우선** — anchor 명확, frontmatter 정확, 표 헤더 명확. 클로드가 grep + 부분 read 가능해야 함
-2. **추측 금지** — `.claude/tmp/onboarding/` 중간 파일에 기록되지 않은 내용은 포함 금지
-3. **빈 섹션 금지** — 분석에서 발견되지 않은 섹션은 통째로 생략
-4. **플레이스홀더 금지** — `[경로]`, `[모듈명]` 같은 미완성 토큰이 최종 문서에 남으면 안 됨
-5. **민감 정보 마스킹** — API 키, 비밀번호는 키 이름만 언급
+1. **인덱싱 가능한 구조 우선**: anchor 명확, frontmatter 정확, 표 헤더 명확. 클로드가 grep + 부분 read 가능해야 함
+2. **추측 금지**: `.claude/tmp/onboarding/` 중간 파일에 기록되지 않은 내용은 포함 금지
+3. **빈 섹션 금지**: 분석에서 발견되지 않은 섹션은 통째로 생략
+4. **플레이스홀더 금지**: `[경로]`, `[모듈명]` 같은 미완성 토큰이 최종 문서에 남으면 안 됨
+5. **민감 정보 마스킹**: API 키, 비밀번호는 키 이름만 언급

@@ -1,6 +1,6 @@
 ---
 name: skills-guide
-description: 사용 가능한 스킬 카탈로그 + 컨텍스트 기반 추천. "지금 어떤 스킬?", "스킬 목록", "오늘 회의록 정리하려는데" 같은 발견성 질문에 응답. 신규 사용자·다른 스킬 진입점 안내·시나리오별 그룹 보기.
+description: 사용 가능한 스킬 카탈로그 + 컨텍스트 기반 추천. "지금 어떤 스킬?", "스킬 목록", "오늘 회의록 정리하려는데" 같은 발견성 질문에 응답. 신규 사용자와 다른 스킬 진입점 안내, 시나리오별 그룹 보기.
 disable-model-invocation: true
 allowed-tools: Read, Glob, Grep, Bash
 ---
@@ -21,19 +21,19 @@ allowed-tools: Read, Glob, Grep, Bash
 |--------|------|:------:|------------|
 | 스킬 목록 | `skills/*/SKILL.md` | **필수** | "스킬 디렉터리 없음" 안내 |
 | CONTRACT.md | `claude-config/CONTRACT.md` 또는 `~/.claude/CONTRACT.md` | 선택 | 카탈로그 모드만 동작, 검증 추천 생략 |
-| 사용자 컨텍스트 | 현재 대화 + git status + 최근 산출물 | 선택 | 카탈로그·태그 필터만 동작 |
+| 사용자 컨텍스트 | 현재 대화 + git status + 최근 산출물 | 선택 | 카탈로그와 태그 필터만 동작 |
 
 ## 모드 판단
 
 | 입력 | 모드 | 동작 |
 |------|------|------|
 | `/skills-guide` (기본) | **카탈로그** | 55개 전체 + 그룹별 보기 |
-| `/skills-guide {자유 텍스트}` | **추천** | 컨텍스트 분석 → top 3~5 추천 |
+| `/skills-guide {자유 텍스트}` | **추천** | 컨텍스트 분석 후 top 3~5 추천 |
 | `/skills-guide --group {그룹명}` | **그룹 필터** | core / diagnosis / write / review / plan / data 등 |
-| `/skills-guide --new` | **신규 프로젝트** | 첫 진입 추천 흐름 (/on-boarding → /setup-guide → ...) |
+| `/skills-guide --new` | **신규 프로젝트** | 첫 진입 추천 흐름 (/on-boarding, /setup-guide 순) |
 | `/skills-guide --search {키워드}` | **검색** | description grep |
 
-## 카탈로그 (55개 — 그룹별)
+## 카탈로그 (55개, 그룹별)
 
 > 최신 카탈로그는 호출 시점에 `ls skills/` + frontmatter description 추출로 자동 생성. 아래는 **현재 분류**.
 
@@ -43,36 +43,36 @@ allowed-tools: Read, Glob, Grep, Bash
 | `/on-boarding` | 6산출물 자동 생성 (CLAUDE.md, bot/INDEX.md, human/README.md, biz-rules.md, team.md, SETUP.md) | 1 |
 | `/setup-guide` | 환경 셋업 가이드 살아있는 문서로 유지 | 2 (수시) |
 | `/skill-check` | 55개 계약 준수 점검 | 3 (월 1회) |
-| `/skills-guide` | 이 스킬 — 카탈로그·추천 | 4 (수시) |
+| `/skills-guide` | 이 스킬 (카탈로그와 추천) | 4 (수시) |
 
 ### 2. 진단 (관점별 정기 보고)
 | 스킬 | 관점 | 활용 빈도 |
 |------|------|--------|
-| `/business-diagnosis` | 사업·경영 (돈·시간·사람) | 분기 |
-| `/product-diagnosis` | 제품·고객 | 분기 |
-| `/tech-diagnosis` | 기술·코드·인프라 | 분기 |
-| `/delivery-diagnosis` | 전달·실행 (PM/PL 시각) | 월 |
-| `/security-diagnosis` | 보안·컴플라이언스 | 분기·반기 |
-| `/growth-diagnosis` | 성장·마케팅 | 분기 (성장 단계만) |
-| `/data-diagnosis` | 데이터·메트릭 | 분기·반기 |
+| `/business-diagnosis` | 사업과 경영 (돈, 시간, 사람) | 분기 |
+| `/product-diagnosis` | 제품과 고객 | 분기 |
+| `/tech-diagnosis` | 기술, 코드, 인프라 | 분기 |
+| `/delivery-diagnosis` | 전달과 실행 (PM/PL 시각) | 월 |
+| `/security-diagnosis` | 보안과 컴플라이언스 | 분기/반기 |
+| `/growth-diagnosis` | 성장과 마케팅 | 분기 (성장 단계만) |
+| `/data-diagnosis` | 데이터와 메트릭 | 분기/반기 |
 
-### 3. 작성·생성 (산출물)
+### 3. 작성과 생성 (산출물)
 | 스킬 | 산출물 |
 |------|------|
 | `/prd` | 제품 요구사항 문서 |
 | `/srs` | 기술 요구사항 명세서 |
 | `/todo` | Outside-In 개발 TODO |
-| `/pr` | PR 제목·본문 |
+| `/pr` | PR 제목과 본문 |
 | `/issue` | GitHub 이슈 |
-| `/draft` | 메시지·보고서 초안 |
+| `/draft` | 메시지와 보고서 초안 |
 | `/adr` | 아키텍처 의사결정 기록 |
-| `/poc` | PoC 계획·실행 |
+| `/poc` | PoC 계획과 실행 |
 | `/brainstorm` | 아이디어 발산 |
-| `/rfc` | 기술/비기술 의사결정 RFC (복수안 비교→결정) |
-| `/spec-demo` | 동작하는 명세 — 도메인 규칙을 인터랙티브 HTML로 정렬·합의 |
-| `/html-explain` | 코드·문서를 인터랙티브 HTML로 설명·시각화 |
+| `/rfc` | 기술/비기술 의사결정 RFC (복수안 비교 후 결정) |
+| `/spec-demo` | 동작하는 명세. 도메인 규칙을 인터랙티브 HTML로 정렬하고 합의 |
+| `/html-explain` | 코드와 문서를 인터랙티브 HTML로 설명하고 시각화 |
 
-### 4. 리뷰·검증
+### 4. 리뷰와 검증
 | 스킬 | 용도 |
 |------|------|
 | `/review` | 자기 검토 (4관점) |
@@ -82,9 +82,9 @@ allowed-tools: Read, Glob, Grep, Bash
 | `/qa-run-deep` | QA 1M context 깊이 실행 |
 | `/convention-audit` | 컨벤션 준수 감사 |
 | `/deploy-checklist` | 배포 전 체크리스트 |
-| `/pitfall` | 반복되는 함정·실수 패턴 점검·예방 |
+| `/pitfall` | 반복되는 함정과 실수 패턴 점검과 예방 |
 
-### 5. 회고·학습
+### 5. 회고와 학습
 | 스킬 | 용도 |
 |------|------|
 | `/daily` | 데일리/주간/분기/성장 회고 |
@@ -93,30 +93,30 @@ allowed-tools: Read, Glob, Grep, Bash
 | `/memo` | 검증 없이 일단 적기 |
 | `/meeting-notes` | 회의록 구조화 |
 | `/briefing` | 아침 브리핑 (최근 변경 요약) |
-| `/session-handoff` | 세션 인계 문서 생성 (다음 세션·모델용) |
-| `/session-glean` | 세션에서 지식·결정·할일 수확 |
+| `/session-handoff` | 세션 인계 문서 생성 (다음 세션과 모델용) |
+| `/session-glean` | 세션에서 지식, 결정, 할일 수확 |
 
-### 6. 데이터·고객·팀 관리
+### 6. 데이터, 고객, 팀 관리
 | 스킬 | 용도 |
 |------|------|
 | `/biz-rules` | 비즈니스 규칙 단일 진실 원천 |
 | `/customer-profile` | 고객사별 프로필 (B2B 시) |
-| `/cs` | 고객 문의·장애 추적 (B2B 시) |
-| `/people` | 동료·상사·팀원 프로필 |
-| `/coaching` | 1on1·성장 가이드 |
+| `/cs` | 고객 문의와 장애 추적 (B2B 시) |
+| `/people` | 동료, 상사, 팀원 프로필 |
+| `/coaching` | 1on1과 성장 가이드 |
 | `/leadership` | 리더십 조언 |
 | `/analyze-request` | 들어온 요청 해석 |
 
-### 7. 정원·정리
+### 7. 정원과 정리
 | 스킬 | 용도 |
 |------|------|
 | `/garden` | .local.claude 정원 관리 + 분량 임계 검사 |
 | `/absorb` | 외부 문서 흡수 + 지식 추출 |
-| `/parse-doc` | 바이너리·외부 문서 파싱 |
-| `/dualize-docs` | 사람용·AI용 문서 분리 |
+| `/parse-doc` | 바이너리와 외부 문서 파싱 |
+| `/dualize-docs` | 사람용과 AI용 문서 분리 |
 | `/optimize-claude-md` | CLAUDE.md 최적화 (200줄 룰) |
 | `/analyze-dir` | 디렉터리 구조 분석 |
-| `/rewrite-external` | 외부 공유용 문서로 재작성 (민감정보 제거·저맥락화) |
+| `/rewrite-external` | 외부 공유용 문서로 재작성 (민감정보 제거와 저맥락화) |
 | `/memory-garden` | 메모리(.claude/memory) 정원 관리 |
 
 ### 8. 메타 (스킬 시스템 자체)
@@ -124,13 +124,13 @@ allowed-tools: Read, Glob, Grep, Bash
 |------|------|
 | `/skill-check` | CONTRACT.md 준수 자동 점검 |
 | `/skill-modernize` | 모델 세대 전환 시 전 스킬 최신화 메타-스킬 |
-| `/skills-guide` | 이 스킬 (카탈로그·추천) |
+| `/skills-guide` | 이 스킬 (카탈로그와 추천) |
 
-## 추천 모드 (자유 텍스트 → top 3~5)
+## 추천 모드 (자유 텍스트에서 top 3~5로)
 
 > **[1M 활용]** 다음을 **단일 메시지에서 병렬로 호출**하여 컨텍스트 효율화:
-> - Glob: `skills/*/SKILL.md` — 전체 스킬 파일 경로 수집
-> - Read 병렬: 모든 `skills/*/SKILL.md` (55개) 의 frontmatter + 상단 description/역할 섹션 동시 로드 — 1M context 내 충분
+> - Glob: `skills/*/SKILL.md` 로 전체 스킬 파일 경로 수집
+> - Read 병렬: 모든 `skills/*/SKILL.md` (55개) 의 frontmatter + 상단 description/역할 섹션 동시 로드. 1M context 내 충분
 > - Bash: `git status --short`, 최근 `.local.claude/*` mtime 체크를 병렬로
 > - Grep: 사용자 입력 키워드를 전체 스킬 description 에 동시 매칭
 
@@ -138,9 +138,9 @@ allowed-tools: Read, Glob, Grep, Bash
 1. 현재 대화 마지막 N 메시지 키워드
 2. `git status` (변경 파일 패턴)
 3. 최근 산출물 (`.local.claude/*` mtime 14일)
-4. 현재 시각 (아침 → briefing, 저녁 → daily)
+4. 현재 시각 (아침이면 briefing, 저녁이면 daily)
 
-### 매핑 예시 (자유 텍스트 → 추천)
+### 매핑 예시 (자유 텍스트별 추천)
 
 | 사용자 입력 패턴 | 추천 |
 |--------------|------|
@@ -179,16 +179,16 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ```
 1. /on-boarding              # 6산출물 자동 생성
-   → CLAUDE.md, bot/INDEX.md, human/README.md, biz-rules.md, team.md, SETUP.md
+   산출: CLAUDE.md, bot/INDEX.md, human/README.md, biz-rules.md, team.md, SETUP.md
 
 2. /setup-guide              # SETUP.md 환경 점검
-   → 빈 프로젝트 환경 vs 자동 추출 결과 일치 검증
+   검증: 빈 프로젝트 환경 vs 자동 추출 결과 일치
 
 3. /skill-check              # 55개 계약 준수 첫 점검
-   → P1 0건 / P2 N건 / P3 N건 보고서
+   산출: P1 0건 / P2 N건 / P3 N건 보고서
 
 4. (작업하며 점진적으로)
-   /biz-rules                # 도메인 규칙 발견 시 §4 채움
+   /biz-rules                # 도메인 규칙 발견 시 4절 채움
    /people                   # 동료 프로필 (팀 있을 때)
    /customer-profile         # 고객 프로필 (B2B 시)
 
@@ -207,10 +207,10 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ### 카탈로그 모드
 ```markdown
-## 사용 가능한 스킬 — 55개 (그룹별)
+## 사용 가능한 스킬: 55개 (그룹별)
 
 ### 1. 신규 프로젝트 진입 (4개)
-- `/on-boarding` — ...
+- `/on-boarding`: ...
 ...
 
 ### 핵심 권장 (가장 자주 호출)
@@ -225,18 +225,18 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ### 추천 모드
 ```markdown
-## 추천 — "{사용자 입력}"
+## 추천: "{사용자 입력}"
 
 ### Top 3
-1. **`/{스킬명}`** — {1줄 이유}
+1. **`/{스킬명}`**: {1줄 이유}
    호출: `/{스킬명} {예상 인자}`
 
-2. **`/{스킬명}`** — ...
+2. **`/{스킬명}`**: ...
 
-3. **`/{스킬명}`** — ...
+3. **`/{스킬명}`**: ...
 
 ### 보강 (선택)
-- 위 작업 후 → `/{다음 스킬}` 권장
+- 위 작업 후 `/{다음 스킬}` 권장
 ```
 
 ## 다른 스킬과의 경계
@@ -251,27 +251,27 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ## 다음 스킬 연결
 
-- 추천 결과 호출 후 산출물 생성 → 자연스러운 다음 스킬 안내 (각 스킬의 "다음 스킬 연결" 섹션)
+- 추천 결과 호출 후 산출물이 생성되면 자연스러운 다음 스킬 안내 (각 스킬의 "다음 스킬 연결" 섹션)
 - 신규 프로젝트면 `--new` 흐름
-- 카탈로그가 변하면 (스킬 추가/삭제) → 본 스킬 카탈로그 섹션 자동 갱신 권장
+- 카탈로그가 변하면 (스킬 추가/삭제) 본 스킬 카탈로그 섹션 자동 갱신 권장
 
 ## 분량 임계
 
-이 스킬 자체는 카탈로그 + 추천 로직. 55개 → 70개+ 늘어나면 그룹별 sub-doc 분리 검토.
+이 스킬 자체는 카탈로그 + 추천 로직. 55개에서 70개 이상으로 늘어나면 그룹별 sub-doc 분리 검토.
 
 ## 검증 시나리오
 
-공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT §6-1** 참조.
+공통 3블록(빈 / 부분 / 풀 데이터)은 **CONTRACT 6-1절** 참조.
 
 ### 이 스킬의 고유 실패 시나리오
 
 **[데이터 결함]** 스킬 디렉터리 이름과 frontmatter `name` 불일치
 - 신호: `skills/foo/SKILL.md`의 frontmatter `name: bar`
-- 대응: 불일치 스킬을 카탈로그·추천에서 제외 + 경고 표시 ("naming 불일치 — 수정 필요")
+- 대응: 불일치 스킬을 카탈로그와 추천에서 제외 + 경고 표시 ("naming 불일치, 수정 필요")
 
 **[사용자 개입 필요]** 자유 텍스트 입력으로 추천 결과가 모호(점수 동률 등)
 - 신호: top 후보 스코어 차이 < 임계치 또는 키워드 매칭 다의어
-- 대응: AskUserQuestion 으로 범위·의도 확정(예: "코드 리뷰입니까, PR 본문 작성입니까?") 후 재추천
+- 대응: AskUserQuestion 으로 범위와 의도 확정(예: "코드 리뷰입니까, PR 본문 작성입니까?") 후 재추천
 
 ## 제약조건
 
