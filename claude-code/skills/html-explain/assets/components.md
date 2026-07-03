@@ -1,135 +1,131 @@
-# html-explain 컴포넌트 라이브러리
+# html-explain 컴포넌트 (담백 풀폭 전용)
 
-> `template.html` 스킨이 정의한 클래스로 `{{MAIN}}`·`{{TOC_ITEMS}}`를 채울 때 쓰는 스니펫. 필요한 것만 골라 적응형 배치. 정적 정보는 `.tag`(버튼 아님), 동작은 `button`/`a`로.
+> 이 스킬의 모든 산출물은 담백하다. `template.html`의 플레이스홀더(`{{TITLE}} {{SUBTITLE}} {{TOC_ITEMS}} {{MAIN}}`)를 아래 컴포넌트로만 채운다. 레이아웃은 사이드바가 화면 왼쪽 끝에 붙고 본문이 풀폭이다(가운데 정렬 아님). 색 배경 박스, hero, 화려한 카드는 만들지 않는다.
+
+## 비협상 (재현성의 근거)
+
+이걸 어기면 예전처럼 매번 다르게 나온다. 반드시 지킨다.
+
+- hero(큰 결론 박스)를 만들지 않는다. 한눈에나 결론도 그냥 섹션 하나로, 섹션 요약과 불릿 또는 항목으로 시작한다.
+- 색 배경 박스를 만들지 않는다. 요약, 용어, 콜아웃 전부 배경 없이 좌측 얇은 선과 작은 라벨만 쓴다.
+- 카드 그림자, 점수 막대, 통계 카드, 타임라인 막대, 흐름 다이어그램 같은 화려한 컴포넌트를 만들지 않는다.
+- 강조는 색이 아니라 굵기, 크기, 여백, 좌측 얇은 선으로 한다. 색은 표의 O와 X, 그리고 주의와 중요 콜아웃에만 최소로 쓴다.
+- 헤더에 아이콘을 넣지 않는다. 제목과 메타 한 줄만 둔다.
 
 ## TOC 항목 (`{{TOC_ITEMS}}`)
 
 ```html
-<a href="#s-tldr"><span class="n">00</span> 한눈에</a>
-<a href="#s-flow"><span class="n">01</span> 흐름</a>
+<a href="#s-tldr">한눈에</a>
+<a href="#s-done">한 일</a>
 ```
-각 `href`는 main의 `<section id="...">`와 일치. scroll-spy가 자동 하이라이트.
 
-## 섹션 + 헤더
+각 `href`는 본문 `<section class="s" id="...">`의 id와 일치한다. 스크롤에 따라 현재 항목이 자동으로 표시된다.
+
+## 문서 헤더 (`{{TITLE}}` `{{SUBTITLE}}`)
+
+`template.html`이 이미 헤더 자리를 잡아둔다. 제목과 메타 한 줄만 채운다. 아이콘은 없다.
+
+## 섹션
 
 ```html
-<section id="s-flow">
-  <div class="sec-h"><span class="n">01</span><h3>제목</h3></div>
+<section class="s" id="s-done">
+  <h2>한 일</h2>
   ...
 </section>
 ```
 
-## 한눈에 / BLUF (역피라미드 — 맨 위)
+## 섹션 핵심 요약 (그 섹션 결론을 맨 위에 한두 줄)
 
 ```html
-<section id="s-tldr"><div class="hero">
-  <span class="eyebrow">한눈에</span>
-  <h2>핵심 한 줄 — <span class="key">결론·강조</span>.</h2>
-  <ul class="why"><li>근거 1</li><li>근거 2</li></ul>
-  <div class="tags"><span class="tag">라벨 <b>값</b></span></div>
-</div></section>
+<div class="sec-summary">이 섹션에서 알아야 할 핵심을 한두 줄로.</div>
 ```
 
-## 콜아웃 (ok / info / warn / crit)
+## 항목 (무엇 왜 어떻게, 어떻게는 접어서 점진적 공개)
 
 ```html
-<div class="note crit"><span class="lbl">주의</span><div>본문 <b>강조</b>.</div></div>
+<div class="item">
+  <span class="item-id">항목 라벨</span>
+  <div class="item-title">제목</div>
+  <div class="item-body">
+    <p><b>무엇:</b> 무엇이 되는가.</p>
+    <p><b>왜:</b> 왜 그런가(근거나 재사용).</p>
+    <details><summary>어떻게</summary><p>구현이나 함정 상세.</p></details>
+  </div>
+</div>
 ```
-의미별: ok=성공/낮은리스크, info=특이점/참고, warn=중간주의, crit=치명/높음.
 
-## 표 + 점수·진행 막대
+한눈에나 결론 섹션처럼 짧은 요약이면 항목 대신 섹션 요약과 담백한 불릿을 쓴다.
 
 ```html
-<div class="card pad scrollx"><table>
-  <thead><tr><th>기준</th><th class="win">A안</th></tr></thead>
+<div class="item-body" style="padding:0">
+  <ul><li>핵심 1</li><li>핵심 2</li></ul>
+</div>
+```
+
+## 용어 사전 (항목 하단, 그 항목에 처음 나온 용어)
+
+```html
+<div class="item-glossary"><dl><dt>용어</dt><dd>쉬운 풀이.</dd></dl></div>
+```
+
+용어 사전을 넣으면 `template.html`의 스크립트가 본문 첫 등장 용어에 자동으로 밑줄과 툴팁을 붙인다(위로 올려다볼 필요가 없어진다). 사전이 없으면 조용히 넘어간다.
+
+## 표 (데이터가 밀집할 때만)
+
+서술로 풀 수 있으면 서술이 먼저다. 비교나 매트릭스처럼 격자가 꼭 필요할 때만 표를 쓴다.
+
+```html
+<div class="item-body"><table>
+  <thead><tr><th>항목</th><th class="c">가능</th></tr></thead>
   <tbody>
-    <tr><td class="crit">항목</td>
-      <td class="win"><div class="cell"><div class="bar"><span style="width:88%"></span></div><span class="num">88</span></div></td></tr>
+    <tr><td>기능</td><td class="c"><span class="ok-m">O</span></td></tr>
+    <tr><td>기능</td><td class="c"><span class="x-m">X</span></td></tr>
   </tbody>
 </table></div>
 ```
-약한 값은 `<div class="bar dim">`, 추천/우위 열·셀은 `class="win"`.
 
-## 카드 (점수·통계, 추천 핀)
+`ok-m`은 초록, `x-m`은 빨강, `co-m`은 주황(조건부), `na-m`은 회색(해당 없음). 난이도나 등급은 `<span class="lv mid">중</span>`, `lv hi`, `lv top`으로 배경 없이 색 텍스트만.
 
-```html
-<div class="cards">
-  <div class="stat"><div class="label">A안</div><div class="big">72</div><div class="meta">한 줄 평</div></div>
-  <div class="stat win"><span class="pin">추천</span><div class="label">B안</div><div class="big">88</div><div class="meta">한 줄 평</div></div>
-</div>
-```
-
-## 타임라인 + 예산 막대
+## 콜아웃 (담백, 좌측 선만)
 
 ```html
-<div class="timeline">
-  <div class="phase now" style="--w:3"><div class="pl">PHASE 1 · 4주</div><div class="pt">설계</div></div>
-  <div class="phase" style="--w:5"><div class="pl">PHASE 2 · 7주</div><div class="pt">구축</div></div>
-</div>
-<div class="brow"><span class="bn">A안</span><div class="bar"><span style="width:64%"></span></div><span class="bv">0.64억</span></div>
+<div class="cal warn">본문. <b>강조</b>.</div>
 ```
 
-## 코드 블록 (복사 버튼)
+`warn`은 주의(주황 선), `danger`는 중요(빨강 선), `ok`는 정리(회색 선). 배경색은 없다.
+
+## 코드
 
 ```html
-<div class="code"><div class="topbar"><i></i><i></i><i></i></div>
-  <button class="copy" onclick="copyText(this,'c1')">복사</button>
-<pre id="c1">코드/JSON/curl</pre></div>
-```
-JSON 강조: `<span class="tok-key">"키"</span><span class="tok-punc">:</span> <span class="tok-str">"값"</span>`.
-
-## 흐름 다이어그램 (과정·시퀀스 — 산문보다 우선)
-
-> 번호 동그라미 배지(`.fn`) 안 씀 — 화살표가 순서를 말함(겹침 배지는 산만·밀도↑). 카드 + 화살표만.
-
-```html
-<div class="flow">
-  <div class="fnode"><div class="actor">주체</div><div class="act">행동</div></div>
-  <div class="farrow">&#10142;</div>
-  <div class="fnode accent"><div class="actor">주체</div><div class="act"><b>핵심</b></div></div>
-</div>
+<pre>curl 이나 JSON 이나 코드</pre>
 ```
 
-## 용어 툴팁 (회상보다 인식)
+`item-body` 안에 두면 회색 코드 박스로 나온다.
+
+## 용어 툴팁 (수동으로 붙일 때)
 
 ```html
 <span class="term" tabindex="0" data-tip="용어 풀이">전문용어</span>
 ```
-키보드 포커스로도 뜸. 인라인 코드는 `<span class="ic">코드</span>`.
 
-## 원문 토글 (소스 문서가 있을 때만)
+용어 사전을 쓰면 자동으로 붙으므로 대개 필요 없다.
 
-`template.html`의 단일 토글 버튼(`#modetoggle`, 클릭마다 스왑·라벨이 다음 상태 안내) 유지 + 각 블록에 `class="only-easy"`(쉬운 설명) / `class="only-raw"`(원문 verbatim) 부여. 세션 요약 모드면 버튼 제거.
-
-## footer (출처·주의)
+## footer
 
 ```html
-<footer>생성 · 원본 §출처 · <b>원본 불변</b> · 폰트만 CDN<br>외부 공유 전 정확성 검토.</footer>
+<footer>생성일과 출처. 원본 불변. 외부 공유 전 정확성 검토.</footer>
 ```
 
----
+## kind별 구성 (컴포넌트는 다 담백, 내용 구성만 다르다)
 
-## kind별 프리셋 (가이드 — 강제 아님)
+kind가 달라도 스킨은 같다. 무엇을 담느냐만 다르다.
 
-| kind | 주로 쓰는 컴포넌트 |
-|------|-------------------|
-| meeting(회의록) | hero(결정 요약) · 표(액션아이템 담당/기한) · 콜아웃(미결) |
-| status(진행현황) | hero · 카드(트랙 진행률) · 막대 · 타임라인 · 콜아웃(블로커) |
-| summary(요약) | hero(핵심 합의) · 불릿 · 콜아웃(결정/미해결) · 흐름(필요 시) |
-| rfp/decision | hero(BLUF 추천) · 카드(점수) · 표+막대(비교 매트릭스) · 콜아웃(리스크) |
-| api | hero · 흐름 다이어그램 · 표(요청/응답) · 코드 · 콜아웃(에러/함정) · 원문 토글 |
-| external | 위 중 적합 + redact 강화 + footer 정확성 검토 |
-
-## 헤더 아이콘 (kind별 — `{{ICON}}`에 1개)
-
-헤더 dot을 빈 장식이 아니라 문서 종류 표시로 쓴다. kind에 맞는 한 개를 `{{ICON}}`에 넣는다(흰색 선 아이콘으로 자동 스타일). 매칭 없으면 default.
-
-```html
-<!-- api -->      <svg viewBox="0 0 24 24"><path d="M9 8l-4 4 4 4"/><path d="M15 8l4 4-4 4"/></svg>
-<!-- meeting -->  <svg viewBox="0 0 24 24"><path d="M5 6h14v9H10l-4 3v-3H5z"/></svg>
-<!-- status -->   <svg viewBox="0 0 24 24"><path d="M5 19h14"/><path d="M8 19v-6"/><path d="M12 19V8"/><path d="M16 19v-9"/></svg>
-<!-- summary -->  <svg viewBox="0 0 24 24"><path d="M6 8h12"/><path d="M6 12h12"/><path d="M6 16h8"/></svg>
-<!-- rfp -->      <svg viewBox="0 0 24 24"><path d="M7 4h7l3 3v13H7z"/><path d="M9 13l2 2 4-4"/></svg>
-<!-- external --> <svg viewBox="0 0 24 24"><path d="M12 4v10"/><path d="M8 8l4-4 4 4"/><path d="M6 13v5h12v-5"/></svg>
-<!-- default -->  <svg viewBox="0 0 24 24"><path d="M7 4h10v16H7z"/><path d="M10 9h4M10 13h4"/></svg>
-```
+| kind | 담는 내용 |
+|------|------|
+| meeting(회의록) | 섹션 요약, 결정과 액션 항목, 담당과 기한 표 |
+| status(진행현황) | 섹션 요약, 트랙별 항목, 진행률 표, 블로커 콜아웃 |
+| summary(요약)와 세션 요약 | 섹션 요약, 한 일과 정한 것과 다음 항목, 불릿 |
+| rfp(제안과 결정) | 섹션 요약, 비교 표, 기준 항목, 리스크 콜아웃 |
+| api | 섹션 요약, 흐름을 서술한 항목, 요청과 응답 표, 코드 |
+| explain(설명형) | 섹션 요약, 무엇 왜 어떻게 항목, 접기, 용어 사전 |
+| external(외부 제공용) | 위에 더해 내부 경로와 담당자 주관을 지우고 저맥락으로 |
