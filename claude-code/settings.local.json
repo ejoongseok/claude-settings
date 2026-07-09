@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "defaultMode": "auto",
     "allow": [
       "Read",
       "Glob",
@@ -44,6 +45,25 @@
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_wait_for",
       "Bash(./mvnw test:*)"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "python ~/.claude/hooks/manner_capture.py" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "python ~/.claude/hooks/manner_stop.py" } ] }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ~/.claude/hooks/style_lint.py"
+          }
+        ]
+      }
     ]
   },
   "enabledMcpjsonServers": [
