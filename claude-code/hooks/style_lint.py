@@ -62,6 +62,7 @@ HITS_PATH = Path.home() / ".claude" / "calibration" / "rule-hits.jsonl"
 def log_hits(path: str, hits) -> None:
     # 규칙 되먹임 루프의 검거 데이터. 기록 실패가 린트 경고를 막으면 안 된다.
     try:
+        HITS_PATH.parent.mkdir(parents=True, exist_ok=True)
         ts = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
         with HITS_PATH.open("a", encoding="utf-8") as f:
             for ln, rule, _ in hits:
