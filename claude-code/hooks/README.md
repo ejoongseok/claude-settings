@@ -28,6 +28,10 @@
 
 저장소 루트(또는 상위 경로)에 `.style-lint-off` 파일을 두면 그 저장소 전체를 건너뛴다. 원문 문체 보존이 우선인 코퍼스 저장소 같은 곳에 쓴다.
 
+## 검거 로그 (rule-hits.jsonl)
+
+위반 검거는 stderr 경고와 별개로 `~/.claude/calibration/rule-hits.jsonl`에 한 건당 한 줄(JSON)로 누적된다. 필드는 ts, hook, rule, target, line. 어떤 표현 규칙이 실제로 자주 걸리는지 월 1회 캘리브레이션 채점 때 집계하는 용도다(집계 취지는 `../calibration/principles-check.md`의 관측 한계 절에 있다). 디렉터리가 없으면 자동 생성하며, 기록에 실패해도 린트 경고는 정상 동작한다. 누적이 필요 없으면 main() 안의 log_hits 호출 한 줄을 지우면 된다.
+
 ## 미포함 훅
 
 로컬에서 함께 쓰는 git 정책 훅(커밋과 푸시 차단)은 환경 종속 설정이라 반출하지 않는다. 취지는 CLAUDE(GLOBAL).md 도구 제약 절에 서술되어 있다.
