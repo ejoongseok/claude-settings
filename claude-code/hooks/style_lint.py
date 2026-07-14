@@ -15,12 +15,14 @@
   INDEX.md, MEMORY.md는 제외. Edit는 소급 없음 원칙에 따라 미검사.
 - 위반 발견 시 exit 2 + stderr. Claude에 피드백되어 자가 수정을 유도한다.
   파일은 이미 저장된 뒤라 차단이 아니라 경고다.
+- 검거는 ~/.claude/calibration/rule-hits.jsonl 에 한 건당 한 줄 누적된다
+  (2026-07-14, 규칙 되먹임 루프의 관측 데이터. 기록 실패는 린트를 막지 않는다).
 - 제외: `~/.claude` 등 .claude 설정 구역(규칙 정의라 언급과 사용 구분 불가,
   단 memory는 산출물이므로 검사함), 임시 디렉터리, CLAUDE.md 파일,
   상위 디렉터리 어딘가에 `.style-lint-off` 마커가 있는 저장소 전체.
 - 기준 문서: ~/.claude/rules/expression.md
 """
-import sys, json, re
+import sys, json, re, datetime
 from pathlib import Path
 
 WHITELIST = "✓✗△"  # 허용 상태 기호
@@ -52,6 +54,23 @@ def exempted(fp: Path) -> bool:
     except OSError:
         pass
     return False
+
+
+HITS_PATH = Path.home() / ".claude" / "calibration" / "rule-hits.jsonl"
+
+
+def log_hits(path: str, hits) -> None:
+    # 규칙 되먹임 루프의 검거 데이터. 기록 실패가 린트 경고를 막으면 안 된다.
+    try:
+        ts = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
+        with HITS_PATH.open("a", encoding="utf-8") as f:
+            for ln, rule, _ in hits:
+                f.write(json.dumps(
+                    {"ts": ts, "hook": "style_lint", "rule": rule,
+                     "target": path.replace("\\", "/"), "line": ln},
+                    ensure_ascii=False) + "\n")
+    except OSError:
+        pass
 
 
 def fence_split(text: str):
@@ -147,6 +166,7 @@ def main() -> int:
 
     if not hits:
         return 0
+    log_hits(raw_path, hits)
     err = sys.stderr
     try:
         err.reconfigure(encoding="utf-8")
