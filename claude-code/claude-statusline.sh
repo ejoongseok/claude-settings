@@ -19,7 +19,7 @@ if [ -z "$JQ" ]; then
   JQ=$(ls "$HOME"/AppData/Local/Microsoft/WinGet/Packages/jqlang.jq_*/jq.exe 2>/dev/null | head -1)
 fi
 if [ -z "$JQ" ]; then
-  printf 'statusline: jq not found (winget install jqlang.jq)\n'
+  printf 'statusline: jq not found (Windows: winget install jqlang.jq / macOS: brew install jq)\n'
   exit 0
 fi
 
@@ -63,8 +63,9 @@ SECTION_FOLDER=$(dim "${CWD}")
 
 # ── 2b. KST time (Asia/Seoul) + UTC ─────────────────────────────────────────
 # Git Bash 는 tzdata 미탑재라 TZ=Asia/Seoul 이 UTC 로 폴백됨 → epoch 직접 가산
+# macOS(BSD date)는 -d 미지원 → -r 폴백
 KST_EPOCH=$(( $(date -u +%s) + 32400 ))
-KST_TIME=$(date -u -d "@${KST_EPOCH}" '+%Y-%m-%d %H:%M' 2>/dev/null)
+KST_TIME=$(date -u -d "@${KST_EPOCH}" '+%Y-%m-%d %H:%M' 2>/dev/null || date -u -r "${KST_EPOCH}" '+%Y-%m-%d %H:%M' 2>/dev/null)
 UTC_TIME=$(date -u '+%Y-%m-%d %H:%M')
 SECTION_TIME="$(yellow "${KST_TIME} KST")${SEP}$(dim "${UTC_TIME} UTC")"
 
@@ -226,16 +227,22 @@ fi
 
 # ── 6b. Fable 주간 한도 (/api/oauth/usage, 300s 캐시, 백그라운드 갱신) ───────
 # stdin rate_limits 에는 모델별 주간 한도가 없어 undocumented usage API 를 사용.
-# 본인 계정의 OAuth 토큰(~/.claude/.credentials.json)을 읽어 본인 사용량만 조회.
+# 본인 계정의 OAuth 토큰을 읽어 본인 사용량만 조회.
+# 토큰 위치: Windows/Linux=~/.claude/.credentials.json 파일, macOS=Keychain.
 # 실패해도(토큰 없음/네트워크/스키마 변경) 이 섹션만 조용히 생략 — 나머지 무영향.
 FABLE_CACHE="$CACHE_DIR/fable_usage"
 FABLE_TTL=300
 CRED_FILE="$HOME/.claude/.credentials.json"
 
 _fetch_fable_usage() {
-  [ -f "$CRED_FILE" ] || return
   local tok
-  tok=$("$JQ" -r '.claudeAiOauth.accessToken // empty' "$CRED_FILE" 2>/dev/null)
+  if [ -f "$CRED_FILE" ]; then
+    tok=$("$JQ" -r '.claudeAiOauth.accessToken // empty' "$CRED_FILE" 2>/dev/null)
+  elif command -v security >/dev/null 2>&1; then
+    # macOS: 자격증명이 파일이 아니라 Keychain 에 저장됨. 최초 1회 접근 허용 팝업이 뜰 수 있음.
+    tok=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null \
+      | "$JQ" -r '.claudeAiOauth.accessToken // empty' 2>/dev/null)
+  fi
   [ -n "$tok" ] || return
   local resp
   resp=$(curl -s --max-time 5 "https://api.anthropic.com/api/oauth/usage" \
@@ -273,7 +280,11 @@ if [ -n "$FABLE_LINE" ]; then
     if [ -n "$FABLE_RESET_ISO" ] && [ "$FABLE_RESET_ISO" != "null" ]; then
       # ISO8601(+00:00) → 로컬 MM-DD HH:MM. 7d 섹션과 동일 형식.
       # TZ 미지정: Git Bash 는 tzdata 미탑재라 TZ 명시 시 UTC 폴백 → 시스템 로컬에 위임.
-      FABLE_RESET_STR=$(date -d "$FABLE_RESET_ISO" '+%m-%d %H:%M' 2>/dev/null || echo "")
+      # macOS(BSD date)는 -d 로 ISO 파싱 불가 → 소수점 초/콜론 오프셋 정규화 후 -j -f 폴백.
+      _ISO_BSD=$(printf '%s' "$FABLE_RESET_ISO" | sed -E 's/\.[0-9]+//; s/Z$/+0000/; s/([+-][0-9]{2}):([0-9]{2})$/\1\2/')
+      FABLE_RESET_STR=$(date -d "$FABLE_RESET_ISO" '+%m-%d %H:%M' 2>/dev/null \
+        || date -j -f '%Y-%m-%dT%H:%M:%S%z' "$_ISO_BSD" '+%m-%d %H:%M' 2>/dev/null \
+        || echo "")
     fi
 
     if   [ "$FABLE_INT" -ge 80 ]; then FABLE_LABEL=$(red    "fable:${FABLE_INT}%")
